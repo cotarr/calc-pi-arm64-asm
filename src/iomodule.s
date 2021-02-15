@@ -40,7 +40,7 @@ SOFTWARE.
 	.bss    // Section containing uninitialized data
 
 OutChar: // Character output buffer
-	.skip	4
+	.skip	8
 
 
 /* ------------------------------------------------------------ */
