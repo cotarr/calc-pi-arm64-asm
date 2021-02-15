@@ -42,30 +42,41 @@ SOFTWARE.
 
 _start:
 main:
-	bl	CROut		// Send EOL
 
-	ldr	x0, =hello	// Pointer to text string
+//
+// Setup terminal screen
+//
+	ldr	x0, =Clear_String
+	bl	StrOut
+//
+// Welcome message
+//
+
+	ldr	x0, =HelloMsg	// Pointer to text string
 	bl	StrOut		// Send string to stdout
-	bl	CROut		// Send EOL
 
-	// load 64 bit immediate to register 0x0123456789abcdef
-
-	movz	x0, #0x0123, lsl 48
-	movk	x0, #0x4567, lsl 32
-	movk	x0, #0x89ab, lsl 16
-	movk	x0, #0xcdef
-
-	bl	PrintWordHex
-	bl	CROut
+	bl	ParseCmd	// Infinite loop... user input
 
 ProgramExit:
 	mov	x0, #0  	// exit with status 0
 	mov	x8, sys_exit 	// exit
 	svc	#0      	// syscall
 
+// ----------------
 	.data
-hello:
-	.ascii "Testing hex print",
-	.byte	0
+	.align 4
+// ----------------
+
+HelloMsg:
+	.ascii	"\nCalculation of Pi on Raspberry Pi\n"
+	.ascii	"Written in GNU Assembler (as)\n"
+	.asciz	"Assembled arch=armv8-a cpu=cortex-a72\n\n"
+
+Clear_String:
+        .byte	27			// esc
+	.ascii	"[2J"			// Clear Screen
+        .byte	27
+	.ascii	"[H"			// Home Cursor
+        .byte	0			// End of string
 
 .end

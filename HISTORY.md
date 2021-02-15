@@ -50,3 +50,12 @@ Flags:               fp asimd evtstrm crc32 cpuid
 - Fixed several errors perserving registers in Hello World
 - Added Keyboard input function KeyIn, reads line from console terminal with address in X0
 - Added util.s with function to print byte and 64 bit word in hexadecimal format to stdout
+
+- Added command parser
+
+The command parser is a table of 8 byte null terminated strings and 8 byte jump addresses,
+with 16 bytes per command. Upon a command match, the address of the handler is
+put into the x30 register, and a `ret` command is executed as a "jump".
+
+Checks were added to make sure the stack pointer does not change and a check
+that the command addresses are in btye alignment.
