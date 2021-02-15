@@ -46,8 +46,8 @@ main:
 
 	ldr	x0, =hello	// Pointer to text string
 	bl	StrOut		// Send string to stdout
-
 	bl	CROut		// Send EOL
+
 	bl	CROut		// Send EOL
 
 ProgramExit:

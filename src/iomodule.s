@@ -42,6 +42,7 @@ SOFTWARE.
 OutChar: // Character output buffer
 	.skip	4
 
+
 /* ------------------------------------------------------------ */
 
 	.text
@@ -50,6 +51,7 @@ OutChar: // Character output buffer
 	.global	StrOut
 	.global	CharOut
 	.global	CROut
+
 
 /* *****************************************************
   StrOut - Print null-terminated string
@@ -84,7 +86,6 @@ StrOut:
 	ldr	x4, [sp, #16]
 	add	sp, sp, #32
 	ret
-
 /* *****************************************************
   CharOut - Output character in R0 to stdout
 
@@ -94,14 +95,26 @@ StrOut:
 
 ****************************************************** */
 CharOut:
-	stp	x0, x30, [sp, -16]!	// preserve registers
+	sub	sp, sp, #64		// Space for 8 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x0, [sp, #8]
+	str	x1, [sp, #16]
+	str	x2, [sp, #24]
+	str	x8, [sp, #32]
+
 	ldr	x1, =OutChar		// buffer address
 	str	x0, [x1]		// store character for print
 	mov	x0, stdout		// stream
 	mov	x2, #1  		// count
 	mov	x8, sys_write		// write
 	svc	#0			// syscall
-	ldp	x0, x30, [sp], 16	// restore registers
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x0, [sp, #8]
+	ldr	x1, [sp, #16]
+	ldr	x2, [sp, #24]
+	ldr	x8, [sp, #32]
+	add	sp, sp, #64
 	ret
 
 /* *****************************************************
