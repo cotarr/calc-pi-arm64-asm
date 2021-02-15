@@ -39,19 +39,62 @@ SOFTWARE.
 
 	.bss    // Section containing uninitialized data
 
-OutChar: // Character output buffer
-	.skip	4
+OutChar: // Character output buffer (1 64 bit word)
+	.skip	8
 
+KeyBuf:	// Keyboard Input Buffer
+	.set	KeyBufLen, 0x100
+	.skip	KeyBufLen
 
 /* ------------------------------------------------------------ */
 
 	.text
 	.align	4
 
+	.global KeyIn
 	.global	StrOut
 	.global	CharOut
 	.global	CROut
 
+/******************************************************
+  KeyIn - Read text line from console input
+
+  Input: none
+
+  Output: X0 = address of buffer
+
+*******************************************************/
+KeyIn:
+
+	sub	sp, sp, #64		// Space for 8 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x1, [sp, #8]
+	str	x2, [sp, #16]
+	str	x7, [sp, #24]
+	str	x8, [sp, #32]
+
+	mov	x0, stdin		// stdin stream
+	ldr	x1, =KeyBuf		// point to buffer
+ 	mov	x2, #(KeyBufLen-8)	// size (count)
+	mov	x8, sys_read
+	svc	#0			// kernel syscall
+
+	tst	x0, x0			// count zero?
+	b.eq	10f
+	sub	x0, x0, #1		// point prior to LF (0x10)
+10:
+	mov	w2, #0			// null terminate string
+	strb	w2, [x1,x0]
+
+	ldr	x0, =KeyBuf		// Return buffer address
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x1, [sp, #8]
+	ldr	x2, [sp, #16]
+	ldr	x7, [sp, #24]
+	ldr	x8, [sp, #32]
+	add	sp, sp, #64
+	ret
 
 /* *****************************************************
   StrOut - Print null-terminated string
