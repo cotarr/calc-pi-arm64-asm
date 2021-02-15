@@ -48,7 +48,9 @@ main:
 	bl	StrOut		// Send string to stdout
 	bl	CROut		// Send EOL
 
-	bl	CROut		// Send EOL
+	bl	KeyIn		// String in x0
+	bl	StrOut		// print from x0
+	bl	CROut
 
 ProgramExit:
 	mov	x0, #0  	// exit with status 0
@@ -57,7 +59,7 @@ ProgramExit:
 
 	.data
 hello:
-	.ascii "Hello World",
+	.ascii "Enter input line to be repeated",
 	.byte	0
 
 .end
