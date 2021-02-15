@@ -20,3 +20,8 @@ make
 # Hello world only
 ./calc-pi
 ```
+
+### Commits of interest
+```
+Hello world       a426fa030e9cbeaf7704376dff44c650e9e77847
+```

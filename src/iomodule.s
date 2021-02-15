@@ -4,8 +4,8 @@
 	This module contains operating system input/output
 	subroutines.
 
-	Created:   02/14/2021
-	Last Edit: 02/15/2021
+	Created:   2021-02-14
+	Last Edit: 2021-02-15
 
 	StrOut
 	CharOut
@@ -79,9 +79,9 @@ StrOut:
 	b.ne	10b			// Yes, exit on zero byte
 
 20:
-	ldr	x4, [sp, #16]		// restore registers
-	ldr	x1, [sp, #8]
-	ldr	x30, [sp, #0]
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x0, [sp, #8]
+	ldr	x4, [sp, #16]
 	add	sp, sp, #32
 	ret
 
