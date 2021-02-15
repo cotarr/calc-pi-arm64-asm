@@ -48,8 +48,14 @@ main:
 	bl	StrOut		// Send string to stdout
 	bl	CROut		// Send EOL
 
-	bl	KeyIn		// String in x0
-	bl	StrOut		// print from x0
+	// load 64 bit immediate to register 0x0123456789abcdef
+
+	movz	x0, #0x0123, lsl 48
+	movk	x0, #0x4567, lsl 32
+	movk	x0, #0x89ab, lsl 16
+	movk	x0, #0xcdef
+
+	bl	PrintWordHex
 	bl	CROut
 
 ProgramExit:
@@ -59,7 +65,7 @@ ProgramExit:
 
 	.data
 hello:
-	.ascii "Enter input line to be repeated",
+	.ascii "Testing hex print",
 	.byte	0
 
 .end

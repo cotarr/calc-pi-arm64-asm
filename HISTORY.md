@@ -49,3 +49,4 @@ Flags:               fp asimd evtstrm crc32 cpuid
 
 - Fixed several errors perserving registers in Hello World
 - Added Keyboard input function KeyIn, reads line from console terminal with address in X0
+- Added util.s with function to print byte and 64 bit word in hexadecimal format to stdout

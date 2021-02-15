@@ -23,6 +23,7 @@ make
 
 ### Commits of interest
 ```
-Hello world       d5188777cda71522eb2428c5fdba4ab9a0a63314
-Keyboard Input
+Hello world         d5188777cda71522eb2428c5fdba4ab9a0a63314
+Keyboard Input      65da3a3638f6e00af1871582e16e8118a5e28419
+Print wors in Hex   
 ```
