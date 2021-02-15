@@ -4,3 +4,4 @@ src/*.lst
 src/*.map
 push*
 pull*
+NOTES.s

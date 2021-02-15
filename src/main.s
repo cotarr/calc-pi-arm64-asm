@@ -6,7 +6,7 @@
 	David Bolenbaugh
 
 	Created:   02/14/21
-	Last Edit: 02/14/21
+	Last Edit: 02/15/21
 --------------------------------------------------------------
 MIT License
 
@@ -32,22 +32,23 @@ SOFTWARE.
 *****************************************************************************/
 
 	.Include "arch.inc"	// .arch and .cpu directives
+	.include "header.inc"
 
 	.global	_start
 	.global	ProgramExit
-
-	.include "header.inc"
-//	.arch	armv8-a		// arm64 --> trying armv8-a
-//	.cpu	cortex-a72	// Raspberry Pi 4 from lscpu
 
 	.text
 	.align 4
 
 _start:
 main:
+	bl	CROut		// Send EOL
+
 	ldr	x0, =hello	// Pointer to text string
 	bl	StrOut		// Send string to stdout
-	bl	CROut		// End of line character
+
+	bl	CROut		// Send EOL
+	bl	CROut		// Send EOL
 
 ProgramExit:
 	mov	x0, #0  	// exit with status 0
