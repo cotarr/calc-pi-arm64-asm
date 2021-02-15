@@ -1,0 +1,6 @@
+src/calc-pi
+src/*.o
+src/*.lst
+src/*.map
+push*
+pull*
