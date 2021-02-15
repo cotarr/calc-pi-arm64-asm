@@ -43,4 +43,9 @@ Flags:               fp asimd evtstrm crc32 cpuid
 
 ### 2021-02-14
 
-- Wrote Hello World, first commit:
+- Wrote Hello World, print string with address in X0, first commit:
+
+### 2021-02-15
+
+- Fixed several errors perserving registers in Hello World
+- Added Keyboard input function KeyIn, reads line from console terminal with address in X0
