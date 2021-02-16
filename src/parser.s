@@ -317,7 +317,7 @@ Command_test:
 	// mov	x0, x1			// pointer to command argument`
 	// bl	StrOut			// if exit print argument
 	// bl	CROut
-
+	// -------------------
 	//
 	// Test of print of 64 bit work in hex
 	// Load 0x0123456789ABCDEF into x0
@@ -327,12 +327,18 @@ Command_test:
 	// movk	x0, #0x89ab, lsl 16
 	// movk	x0, #0xcdef
 	// bl	PrintWordHex
-
-
+	// ---------------------
+	mov	x0, #10
+	mov	x1, #100
+	subs	x0, x0, x1
+	bl	PrintFlags
+	// --------------------
+	// Test of register clear and print
 	// bl	ClearRegisters
-	bl	PrintRegisters
+	//bl	PrintRegisters
 
 	// -------- End Test ------------------
+
 	bl	CROut
 	bl	CROut
 	b	ParseCmd

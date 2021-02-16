@@ -34,6 +34,7 @@ SOFTWARE.
 
         .global	PrintByteHex
 	.global	PrintWordHex
+	.global PrintFlags
 	.global ClearRegisters
 	.global PrintRegisters
 
@@ -162,15 +163,122 @@ PrintByteHex:
 	add	sp, sp, #32
 	ret
 
-	/***************************************
+/***************************************
 
-	   ClearRegisters
+   PrintFlags
 
-	   Input:  none
+   Print R0-R15 in hexidecimal
 
-	   Output: (all registers as listed below)
+   Input:  R0-R15 for printing
 
-	***************************************/
+   Output: none
+
+***************************************/
+PrintFlags:
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x19,  [sp, #24]
+//
+// get status of flags before they are changed
+//
+	mov	x19, xzr		// x19 = 0
+	b.ne	10f			// zero flag 1 = zero
+	orr	x19, x19, #1
+10:	b.lo	20f			// carry flag
+	orr	x19, x19, #2
+20:	b.pl	30f			// sign flag 1 = negative
+	orr	x19, x19, #4
+30:	b.vc	40f			// overflow flag
+	orr	x19, x19, #8
+
+//
+// Display status flags
+//
+40:
+	bl	CROut
+	mov	x0, #0x20		// ascii space
+	bl	CharOut
+	tst	x19, #1
+	b.eq	45f
+	mov	x0, #'E'		// z = 1
+	bl	CharOut
+	mov	x0, #'Q'
+ 	bl	CharOut
+	b.al	50f
+45:	mov	x0, #'N'		// z = 0
+	bl	CharOut
+	mov	x0, #'E'
+ 	bl	CharOut
+50:	mov	x0, #0x20
+	bl	CharOut
+	tst	x19, #2
+	b.eq	55f
+	mov	x0, #'H'		// c = 1
+	bl	CharOut
+	mov	x0, #'S'
+	bl	CharOut
+	mov	x0, #'/'
+	bl	CharOut
+	mov	x0, #'C'
+	bl	CharOut
+	mov	x0, #'S'
+	bl	CharOut
+	b.al	60f
+55:	mov	x0, #'L'		// c = 0
+	bl	CharOut
+	mov	x0, #'O'
+	bl	CharOut
+	mov	x0, #'/'
+	bl	CharOut
+	mov	x0, #'C'
+	bl	CharOut
+	mov	x0, #'C'
+	bl	CharOut
+60:	mov	x0, #0x20
+	bl	CharOut
+	tst	x19, #4
+	b.eq	65f
+	mov	x0, #'M'		// n = 1
+	bl	CharOut
+	mov	x0, #'I'
+	bl	CharOut
+	b.al	70f
+65:	mov	x0, #'P'		// n = 0
+	bl	CharOut
+	mov	x0, #'L'
+	bl	CharOut
+70:	mov	x0, #0x20
+	bl	CharOut
+	tst	x19, #4
+	b.eq	75f
+	mov	x0, #'V'		// v = 1
+	bl	CharOut
+	mov	x0, #'S'
+	bl	CharOut
+	b.al	80f
+75:	mov	x0, #'V'		// v = 0
+	bl	CharOut
+	mov	x0, #'C'
+	bl	CharOut
+80:
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x19,  [sp, #24]
+	add	sp, sp, #32
+	ret
+
+/***************************************
+
+   ClearRegisters
+
+   Input:  none
+
+   Output: (all registers as listed below)
+
+***************************************/
 ClearRegisters:
 	mov	x0, xzr
 	mov	x1, xzr
@@ -254,63 +362,6 @@ PrintRegisters:
 	sub	x9, x9, #256	// value before preserve stack
 	str	x9, [sp, #248]
 
-//
-// get status of flags before they are changed
-//
-	mov	x9, xzr			// x9 = 0
-	b.ne	10f			// zero flag 1 = zero
-	and	x9, x9, #1
-10:	b.lo	20f			// carry flag
-	and	x9, x9, #2
-20:	b.pl	30f			// sign flag 1 = negative
-	and	x9, x9, #4
-30:	b.vc	40f			// overflow flag
-	and	x9, x9, #8
-//
-// Display status flags
-//
-
-40:	bl	CROut
-	mov	x0, #0x20		// ascii space
-	bl	CharOut
-	ldr	x0, =.LTR_FlagNames
-	bl	StrOut
-	mov	x0, #0x30
-	tst	x9, #1			// Zero
-	b.eq	50f
-	mov	x0, #0x31
-50: 	bl	CharOut
-
-	ldr	x0, =.LTR_FlagNames
-	add	x0, x0, #FlagNameLen
-	bl	StrOut
-	mov	x0, #0x30
-	tst	x9, #2			// Carry
-	b.eq	60f
-	mov	x0, #0x31
-60: 	bl	CharOut
-
-	ldr	x0, =.LTR_FlagNames
-	add	x0, x0, #FlagNameLen
-	add	x0, x0, #FlagNameLen
-	bl	StrOut
-	mov	x0, #0x30
-	tst	x9, #4			// Minus
-	b.eq	70f
-	mov	x0, #0x31
-70: 	bl	CharOut
-
-	ldr	x0, =.LTR_FlagNames
-	add	x0, x0, #FlagNameLen
-	add	x0, x0, #FlagNameLen
-	add	x0, x0, #FlagNameLen
-	bl	StrOut
-	mov	x0, #0x30
-	tst	x9, #8			// Overflow
-	b.eq	80f
-	mov	x0, #0x31
-80: 	bl	CharOut
-	bl	CROut
 
 // ---------------------
 // print 32 ARM64 registers
@@ -574,13 +625,6 @@ PrintRegisters:
 	str	x28, [sp, #240]
 	add	sp, sp, #256
 	ret
-
-	.set	FlagNameLen, 5
-.LTR_FlagNames:
-	.asciz	" ZF="
-	.asciz	" CF="
-	.asciz	" SF="
-	.asciz	" VF="
 
 	.set	RegNameLen, 9
 .LTR_RegNames:
