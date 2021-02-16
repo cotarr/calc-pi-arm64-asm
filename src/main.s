@@ -68,6 +68,7 @@ ProgramExit:
 // ----------------
 
 HelloMsg:
+	.ascii	"\nW O R K  I N   P R O G R E S S (no calculation yet)\n"
 	.ascii	"\nCalculation of Pi on Raspberry Pi\n"
 	.ascii	"Written in GNU Assembler (as)\n"
 	.asciz	"Assembled arch=armv8-a cpu=cortex-a72\n\n"

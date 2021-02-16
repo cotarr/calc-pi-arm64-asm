@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-02-15
+	Last edit: 2021-02-16
 
 	PrintCommandList
 	ParseCmd
@@ -125,33 +125,36 @@ OpCodeErrString:	.asciz	"     Input Error: Illegal Op Code.  (Type: cmdlist)\n\n
 
 *********************************************/
 PrintCommandList:
-	sub	sp, sp, #64		// Space for 8 words
+	sub	sp, sp, #48		// Reserve 6 words
 	str	x30, [sp, #0]		// Preserve these registers
-	str	x0, [sp, #8]
-	str	x1, [sp, #16]
-	str	x8, [sp, #24]
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x9, [sp, #24]
+	str	x10, [sp, #32]
 
-	ldr	x8, =Command_Table
+	ldr	x10, =Command_Table
 
-	mov	x0, x8			// Address first command
+	mov	x0, x10			// Address first command
 10:
 	bl	StrOut			// print command
 	mov	x0, #32			// ASCII space
 	bl	CharOut
-	add	x8, x8, #16		// point next entry
-	mov	x0, x8
-	ldr	x1, [x0]
-	tst	x1, x1			// is zero, last?
+	add	x10, x10, #16		// point next entry
+	mov	x0, x10
+	ldr	x9, [x0]
+	tst	x9, x9			// is zero, last?
 	b.ne	10b
 
 	bl	CROut
 
 	ldr	x30, [sp, #0]		// restore registers
-	ldr	x0, [sp, #8]
-	ldr	x1, [sp, #16]
-	ldr	x8, [sp, #24]
-	add	sp, sp, #64
+	ldr	x29, [sp, #8]
+	ldr	x0, [sp, #16]
+	ldr	x9, [sp, #24]
+	ldr	x10, [sp, #32]
+	add	sp, sp, #48
 	ret
+
 /*******************************************
 
    ParseCmd
@@ -170,26 +173,26 @@ ParseCmd:
 //
 // Check stack pointer for unexpected change
 //
-	ldr	x1, =StackPtrSnapshot
-	ldr	x0, [x1]
-	tst	x0, x0
-	b.ne	10f
-	mov	x0, sp
-	str	x0, [x1]
+	ldr	x9, =StackPtrSnapshot	// x9 pointer
+	ldr	x10, [x9]		// last stack pointer address
+	tst	x10, x10		// Initialized? (zero?)
+	b.ne	10f			// next, skip init
+	mov	x10, sp
+	str	x10, [x9]		// Initialize stack pointer snapshot
 10:
-	mov	x1, sp
-	cmp	x0, x1
-	b.eq	20f
-	ldr	x0, =StackPtrErrorMsg
+	mov	x9, sp			// current
+	cmp	x10, x9			// changed from last?
+	b.eq	20f			// no, expected result
+	ldr	x10, =StackPtrErrorMsg	// Error, stack is growing
 	bl	StrOut
 20:
 //
 // Check command table alignment
 //
-	ldr	x0, =Command_TableEnd
-	tst	x0, #0x07
-	b.eq	30f
-	ldr	x0, =AlignErrorMsg
+	ldr	x9, =Command_TableEnd	// get last address of table
+	tst	x9, #0x07		// proper alignment 3 bit are zero
+	b.eq	30f			// zero, no error
+	ldr	x0, =AlignErrorMsg	// Else Fatal error, exit program
 	bl	StrOut
 	b.al	ProgramExit
 30:
@@ -201,50 +204,53 @@ ParseCmd:
 //
 // Get input line from stdin
 //
-	bl	KeyIn
-	mov	x8,  x0			// Address of input string
-	ldr	x9,  =Command_Table
+	bl	KeyIn			// Return pointer in x8
+	mov	x20,  x8		// x20 pointer to input buffer
+	ldr	x19,  =Command_Table	// x19 pointer to command table
 //
 // Loop here for check next command in table
 //
 40:
-	ldr	w0, [x9, #8]		// Table + index + address_offset
-	tst	w0, w0			// Zero? (past last command)
-	b.eq	Com_Tab_Not_Found
-	mov	x10, #0			// index to command
-	ldrb	w0, [x8, x10]		// character from input
-	ldrb	w1, [x9, x10]		// character from table
+	ldr	w10, [x19, #8]		// Table + address_offset
+	tst	w10, w10		// Zero? (past last command)
+	b.eq	Command_Not_Found
+	mov	x21, #0			// index to command character
+	ldrb	w10, [x20, x21]		// character from input
+	ldrb	w11, [x19, x21]		// character from table
 //
 // Loop here for character check
 //
 50:
-	cmp	w0, w1			// character match?
+	cmp	w10, w11			// character match?
 	b.ne	70f			// no, get next command
-	add	x10, x10, #1
-	cmp	x10, #8			// command table error?
-	b.ne	60f
-	ldr	x0, =Byte8ErrorMsg
+	add	x21, x21, #1		// Yes, increment index to next char
+	cmp	x21, #8			// Index > 7 is command table error
+	b.ne	60f			// Command table is valid (< 7 chars)
+	ldr	x0, =Byte8ErrorMsg	// Else: fatal error, exit program
 	bl	StrOut
 	b.al	ProgramExit
 60:
-	ldrb	w0, [x8, x10]		// character from input
-	ldrb	w1, [x9, x10]		// Next character in table
-	tst	w1, w1			// more characters?
-	b.ne	50b			// Yes, check next for match
-	tst	w0, w0			// Next input char 0 or space?
+	ldrb	w10, [x20, x21]		// next character from input
+	ldrb	w11, [x19, x21]		// next character in table
+	tst	w11, w11		// Different? (not match)
+	b.ne	50b			// Yes, check next char for match
+//
+// Check if command has agrument after space character
+//
+	tst	w10, w10		// Next input char 0 or space?
 	b.eq	Com_Tab_MatchNoArg
-	cmp	w0, #32			// ascii space?
+	cmp	w10, #32		// ascii space?
 	b.eq	Com_Tab_MatchWithArg
 //
 // Move pointer to next command in table
 //
 70:
-	add	x9, x9, #16		// increment to next command
-	b.al	40b
+	add	x19, x19, #16		// increment to next command
+	b.al	40b			// loop back, nect command
 //
 // Exit - Command not found in table
 //
-Com_Tab_Not_Found:
+Command_Not_Found:
 	ldr	x0, =OpCodeErrString
 	bl	StrOut
 	b	ParseCmd		// loop always taken
@@ -252,21 +258,23 @@ Com_Tab_Not_Found:
 // Exit - Command matches, no argument
 //
 Com_Tab_MatchNoArg:
-	add	x2, x9, #8		// c0 command from table
-	ldr	x30, [x2]		// c2 command address
-	ret				// using return as a jump
+	add	x9, x19, #8		// x9 address pointer
+	ldr	x10, [x9]		// x10 executable address
+	mov	x1,xzr			// x1 arg pointer zero when no argument
+	br	x10			// jump to handler at [x10]
 //
 // Exit - Command matches, additional arguments on input line
 //
 Com_Tab_MatchWithArg:
-	add	x10, x8, x10		// addr of space character
-	add	x10, x10, #1
-	ldrb	w0, [x10]
-	tst	w0, w0			// x10 point next char
-	b.eq	Com_Tab_MatchNoArg
-	add	x2, x9, #8		// x2 command from table
-	ldr	x30, [x2]		// x2 command address
-	ret				// using return as a jump
+	add	x21, x20, x21		// address + index pointer to space char
+	add	x21, x21, #1		// increment past space char
+	ldrb	w10, [x21]		// first argument character
+	tst	w10, w10		// zero?
+	b.eq	Com_Tab_MatchNoArg	// then space without argument
+	add	x9, x19, #8		// x9 address pointer
+	ldr	x10, [x9]		// x10 executable address
+	mov	x1, x21			// x1 pointer to argument
+	br	x10			// jump to handler at [x10]
 
 ParseCmdEnd:
 
@@ -299,12 +307,33 @@ Command_exit:
 Command_test:
 	ldr	x0, =10f
 	bl	StrOut
+	//-------------------------------------
+	//  I N S E R T   T E S T   H  E R E
+	//-------------------------------------
+	//
+	// Test if parser properly provides pointer to
+	// the argument after command.
+	//
+	mov	x0, x1			// pointer to command argument`
+	bl	StrOut			// if exit print argument
+	bl	CROut
 
-//	bl	Test_Div
+	//
+	// Test of print of 64 bit work in hex
+	// Load 0x0123456789ABCDEF into x0
+	//
+	movz	x0, #0x0123, lsl 48
+	movk	x0, #0x4567, lsl 32
+	movk	x0, #0x89ab, lsl 16
+	movk	x0, #0xcdef
+	bl	PrintWordHex
 
+	// -------- End Test ------------------
+	bl	CROut
 	bl	CROut
 	b	ParseCmd
-10:	.asciz	"\nTest Command:\n\n"
+
+10:	.asciz	"\nTest Command execution:\n\n"
 	.align 4
 
 Command_version:

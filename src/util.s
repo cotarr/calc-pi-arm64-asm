@@ -2,7 +2,7 @@
 	util.s
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-15
+	Last Edit: 2021-02-16
 ----------------------------------------------------------------
 MIT License
 
@@ -46,21 +46,25 @@ SOFTWARE.
 
    Print 8 bit byte in hexidecimal
 
-   Input:  x0 input byte (low 8 bit)
+   Input:  x0 input byte (bottom 8 bit of 64 bit word)
 
    Output: none
 
+   x0 is preserved
+   x10 scratch register
+
 ************************************** */
 PrintByteHex:
-	sub	sp, sp, #32		// Space for 4 words
-	str	x30, [sp, #0]		// Preserve these registers
-	str	x0, [sp, #8]
-
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
 //
 // Print upper nibble
 //
-	and	x0, x0, #0xf0
-	lsr	x0, x0, #4
+	ldr	x0, [sp, #16]		// pick preserved agrument from stack
+	and	x0, x0, #0xf0		// AND --> 4 bit nibble
+	lsr	x0, x0, #4		// high nibble --> low nibble
 	cmp	x0, #0x09		// is number A-F ?
 	b.gt	10f
 	orr	x0, x0, #0x30		// form ASCII 0-9
@@ -69,13 +73,14 @@ PrintByteHex:
 	sub	x0, x0, #0x09
 	orr	x0, x0, #0x40		// form ASCII A-F
 20:
-	bl	CharOut
+	mov	x0, x0			// Character to print in x0
+	bl	CharOut			// Print ascii character
 
 //
 // Print lower nibble
 //
-	ldr	x0, [sp, #8]		// pick lower nibble from stack
-	and	x0, x0, #0x0F
+	ldr	x0, [sp, #16]		// pick preserved agrument from stack
+	and	x0, x0, #0x0F		// AND --> 4 bit nibble
 	cmp	x0, #0x09		// is number A-F ?
 	b.gt	30f
 	orr	x0, x0, #0x30		// Form ASCII 0-9
@@ -84,10 +89,12 @@ PrintByteHex:
 	sub	x0, x0, #0x09
 	orr	x0, x0, #0x40		// Form ASCII A-F
 40:
+	mov	x0, x0			// Character to print
 	bl	CharOut
 
-	ldr	x30, [sp, #0]		// restore registers
-	ldr	x0, [sp, #8]
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
 	add	sp, sp, #32
 	ret
 
@@ -103,54 +110,52 @@ PrintByteHex:
 
 ************************************** */
  PrintWordHex:
-	 sub	sp, sp, #32		// Space for 4 words
-	 str	x30, [sp, #0]		// Preserve these registers
-	 str	x0, [sp, #8]
-	 str	x8, [sp, #16]
+	 sub	sp, sp, #32		// Reserve 4 words
+	 str	x30, [sp, #0]
+	 str	x29, [sp, #8]
+	 str	x0,  [sp, #16]
 
-	mov	x8, x0			// Save original value in x8
-
-	ldr	x0, [sp, #8]		// Pick 64 bit word from stack
+	ldr	x0, [sp, #16]		// Pick 64 bit word from stack
 	lsr	x0, x0, #56		// Shift to align byte
 	and	x0, x0, #0xff		// Mask to 1 byte (8 bit)
 	bl	PrintByteHex		// Print the byte
 
-	ldr	x0, [sp, #8]
+	ldr	x0, [sp, #16]
 	lsr	x0, x0, #48
 	and	x0, x0, #0xff
 	bl	PrintByteHex
 
-	ldr	x0, [sp, #8]
+	ldr	x0, [sp, #16]
 	lsr	x0, x0, #40
 	and	x0, x0, #0xff
 	bl	PrintByteHex
 
-	ldr	x0, [sp, #8]
+	ldr	x0, [sp, #16]
 	lsr	x0, x0, #32
 	and	x0, x0, #0xff
 	bl	PrintByteHex
 
-	ldr	x0, [sp, #8]
+	ldr	x0, [sp, #16]
 	lsr	x0, x0, #24
 	and	x0, x0, #0xff
 	bl	PrintByteHex
 
-	ldr	x0, [sp, #8]
+	ldr	x0, [sp, #16]
 	lsr	x0, x0, #16
 	and	x0, x0, #0xff
 	bl	PrintByteHex
 
-	ldr	x0, [sp, #8]
+	ldr	x0, [sp, #16]
 	lsr	x0, x0, #8
 	and	x0, x0, #0xff
 	bl	PrintByteHex
 
-	ldr	x0, [sp, #8]
+	ldr	x0, [sp, #16]
 	and	x0, x0, #0xff
 	bl	PrintByteHex
 
-	ldr	x30, [sp, #0]		// restore registers
-	ldr	x0, [sp, #8]
-	ldr	x8, [sp, #16]
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
 	add	sp, sp, #32
 	ret

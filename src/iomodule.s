@@ -5,7 +5,7 @@
 	subroutines.
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-15
+	Last Edit: 2021-02-16
 
 	StrOut
 	CharOut
@@ -61,22 +61,22 @@ KeyBuf:	// Keyboard Input Buffer
 
   Input: none
 
-  Output: X0 = address of buffer
+  Output: X8 = address of buffer
 
 *******************************************************/
 KeyIn:
 
-	sub	sp, sp, #64		// Space for 8 words
+	sub	sp, sp, #48		// Reserve 6 words
 	str	x30, [sp, #0]		// Preserve these registers
-	str	x1, [sp, #8]
-	str	x2, [sp, #16]
-	str	x7, [sp, #24]
-	str	x8, [sp, #32]
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x1, [sp, #24]
+	str	x2, [sp, #32]
 
 	mov	x0, stdin		// stdin stream
 	ldr	x1, =KeyBuf		// point to buffer
- 	mov	x2, #(KeyBufLen-8)	// size (count)
-	mov	x8, sys_read
+ 	mov	x2, #(KeyBufLen-8)	// buffer size (count)
+	mov	x8, sys_read		// Request code
 	svc	#0			// kernel syscall
 
 	tst	x0, x0			// count zero?
@@ -84,16 +84,16 @@ KeyIn:
 	sub	x0, x0, #1		// point prior to LF (0x10)
 10:
 	mov	w2, #0			// null terminate string
-	strb	w2, [x1,x0]
+	strb	w2, [x1,x0]		// Character EOL --> 0x00
 
-	ldr	x0, =KeyBuf		// Return buffer address
+	ldr	x8, =KeyBuf		// Return buffer address
 
 	ldr	x30, [sp, #0]		// restore registers
-	ldr	x1, [sp, #8]
-	ldr	x2, [sp, #16]
-	ldr	x7, [sp, #24]
-	ldr	x8, [sp, #32]
-	add	sp, sp, #64
+	ldr	x29, [sp, #8]
+	ldr	x0, [sp, #16]
+	ldr	x1, [sp, #24]
+	ldr	x2, [sp, #32]
+	add	sp, sp, #48
 	ret
 
 /* *****************************************************
@@ -103,32 +103,37 @@ KeyIn:
 
   Output: none
 
+  x0 is preserved
+
 ****************************************************** */
 StrOut:
-	sub	sp, sp, #32		// Space for 4 words
+	sub	sp, sp, #48		// Reserve 6 words
 	str	x30, [sp, #0]		// Preserve these registers
-	str	x0, [sp, #8]
-	str	x4, [sp, #16]
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x9, [sp, #24]
 
 	tst	x0,x0			//check for zero in pointer
 	b.eq	20f			//yes, done, exit
 
-	mov	x4, x0			// Setup pointer
-	ldrb	w0, [x4], #1		// w0 first character to print
+	mov	x9, x0			// Setup pointer
+	ldrb	w0, [x9], #1		// w0 first character to print
 	tst	w0, w0			// null string?
 	b.eq	20f			// Yes, exit on empty string
 10:
 	bl	CharOut			// Output character
-	ldrb	w0, [x4], #1		// w0 = next character
+	ldrb	w0, [x9], #1		// w0 = next character
 	tst	w0, w0			// End of string?
 	b.ne	10b			// Yes, exit on zero byte
 
 20:
 	ldr	x30, [sp, #0]		// restore registers
-	ldr	x0, [sp, #8]
-	ldr	x4, [sp, #16]
-	add	sp, sp, #32
+	ldr	x29, [sp, #8]
+	ldr	x0, [sp, #16]
+	ldr	x9, [sp, #24]
+	add	sp, sp, #48
 	ret
+
 /* *****************************************************
   CharOut - Output character in R0 to stdout
 
@@ -138,12 +143,13 @@ StrOut:
 
 ****************************************************** */
 CharOut:
-	sub	sp, sp, #64		// Space for 8 words
+	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]		// Preserve these registers
-	str	x0, [sp, #8]
-	str	x1, [sp, #16]
-	str	x2, [sp, #24]
-	str	x8, [sp, #32]
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x1, [sp, #24]
+	str	x2, [sp, #32]
+	str	x8, [sp, #40]
 
 	ldr	x1, =OutChar		// buffer address
 	str	x0, [x1]		// store character for print
@@ -153,10 +159,11 @@ CharOut:
 	svc	#0			// syscall
 
 	ldr	x30, [sp, #0]		// restore registers
-	ldr	x0, [sp, #8]
-	ldr	x1, [sp, #16]
-	ldr	x2, [sp, #24]
-	ldr	x8, [sp, #32]
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x8,  [sp, #40]
 	add	sp, sp, #64
 	ret
 
@@ -170,10 +177,18 @@ CharOut:
 
 ****************************************************** */
 CROut:
-	stp	x0, x30, [sp, -16]!	// Preserve regs
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+
 	mov	x0, #0x0A		// ASCII Linefeed Char
 	bl	CharOut
-	ldp	x0, x30, [sp], 16	// Restore regs
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	add	sp, sp, #32
 	ret
 
 /* ------------------------------------------------------------ */
