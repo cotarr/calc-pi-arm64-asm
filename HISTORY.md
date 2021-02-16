@@ -64,3 +64,6 @@ that the command addresses are in btye alignment.
 
 Spent many hours reading asm64 docs. Following docs, cleaned up register use
 following convention for register numbering. Cleaned up command parsing code in parser.s
+
+- Added function ClearRegisters to zero all non-critical registers
+- Added function PrintRegisters to print current status flags Z,C,N,V and all 31 registers

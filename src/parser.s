@@ -314,19 +314,23 @@ Command_test:
 	// Test if parser properly provides pointer to
 	// the argument after command.
 	//
-	mov	x0, x1			// pointer to command argument`
-	bl	StrOut			// if exit print argument
-	bl	CROut
+	// mov	x0, x1			// pointer to command argument`
+	// bl	StrOut			// if exit print argument
+	// bl	CROut
 
 	//
 	// Test of print of 64 bit work in hex
 	// Load 0x0123456789ABCDEF into x0
 	//
-	movz	x0, #0x0123, lsl 48
-	movk	x0, #0x4567, lsl 32
-	movk	x0, #0x89ab, lsl 16
-	movk	x0, #0xcdef
-	bl	PrintWordHex
+	// movz	x0, #0x0123, lsl 48
+	// movk	x0, #0x4567, lsl 32
+	// movk	x0, #0x89ab, lsl 16
+	// movk	x0, #0xcdef
+	// bl	PrintWordHex
+
+
+	// bl	ClearRegisters
+	bl	PrintRegisters
 
 	// -------- End Test ------------------
 	bl	CROut
