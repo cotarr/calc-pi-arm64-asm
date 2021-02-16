@@ -59,3 +59,8 @@ put into the x30 register, and a `ret` command is executed as a "jump".
 
 Checks were added to make sure the stack pointer does not change and a check
 that the command addresses are in btye alignment.
+
+### 2021-02-16
+
+Spent many hours reading asm64 docs. Following docs, cleaned up register use
+following convention for register numbering. Cleaned up command parsing code in parser.s
