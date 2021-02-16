@@ -328,10 +328,14 @@ Command_test:
 	// movk	x0, #0xcdef
 	// bl	PrintWordHex
 	// ---------------------
-	mov	x0, #10
-	mov	x1, #100
-	subs	x0, x0, x1
-	bl	PrintFlags
+	mov	x0, #1142
+	bl	PrintWordB10
+	bl	CROut
+	// ---------------------
+	// mov	x0, #10
+	// mov	x1, #100
+	// subs	x0, x0, x1
+	// bl	PrintFlags
 	// --------------------
 	// Test of register clear and print
 	// bl	ClearRegisters

@@ -30,14 +30,12 @@ SOFTWARE.
 
 /* ------------------------------------------------------------ */
 
-
-
         .global	PrintByteHex
 	.global	PrintWordHex
 	.global PrintFlags
 	.global ClearRegisters
 	.global PrintRegisters
-
+	.global PrintWordB10
 
 	.text
 
@@ -662,5 +660,68 @@ PrintRegisters:
 	.asciz	"  sp  = "
 
 	.align 2
+
+/***************************************
+
+   PrintWordB10
+
+   Input:  x0 = Number to print
+
+   Output: none
+
+***************************************/
+PrintWordB10:
+	sub	sp, sp, #80		// Reserve 20 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x9, [sp, #24]
+	str	x10, [sp, #32]
+	str	x11, [sp, #40]
+	str	x12, [sp, #48]
+	str	x13, [sp, #56]
+//
+// Setup counters and variables
+//
+	mov	x9, #10			// x9 Used as constant x9 = #10
+	mov	x10, #0			// x10 Initialize digit counter
+	mov	x11, x0			// x11 Running remainder
+	mov	x12, #1			// x12 initialize multiples of 10
+					// x13 is scratch register
+//
+// Generate powers of 10 until bigger than number to print
+//
+10:
+	udiv	x13, x11, x12		// x13 = x12/x11  (number / 10^?)
+	cmp	x13, x9			// Is result of div < 10 (x9=10)
+	b.lo	20f			// Yes, cf = 0, less than 10, done counting
+	mov	x13, x12, lsl #1	// Mult x 2
+	mov	x12, x12, lsl #3	// Mult x 8
+	add	x12, x12, x13		// x2 + x8 --> x10
+	add	x10, x10, #1		// increment digit counter
+        b.al    10b
+//
+//  Recursively divide by power of 10 to get digits
+//
+20:
+	udiv	x13, x11, x12		// Quotient x13 = x11/x12 (remainder/ power-10)
+	msub	x11, x13, x12, x11	// Rem x11 = (last rem) - (power-10 * quot)
+	and	x0, x13, #0x0F
+	orr 	x0, x0, #0x30		// Form ascii
+	bl	CharOut			// Output character
+	udiv	x12, x12, x9		// Next power of 10 x12=x12/x9 (x9=#10)
+	subs	x10, x10, #1		// Decrement digit counter
+	b.hs 	20b
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0, [sp, #16]
+	ldr	x9, [sp, #24]
+	ldr	x10, [sp, #32]
+	ldr	x11, [sp, #40]
+	ldr	x12, [sp, #48]
+	ldr	x13, [sp, #56]
+	add	sp, sp, #80
+	ret
 
 	.end

@@ -66,4 +66,6 @@ Spent many hours reading asm64 docs. Following docs, cleaned up register use
 following convention for register numbering. Cleaned up command parsing code in parser.s
 
 - Added function ClearRegisters to zero all non-critical registers
-- Added function PrintRegisters to print current status flags Z,C,N,V and all 31 registers
+- Added function PrintRegisters to show all 31 registers
+- Added function PrintFlags to show Z, C, N and V flags (may be inserted in loop)
+- Added function to print 64 bit register as base-10 unsigned integer

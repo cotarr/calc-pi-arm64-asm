@@ -19,6 +19,9 @@ cd calc-pi-arm64-asm
 cd src
 make
 # Simple command parser only (no calculation yet)
+# Curently rest is in progress
+
+# to run
 ./calc-pi
 ```
 
