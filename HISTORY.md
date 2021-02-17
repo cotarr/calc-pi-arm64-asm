@@ -74,3 +74,9 @@ following convention for register numbering. Cleaned up command parsing code in 
 
 - Added practice.s as sandbox to try learning ARM64 code
 - Added endian check for 32 bit w0 and 64 bit x0 memory load to register
+- 64 bit string to integer converter
+
+During user input, following command a space delimited string is available for parsing.
+The address of the argument string is available in x0.
+Wrote function IntWordInput to convert integer string to binary unsigned 64 bit integer.
+Error checking added for empty string and non-numeric characters.

@@ -36,6 +36,7 @@ SOFTWARE.
 	.global ClearRegisters
 	.global PrintRegisters
 	.global PrintWordB10
+	.global	IntWordInput
 
 	.text
 
@@ -165,9 +166,9 @@ PrintByteHex:
 
    PrintFlags
 
-   Print R0-R15 in hexidecimal
+   Print x0-x31 in hexidecimal
 
-   Input:  R0-R15 for printing
+   Input:  x0-x31 for printing
 
    Output: none
 
@@ -723,5 +724,71 @@ PrintWordB10:
 	ldr	x13, [sp, #56]
 	add	sp, sp, #80
 	ret
+
+/*;--------------------------------------------------------------
+; Integer input routine
+;
+; This routine will put an integer value from terminal input
+; and convert ASCII to binary, returning 64 bit RAX
+;
+;    Input:    x0 address of input buffer
+;
+;    Output:   x0 contains 64 bit positive integer
+;              x1 0 = no error else > 0 is error
+;
+;--------------------------------------------------------------*/
+IntWordInput:
+	sub	sp, sp, #80		// Reserve 20 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x9, [sp, #16]
+	str	x10, [sp, #24]
+	str	x11, [sp, #32]
+
+	cbz	x0, IntWordInputError	// Error: Pointer is zero
+
+	mov	x11, x0			// Address to input buffer
+	mov	x10, #0			// Accumulate number here
+
+	ldrb	w0, [x11]		// check for empty string
+	cbz	w0, IntWordInputError	// Error: zero length string
+10:
+	ldrb	w0, [x11]		// Get next character from buffe4
+	add	w11, w11, #1		// Point at next character
+	cmp	w0, #0x3A		// Digit > ascii '9' + 1
+        b.hs     20f			// Yes convert input
+        cmp     w0, #0x30		// Digit < ascii '0'
+        b.lo	20f			// Yes convert input
+        and     x0, x0, #0x0F		// Mask to BCD bits
+	mov	x9, x10, lsl #1		// x 2
+	mov	x10, x10, lsl #3	// x 8
+	add	x10, x10, x9		//  add X 2 value to X 8 value for X 10
+	add	x10, x10, x0		// Add the digit
+	b.al	10b			// Always taken
+20:
+	cmp	w0, #0			// expect null terminated string
+	b.ne	IntWordInputError	// Error non numeric characters
+
+	mov	x0, x10			// Exit X0 = value
+	mov	x1, #0			// Exit X1 = error condition
+	b.al	100f			// Go exit
+
+IntWordInputError:
+	ldr	x0, =Non_numeric_err	// Error message
+	bl	StrOut
+	mov	x0, #0			// Return 0 on error
+	mov	x1, #1			// x1=1 --> error
+
+100:	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x9,  [sp, #16]
+	ldr	x10, [sp, #24]
+	ldr	x11, [sp, #32]
+	add	sp, sp, #80
+	ret
+Non_numeric_err:
+	.asciz "\nInput Error:  Expect integer string.\n"
+
+	.align 3
 
 	.end

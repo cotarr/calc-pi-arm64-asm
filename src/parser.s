@@ -264,7 +264,7 @@ Command_Not_Found:
 Com_Tab_MatchNoArg:
 	add	x9, x19, #8		// x9 address pointer
 	ldr	x10, [x9]		// x10 executable address
-	mov	x1,xzr			// x1 arg pointer zero when no argument
+	mov	x0, xzr			// x0 arg pointer zero when no argument
 	br	x10			// jump to handler at [x10]
 //
 // Exit - Command matches, additional arguments on input line
@@ -277,7 +277,7 @@ Com_Tab_MatchWithArg:
 	b.eq	Com_Tab_MatchNoArg	// then space without argument
 	add	x9, x19, #8		// x9 address pointer
 	ldr	x10, [x9]		// x10 executable address
-	mov	x1, x21			// x1 pointer to argument
+	mov	x0, x21			// x0 pointer to argument
 	br	x10			// jump to handler at [x10]
 
 ParseCmdEnd:
@@ -299,11 +299,12 @@ Command_cmdlist:
 //
 //
 Command_exit:
-	ldr	x0, =10f
+	ldr	x0, =exitMessage
 	bl	StrOut
 	b.al	ProgramExit
-10:	.asciz	"Graceful Exit\n"
-	.align 4
+exitMessage:
+	.asciz	"Graceful Exit\n"
+	.align 3
 //
 //
 //
@@ -315,14 +316,25 @@ Command_prac:
 //
 //
 Command_test:
-	ldr	x0, =10f
+	stp	x0, x1, [sp, -16]!	// preserve pointer
+	ldr	x0, =TestMessageString
 	bl	StrOut
+	ldp	x0, x1, [sp], 16	// restore pointer
 	//-------------------------------------
 	//  I N S E R T   T E S T   H  E R E
 	//-------------------------------------
 	//
 	// ---------------------
 
+	// Argument string located in x0
+	bl	IntWordInput		// x0=value no error then x1=0
+
+	cmp	x1, #0
+	b.ne	22f			// Error, skip processing
+	bl	PrintWordHex		// This is processing...
+	bl	CROut
+	bl	PrintWordB10
+22:
 
 	// -------- End Test ------------------
 
@@ -330,14 +342,17 @@ Command_test:
 	bl	CROut
 	b	ParseCmd
 
-10:	.asciz	"\nTest Command execution:\n\n"
+TestMessageString:
+	.asciz	"\nTest Command execution:\n\n"
 	.align 3
 
 Command_version:
-	ldr	x0,=10f
+	ldr	x0,=versionString
 	bl	StrOut
 	b	ParseCmd
-10:	.asciz	"\n     Version 1.0 - Debugging in progress\n\n"
+
+versionString:
+	.asciz	"\n     Version 1.0 - Debugging in progress\n\n"
 	.align 3
 
 CodeEnd:
