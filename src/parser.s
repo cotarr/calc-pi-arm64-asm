@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-02-16
+	Last edit: 2021-02-17
 
 	PrintCommandList
 	ParseCmd
@@ -66,6 +66,10 @@ Command_Table:
 	.ascii	"exit"
 	.byte	0,0,0,0
 	.word	Command_exit,0
+
+	.ascii	"prac"
+	.byte	0,0,0,0
+	.word	Command_prac,0
 
 	.ascii	"q"
 	.byte	0,0,0,0,0,0,0
@@ -300,7 +304,13 @@ Command_exit:
 	b.al	ProgramExit
 10:	.asciz	"Graceful Exit\n"
 	.align 4
-
+//
+//
+//
+Command_prac:
+	bl	practice
+	bl	CROut
+	b	ParseCmd
 //
 //
 //
@@ -348,14 +358,14 @@ Command_test:
 	b	ParseCmd
 
 10:	.asciz	"\nTest Command execution:\n\n"
-	.align 4
+	.align 3
 
 Command_version:
 	ldr	x0,=10f
 	bl	StrOut
 	b	ParseCmd
 10:	.asciz	"\n     Version 1.0 - Debugging in progress\n\n"
-
+	.align 3
 
 CodeEnd:
 	.end

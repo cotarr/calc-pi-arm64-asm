@@ -69,3 +69,8 @@ following convention for register numbering. Cleaned up command parsing code in 
 - Added function PrintRegisters to show all 31 registers
 - Added function PrintFlags to show Z, C, N and V flags (may be inserted in loop)
 - Added function to print 64 bit register as base-10 unsigned integer
+
+### 2021-02-15
+
+- Added practice.s as sandbox to try learning ARM64 code
+- Added endian check for 32 bit w0 and 64 bit x0 memory load to register
