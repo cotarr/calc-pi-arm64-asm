@@ -321,35 +321,8 @@ Command_test:
 	//  I N S E R T   T E S T   H  E R E
 	//-------------------------------------
 	//
-	// Test if parser properly provides pointer to
-	// the argument after command.
-	//
-	// mov	x0, x1			// pointer to command argument`
-	// bl	StrOut			// if exit print argument
-	// bl	CROut
-	// -------------------
-	//
-	// Test of print of 64 bit work in hex
-	// Load 0x0123456789ABCDEF into x0
-	//
-	// movz	x0, #0x0123, lsl 48
-	// movk	x0, #0x4567, lsl 32
-	// movk	x0, #0x89ab, lsl 16
-	// movk	x0, #0xcdef
-	// bl	PrintWordHex
 	// ---------------------
-	mov	x0, #1142
-	bl	PrintWordB10
-	bl	CROut
-	// ---------------------
-	// mov	x0, #10
-	// mov	x1, #100
-	// subs	x0, x0, x1
-	// bl	PrintFlags
-	// --------------------
-	// Test of register clear and print
-	// bl	ClearRegisters
-	//bl	PrintRegisters
+
 
 	// -------- End Test ------------------
 

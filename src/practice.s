@@ -55,9 +55,76 @@ practice:
 	ldr	x0, =pracStr001
 	bl	StrOut
 
+// ///////////////////////////////////////////////
+//              Code jump table
+// ///////////////////////////////////////////////
 //
-// Endian check message
+// Comment each test as needed
 //
+	b	conditional_branching
+	// b	EndianCheck
+	// b	print_registers_test
+	// b	print_status_flags
+	// b	print_reg_base10_unsigned
+	// b	load_64_bit_immediate
+
+// ///////////////////////////////////////////////
+
+
+// -----------------------------------------------
+// Endian check
+//
+conditional_branching:
+
+	// CCMP
+	//
+	// Conditional compare, 4th operand is condition exist when called
+	// If condition met, compare operand 1,2 else 1,3, then set flags
+	mov	x2, #8
+	mov	x3, #8
+	mov	x10, #4
+	subs	x1, x2, x3
+	// EQ HS/CS PL VC
+	// operand 2 (0-31) operand 3 (0-15)
+	// z=1 ccmp conditon "eq" so compare operand 1 and 2
+	ccmp	x10, #4, #2, eq
+	// EQ HS/CS PL VC
+	subs	x1, x2, x3
+	// EQ HS/CS PL VC
+	// z=1 ccmp condition "ne" so compare operand 1 and 3
+	ccmp	x10, #4, #2, ne
+	// NE HS/CS PL VC
+	// bl	PrintFlags
+
+	// CSEL
+	//
+	// If condition in 4th operand met when called,
+	// Then operand 1 register set to operand 2
+	// Else set operand 1 register to operand 3 register
+	mov	x2, #8
+	mov	x3, #8
+	mov	x10, #4
+	mov	x11, #5
+	subs	x1, x2, x3
+	// EQ HS/CS PL VC
+	// bl	PrintFlags
+	csel	x0, x10, x11, eq
+	// x0 = 0000000000000004 (value of x10)
+	bl	PrintWordHex
+	bl	CROut
+	subs	x1, x2, x3
+	// EQ HS/CS PL VC
+	csel	x0, x10, x11, ne
+	// x0 = 0000000000000005 (value of x11)
+	bl	PrintWordHex
+	bl	CROut
+
+	b	exit_prac
+
+// -----------------------------------------------
+// Endian check
+//
+EndianCheck:
 	ldr	x0, =pracStr002
 	bl	StrOut
 //
@@ -82,13 +149,64 @@ practice:
 	ldr	w0, [x0]
 	bl	PrintWordHex
 	bl	CROut
+	b	exit_prac
 
+// -----------------------------------------------
+// Print Registers
+//
+print_registers_test:
+	// bl	ClearRegisters
+	bl	PrintRegisters
+	b	exit_prac
+//
+// Test print status flags
+//
+print_status_flags:
+	mov	x0, #10
+	mov	x1, #10
+	subs	x0, x0, x1 // z=1 c=1 n=0 v=0
+ 	bl	PrintFlags
+	mov	x0, #100
+	mov	x1, #10
+	subs	x0, x0, x1 // z=0 c=1 n=0 v=0
+ 	bl	PrintFlags
+	mov	x0, #10
+	mov	x1, #100
+	subs	x0, x0, x1 // z=0 c=0 n=1 v=1
+ 	bl	PrintFlags
+	b	exit_prac
 
+// -----------------------------------------------
+// Test of print register in base 10 unsigned integer
+//
+print_reg_base10_unsigned:
+	mov	x0, #1142
+	bl	PrintWordB10
+	bl	CROut
+	b 	exit_prac
+
+// -----------------------------------------------
+// Test of print of 64 bit work in hex
+// Load 0x0123456789ABCDEF into x0
+//
+load_64_bit_immediate:
+	movz	x0, #0x0123, lsl 48
+	movk	x0, #0x4567, lsl 32
+	movk	x0, #0x89ab, lsl 16
+	movk	x0, #0xcdef
+	bl	PrintWordHex
+	b	exit_prac
+//
+// -----------------------------------------------
+//
+exit_prac:
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
 	add	sp, sp, #64
 	ret
+
+
 pracStr001:
 	.asciz	"Practice\n\n"
 pracStr002:
