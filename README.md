@@ -35,5 +35,5 @@ Keyboard Input                 65da3a3638f6e00af1871582e16e8118a5e28419
 Print words in Hex             5ff998d0ff4f71e28e12d000c9aa12471d1471ab
 Command parser                 e54339d9f52c790d3e19fe42b6c0cc32b8e141d0
 64 bit reg to base-10 string   8b2540ab1f30d5fda32fc68e5f4d54e65f19bc59
-Base-10 string to 64 bit reg
+Base-10 string to 64 bit reg   6d85d67be0ef52bcf41945c97fe88d62eaee8c2c
 ```
