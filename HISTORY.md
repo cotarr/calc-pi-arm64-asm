@@ -44,6 +44,13 @@ Flags:               fp asimd evtstrm crc32 cpuid
 ### 2021-02-14
 
 - Wrote Hello World, print string with address in X0, first commit:
+
+- main.s - assembler file with program entry point
+- iomodule.s - Character print routines to stdout
+- arch.s - Include file for 'cpu' and 'arch' directives
+- header.s - Include file for configuration variables
+- makefile - Build file to call assembler and linker
+
 ```
 git checkout d5188777cda71522eb2428c5fdba4ab9a0a63314
 ```
@@ -52,11 +59,14 @@ git checkout d5188777cda71522eb2428c5fdba4ab9a0a63314
 
 - Fixed several errors preserving registers in Hello World
 - Added Keyboard input function KeyIn, reads line from console terminal with address in X0
-- Added util.s with function to print byte and 64 bit word in hexadecimal format to stdout
+
+- util.s - New file with function to print byte and 64 bit word in hexadecimal format to stdout
+
 ```
 git checkout 5ff998d0ff4f71e28e12d000c9aa12471d1471ab
 ```
-- Added command parser
+
+- parser.s - New file to hold command parser code.
 
 The command parser is a table of 8 byte null terminated strings and 8 byte jump addresses,
 with 16 bytes per command. Upon a command match, the address of the handler is
@@ -65,6 +75,7 @@ Initial commands: `cmdlist exit q quit test version`
 
 Checks were added to make sure the stack pointer does not change and a check
 that the command addresses are in byte alignment.
+
 ```
 git checkout e54339d9f52c790d3e19fe42b6c0cc32b8e141d0
 ```
@@ -78,25 +89,33 @@ following convention for register numbering. Cleaned up command parsing code in 
 - Added function PrintRegisters to show ARM registers x0 to x31
 - Added function PrintFlags to show Z, C, N and V flags (may be inserted in loop)
 - Added function to print 64 bit register as base-10 unsigned integer
+
 ```
 git checkout 8b2540ab1f30d5fda32fc68e5f4d54e65f19bc59
 ```
+
 ### 2021-02-17
 
-- Added command `prac` in file practice.s as sandbox to try learning ARM64 code.
+- practice.s - New file as sandbox to try learning ARM64 code.
 - Added endian check for 32 bit w0 and 64 bit x0 memory load to register
 - 64 bit string to integer converter
 
-During user input, following command a space delimited string is available for parsing.
-The address of the argument string is available in x0.
-Wrote function IntWordInput to convert integer string to binary unsigned 64 bit integer.
+Use of command arguments: During user input an argument may be added
+to a command followed by a space character to delimiter a string for parsing.
+The address of the argument string is available in x0 in the command handler in parser.s.
+Added a new function IntWordInput to convert integer string to binary unsigned 64 bit integer.
 Error checking added for empty string and non-numeric characters.
+
 ```
 git checkout fd759390c4cd42e42855eef002c2da5b597838f4
 ```
+
 ### 2021-02-18
 
-- created math.s to hold variable declarations
+- math.s - New file to hold variable declarations
+- math-debug.s New file to hold debug tools used to write the program.
+- arch-include.s - Renamed from arch.inc to get editor source highlighting.
+- header-include.s - Renamed from header.inc to get editor source highlighting.
 
 Typically, variables would be defined as binary floating point, with an
 exponent, mantissa, and some extra words at the least significant end to absorb
@@ -104,12 +123,14 @@ errors which are called guard words.
 ```
    < binary exponent words>  <mantissa words> <guard words>
 ```
+
 However, for the case of calculation of pi, scientific notation is not really
 needed. To simplify the code, I am going to define the variables as fixed point.
 In this case there must be a decimal point to separate integer part from fraction part.
 ```
    <binary integer part> /decimal point/ <binary fraction part>  <guard words>
 ```
+
 In the case of this program, the variables are declared within the load image
 of the application, rather than by dynamically allocated memory.
 
@@ -120,7 +141,6 @@ for variable definitions in the math.s module and then include arithmetic functi
 as include files into the math.s file. This way I can have separate files
 for math arithmetic functions, but all calculations will be within one object module.
 
-- Renamed arch.inc-->arch-header.s and header.inc-->header-include.s to get editor syntax highlighting.
 - Added function FP_Initialize to setup variable space on program start
 
 In order to view variables while writing the program, a tool is needed to display
@@ -152,8 +172,8 @@ WORKC  (4)
 0000000000000000 0000000000000000
 Op Code:
 ```
-- Added command 'D.fill <reg numb er> and to fill a variable with incremental bytes values, 11, 12, 13, ...
+- Added command `D.fill <reg number>` and to fill a variable with incremental bytes values, 11, 12, 13, ...
 
 ```
-git checkout main
+git checkout ef153bbb5fa1e279d214abb7029f15f3841bec91
 ```
