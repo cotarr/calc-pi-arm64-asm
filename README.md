@@ -1,39 +1,31 @@
 # WORK IN PROGRESS
+# See HISTORY.md
 
 ## No Pi calculation available at this time
 
 Today is Feb 14, 2021. The goal is to write ARM64 program
 to calculate pi, on a Raspberry Pi, by "Pi Day" March 14.
 Since Raspberry Pi OS is only released as 32 bit stable release ARMHF,
-I will try this with beta version ARM64
+I will try this project with the new beta version ARM64 of Raspberry OS
 
 - Raspberry Pi 4 Model B Rev 1.2
 - ARM64 (Beta) Debian GNU/Linux 10 (buster)
 - https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2020-08-24/
 - GNU Assembler + GNU linker with arch=armv8-a and cpu=cortex-a72
 
-
 ```
 git clone git@github.com:cotarr/calc-pi-arm64-asm.git
 cd calc-pi-arm64-asm
 cd src
 make
-# Simple command parser only (no calculation yet)
-# Curently rest is in progress
 
 # to run
 ./calc-pi
-```
-
-### Commits of interest
-
-See HISTORY.md
 
 ```
-Hello world                    d5188777cda71522eb2428c5fdba4ab9a0a63314
-Keyboard Input                 65da3a3638f6e00af1871582e16e8118a5e28419
-Print words in Hex             5ff998d0ff4f71e28e12d000c9aa12471d1471ab
-Command parser                 e54339d9f52c790d3e19fe42b6c0cc32b8e141d0
-64 bit reg to base-10 string   8b2540ab1f30d5fda32fc68e5f4d54e65f19bc59
-Base-10 string to 64 bit reg   6d85d67be0ef52bcf41945c97fe88d62eaee8c2c
+
+## Commands available:
+
+```
+cmdlist D.fill exit hex prac q quit test version
 ```

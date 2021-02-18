@@ -63,6 +63,10 @@ Command_Table:
 	.byte	0
 	.quad	Command_cmdlist
 
+	.ascii	"D.fill"
+	.byte	0,0
+	.quad	Command_D_fill
+
 	.ascii	"exit"
 	.byte	0,0,0,0
 	.quad	Command_exit
@@ -302,6 +306,35 @@ Command_cmdlist:
 //
 //
 //
+Command_D_fill:
+
+	cmp	x0, #0			// Check for argument
+	b.eq	10f			// No argument
+	ldrb	w1, [x0]
+	cmp	w1, #0x30			// Check first character of command
+	b.lt	10f			// less than '0'? then skip
+	cmp	w1, #0x39			// greater than '9'? then skip
+	b.gt	10f
+	bl	IntWordInput		// x0 in binary 32 bit data
+	cmp	x1, #0			// Check for input error
+	b.ne	10f			// yes error
+	cmp	x0, #TOPHAND
+	b.gt	10f
+	mov	x1, x0
+	bl	DebugFillVariable
+	b	ParseCmd
+10:
+	ldr	x0,=20f
+	bl	StrOut
+	b	ParseCmd
+
+20:
+	.asciz	"D.fill: Error, invalid argument\n\n"
+	.align 2
+
+//
+//
+//
 Command_exit:
 	ldr	x0, =exitMessage
 	bl	StrOut
@@ -316,23 +349,22 @@ exitMessage:
 Command_hex:
 	cmp	x0, #0			// Check for argument
 	b.eq	10f			// No argument
-
 	ldrb	w1, [x0]
 	cmp	w1, #0x30		// Check first character of command
-	b.lt	20f			// less than 0? then skip
-	cmp	w1, #0x39		// greater than 9? then skip
+	b.lt	20f			// less than '0'? then skip
+	cmp	w1, #0x39		// greater than '9'? then skip
 	b.gt	20f
 	bl	IntWordInput		// x0 in binary 64 bit data
 	cmp	x1, #0			// Check for input error
 	b.ne	20f			// yes error
 	cmp	x0, #TOPHAND
 	b.gt	20f
-	mov	x1, x0			// Argument x1 register index			
+	mov	x1, x0			// Argument x1 register index
 	bl	PrintVar		// Display register in hex
 	b	ParseCmd
 10:
-//	bl	PrintHex
-//	b	ParseCmd
+	bl	PrintHex
+	b	ParseCmd
 20:
 	ldr	x0, =30f
 	bl	StrOut
