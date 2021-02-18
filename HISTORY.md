@@ -80,3 +80,31 @@ During user input, following command a space delimited string is available for p
 The address of the argument string is available in x0.
 Wrote function IntWordInput to convert integer string to binary unsigned 64 bit integer.
 Error checking added for empty string and non-numeric characters.
+
+### 2021-02-18
+
+- created math.s to hold variable declarations
+
+Typically, variables would be defined as binary floating point, with an
+exponent, mantissa, and some extra words at the least significant end to absorb
+errors which are called guard words.
+```
+   < binary exponent words>  <mantissa words> <guard words>
+```
+However, for the case of calculation of pi, scientific notation is not really
+needed. To simplify the code, I am going to define the variables as fixed point.
+In this case there must be a decimal point to separate integer part from fraction part.
+```
+   <binary integer part> /decimal point/ <binary fraction part>  <guard words>
+```
+In the case of this program, the variables are declared within the load image
+of the application, rather than use dynamically allocated memory.
+
+This raises the question of variable scope. Considering the names and references
+to the variable area are complex, and size of the variables can be adjusted
+by configuration variables, I intended to keep the scope of the name space
+for variable definitions in the math.s module and then include arithmetic functions
+as include files into the math.s file. This way I can have separate files
+for math arithmetic functions, but all calculations will be within one object module.
+
+- Renamed arch.inc-->arch-header.s and header.inc-->header-include.s to get editor syntax highlighting.

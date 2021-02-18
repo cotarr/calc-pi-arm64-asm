@@ -55,6 +55,8 @@ main:
 	ldr	x0, =HelloMsg	// Pointer to text string
 	bl	StrOut		// Send string to stdout
 
+	bl	FP_Initialize
+
 	bl	ParseCmd	// Infinite loop... user input
 
 ProgramExit:

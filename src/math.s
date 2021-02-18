@@ -34,6 +34,8 @@ SOFTWARE.
 
 /* ------------------------------------------------------------ */
 
+	.global	FP_Initialize
+	.global	Set_No_Word
 	.global		No_word, No_Byte
 
 // -----------------------------------------------------
@@ -149,4 +151,77 @@ D_Flt_LSWO:	.skip	BYTE_PER_WORD	// Default Offset address of MS Word
 // -----------------------------------------------------
 
 
+/*--------------------------------------------------------------
+;  On program start, initialize the variable space
+;
+;  Input:   none
+;
+;  Output:  none
+;
+;--------------------------------------------------------------*/
+FP_Initialize:
+PrintByteHex:
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+
+	mov	x0, #INIT_NO_WORD
+	bl	Set_No_Word
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	add	sp, sp, #32
+	ret
+
+
+/*--------------------------------------------------------------
+;  Set Number of Words Variables
+;
+;  Input:   x0 - Number of 64 bit words in mantissa
+;
+;  Output:  none
+;
+;--------------------------------------------------------------*/
+Set_No_Word:
+	sub	sp, sp, #48		// Reserve 6 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x10,  [sp, #24]
+	str	x11,  [sp, #32]
+//
+// [No_Word] is variable for number 32 bit words in mantissa
+//
+	ldr	x11, =No_Word		// [No_Word] number 64 bit words
+	str	x0, [x11]
+	ldr	x11, =D_Flt_Word	// Default [No_Word] value
+	str	x0, [x11]
+//
+// [No_Byte] is variable for number 8 bit bytes in mantissa
+//
+	ldr	x11, =No_Byte
+	mov	x10, x0, lsl #3	// Convert to bytes [No_Byte]
+	str	x10, [x11]
+	ldr	x11, =D_Flt_Byte	// Default value
+	str	x10, [x11]
+//
+// [LSWOfst] is variable to offset to L.S. Word in mantissa
+//
+	ldr	x11, =VAR_MSW_OFST
+	sub	x10, x11, x10		// MSByte-[No_Byte]
+	ldr	x11, =LSWOfst
+	str	x10, [x11]
+	ldr	x11, =D_Flt_LSWO
+	str	x10, [x11]		// Default value
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x10,  [sp, #24]
+	ldr	x11,  [sp, #32]
+	add	sp, sp, #48
+	ret
+
+// ---------------------------------------------
 	.end
