@@ -1,0 +1,152 @@
+/* ----------------------------------------------------------------
+	math.s
+
+	Created:   2021-02-18
+	Last edit: 2021-02-18
+
+	PrintCommandList
+	ParseCmd
+
+----------------------------------------------------------------
+MIT License
+
+Copyright 2021 David Bolenbaugh
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+------------------------------------------------------------- */
+
+   	.Include "arch.inc"	// .arch and .cpu directives
+   	.include "header.inc"
+
+/* ------------------------------------------------------------ */
+
+	.global		No_word, No_Byte
+
+// -----------------------------------------------------
+	.data   // Section containing initialized data
+	.align	3
+// -----------------------------------------------------
+
+//
+// Pointers to variables  (word address table)
+//
+RegAddTable:
+	.word	FP_Acc		// Handle = 0
+	.word	FP_Opr		// Handle = 1
+	.word	FP_WorkA	// Handle = 2
+	.word	FP_WorkB	// Handle = 3
+	.word	FP_WorkC	// Handle = 4
+	.word	FP_X_Reg	// Handle = 5
+	.word	FP_Y_Reg	// Handle = 6
+	.word	FP_Z_Reg	// Handle = 7
+	.word	FP_T_Reg	// Handle = 8
+	.word	FP_Reg0		// handle = 9
+	.word	FP_Reg1		// Handle = 10
+	.word	FP_Reg2		// Handle = 11
+	.word	FP_Reg3		// Handle = 12
+/*
+	.word	FP_Reg4		// Handle = 13
+	.word	FP_Reg5		// Handle = 14
+	.word	FP_Reg6		// Handle = 15
+	.word	FP_Reg7		// Handle = 16
+*/
+
+// Register names (8 bytes per name, ASCII null terminated)
+// Handle is converted to name address in GetVarNameAdd
+//
+RegNameTable:
+
+	.align	2
+	.ascii	"ACC   "
+	.byte	0,0
+	.ascii	"OPR   "
+	.byte	0,0
+	.ascii	"WORKA "
+	.byte	0,0
+	.ascii	"WORKB "
+	.byte	0,0
+	.ascii	"WORKC "
+	.byte	0,0
+	.ascii	"XREG  "
+	.byte	0,0
+	.ascii	"YREG  "
+	.byte	0,0
+	.ascii	"ZREG  "
+	.byte	0,0
+	.ascii	"TREG  "
+	.byte	0,0
+	.ascii	"REG0  "
+	.byte	0,0
+	.ascii	"REG1  "
+	.byte	0,0
+	.ascii	"REG2  "
+	.byte	0,0
+	.ascii	"REG3  "
+	.byte	0,0
+
+/*	.ascii	"REG4  "
+	.byte	0,0
+	.ascii	"REG5  "
+	.byte	0,0
+	.ascii	"REG6  "
+	.byte	0,0
+	.ascii	"REG7  "
+	.byte	0,0
+*/
+
+// -----------------------------------------------------
+	.bss	// Section contain un-initialized data
+	.align 3
+// -----------------------------------------------------
+
+FP_Acc:		.skip	VAR_BSIZE
+FP_Opr:		.skip	VAR_BSIZE
+FP_WorkA:	.skip	VAR_BSIZE
+FP_WorkB:	.skip	VAR_BSIZE
+FP_WorkC:	.skip	VAR_BSIZE
+FP_X_Reg:	.skip	VAR_BSIZE
+FP_Y_Reg:	.skip	VAR_BSIZE
+FP_Z_Reg:	.skip	VAR_BSIZE
+FP_T_Reg:	.skip	VAR_BSIZE
+FP_Reg0:	.skip	VAR_BSIZE
+FP_Reg1:	.skip	VAR_BSIZE
+FP_Reg2:	.skip	VAR_BSIZE
+FP_Reg3:	.skip	VAR_BSIZE
+/*
+FP_Reg4:	.skip	VAR_BSIZE
+FP_Reg5:	.skip	VAR_BSIZE
+FP_Reg6:	.skip	VAR_BSIZE
+FP_Reg7:	.skip	VAR_BSIZE	// If changing, must adjust --> TOPHAND
+*/
+//
+//  Miscellaneous program variables
+//
+		.align	3
+No_Byte:	.skip	BYTE_PER_WORD	// Number of bytes in mantissa (32_64_CHECK align and RESD vs DQ)
+No_Word:	.skip	BYTE_PER_WORD	// Number of words in mantissa
+LSWOfst:	.skip	BYTE_PER_WORD	// Offset address of MS Word at No_Word accuracy
+D_Flt_Byte:	.skip	BYTE_PER_WORD	// Default number of bytes in mantissa
+D_Flt_Word:	.skip	BYTE_PER_WORD	// Default number of words in mantissa
+D_Flt_LSWO:	.skip	BYTE_PER_WORD	// Default Offset address of MS Word
+
+// -----------------------------------------------------
+	.text
+	.align 3
+// -----------------------------------------------------
+
+
+	.end
