@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-02-17
+	Last edit: 2021-02-18
 
 	PrintCommandList
 	ParseCmd
@@ -31,8 +31,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ------------------------------------------------------------- */
 
-   	.Include "arch.inc"	// .arch and .cpu directives
-   	.include "header.inc"
+   	.Include "arch-include.s"	// .arch and .cpu directives
+   	.include "header-include.s"
 
 /* ------------------------------------------------------------ */
 

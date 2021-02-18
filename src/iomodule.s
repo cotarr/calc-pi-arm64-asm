@@ -5,7 +5,7 @@
 	subroutines.
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-16
+	Last Edit: 2021-02-18
 
 	StrOut
 	CharOut
@@ -32,8 +32,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ------------------------------------------------------------- */
 
-	.Include "arch.inc"	// .arch and .cpu directives
-	.include "header.inc"
+	.Include "arch-include.s"	// .arch and .cpu directives
+	.include "header-include.s"
 
 /* ------------------------------------------------------------ */
 

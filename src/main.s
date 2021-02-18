@@ -6,7 +6,7 @@
 	David Bolenbaugh
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-17
+	Last Edit: 2021-02-18
 --------------------------------------------------------------
 MIT License
 
@@ -31,8 +31,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 *****************************************************************************/
 
-	.Include "arch.inc"	// .arch and .cpu directives
-	.include "header.inc"
+	.Include "arch-include.s"	// .arch and .cpu directives
+	.include "header-include.s"
 
 	.global	_start
 	.global	ProgramExit

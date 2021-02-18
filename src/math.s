@@ -29,8 +29,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ------------------------------------------------------------- */
 
-   	.Include "arch.inc"	// .arch and .cpu directives
-   	.include "header.inc"
+   	.Include "arch-include.s"	// .arch and .cpu directives
+   	.include "header-include.s"
 
 /* ------------------------------------------------------------ */
 

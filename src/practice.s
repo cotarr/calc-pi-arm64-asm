@@ -4,7 +4,7 @@
 	Sandbox for playing with various code
 
 	Created:   2021-02-17
-	Last edit: 2021-02-17
+	Last edit: 2021-02-18
 
 	PrintCommandList
 	ParseCmd
@@ -31,8 +31,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ------------------------------------------------------------- */
 
-   	.Include "arch.inc"	// .arch and .cpu directives
-   	.include "header.inc"
+   	.Include "arch-include.s"	// .arch and .cpu directives
+   	.include "header-include.s"
 
 //  	.cpu	cortex-a72		// RPI-4
 //	.cpu	cortex-a7		// RPI-2B
