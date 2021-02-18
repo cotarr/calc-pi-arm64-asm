@@ -7,6 +7,7 @@
 	Created:   2021-02-14
 	Last Edit: 2021-02-18
 
+	KeyIn
 	StrOut
 	CharOut
 	CROut
@@ -32,7 +33,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ------------------------------------------------------------- */
 
-	.Include "arch-include.s"	// .arch and .cpu directives
+	.include "arch-include.s"	// .arch and .cpu directives
 	.include "header-include.s"
 
 /* ------------------------------------------------------------ */

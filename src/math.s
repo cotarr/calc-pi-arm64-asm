@@ -4,9 +4,6 @@
 	Created:   2021-02-18
 	Last edit: 2021-02-18
 
-	PrintCommandList
-	ParseCmd
-
 ----------------------------------------------------------------
 MIT License
 
@@ -29,14 +26,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ------------------------------------------------------------- */
 
-   	.Include "arch-include.s"	// .arch and .cpu directives
+   	.include "arch-include.s"	// .arch and .cpu directives
    	.include "header-include.s"
+	.include "math-debug.s"
 
 /* ------------------------------------------------------------ */
 
 	.global	FP_Initialize
 	.global	Set_No_Word
-	.global		No_word, No_Byte
+	.global	No_word, No_Byte
 
 // -----------------------------------------------------
 	.data   // Section containing initialized data
@@ -47,24 +45,24 @@ SOFTWARE.
 // Pointers to variables  (word address table)
 //
 RegAddTable:
-	.word	FP_Acc		// Handle = 0
-	.word	FP_Opr		// Handle = 1
-	.word	FP_WorkA	// Handle = 2
-	.word	FP_WorkB	// Handle = 3
-	.word	FP_WorkC	// Handle = 4
-	.word	FP_X_Reg	// Handle = 5
-	.word	FP_Y_Reg	// Handle = 6
-	.word	FP_Z_Reg	// Handle = 7
-	.word	FP_T_Reg	// Handle = 8
-	.word	FP_Reg0		// handle = 9
-	.word	FP_Reg1		// Handle = 10
-	.word	FP_Reg2		// Handle = 11
-	.word	FP_Reg3		// Handle = 12
+	.quad	FP_Acc		// Handle = 0
+	.quad	FP_Opr		// Handle = 1
+	.quad	FP_WorkA	// Handle = 2
+	.quad	FP_WorkB	// Handle = 3
+	.quad	FP_WorkC	// Handle = 4
+	.quad	FP_X_Reg	// Handle = 5
+	.quad	FP_Y_Reg	// Handle = 6
+	.quad	FP_Z_Reg	// Handle = 7
+	.quad	FP_T_Reg	// Handle = 8
+	.quad	FP_Reg0		// handle = 9
+	.quad	FP_Reg1		// Handle = 10
+	.quad	FP_Reg2		// Handle = 11
+	.quad	FP_Reg3		// Handle = 12
 /*
-	.word	FP_Reg4		// Handle = 13
-	.word	FP_Reg5		// Handle = 14
-	.word	FP_Reg6		// Handle = 15
-	.word	FP_Reg7		// Handle = 16
+	.quad	FP_Reg4		// Handle = 13
+	.quad	FP_Reg5		// Handle = 14
+	.quad	FP_Reg6		// Handle = 15
+	.quad	FP_Reg7		// Handle = 16
 */
 
 // Register names (8 bytes per name, ASCII null terminated)
@@ -149,7 +147,6 @@ D_Flt_LSWO:	.skip	BYTE_PER_WORD	// Default Offset address of MS Word
 	.text
 	.align 3
 // -----------------------------------------------------
-
 
 /*--------------------------------------------------------------
 ;  On program start, initialize the variable space

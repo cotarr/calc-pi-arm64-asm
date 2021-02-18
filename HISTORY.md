@@ -108,3 +108,4 @@ as include files into the math.s file. This way I can have separate files
 for math arithmetic functions, but all calculations will be within one object module.
 
 - Renamed arch.inc-->arch-header.s and header.inc-->header-include.s to get editor syntax highlighting.
+- Added function FP_Initialize to setup variable space on program start

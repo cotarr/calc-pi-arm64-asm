@@ -31,7 +31,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ------------------------------------------------------------- */
 
-   	.Include "arch-include.s"	// .arch and .cpu directives
+   	.include "arch-include.s"	// .arch and .cpu directives
    	.include "header-include.s"
 
 /* ------------------------------------------------------------ */
@@ -61,35 +61,39 @@ SOFTWARE.
 Command_Table:
 	.ascii	"cmdlist"
 	.byte	0
-	.word	Command_cmdlist,0
+	.quad	Command_cmdlist
 
 	.ascii	"exit"
 	.byte	0,0,0,0
-	.word	Command_exit,0
+	.quad	Command_exit
+
+	.ascii	"hex"
+	.byte	0,0,0,0,0
+	.quad	Command_hex
 
 	.ascii	"prac"
 	.byte	0,0,0,0
-	.word	Command_prac,0
+	.quad	Command_prac
 
 	.ascii	"q"
 	.byte	0,0,0,0,0,0,0
-	.word	Command_exit,0
+	.quad	Command_exit
 
 	.ascii	"quit"
 	.byte	0,0,0,0
-	.word	Command_exit,0
+	.quad	Command_exit
 
 	.ascii	"test"
 	.byte	0,0,0,0
-	.word	Command_test,0
+	.quad	Command_test
 
 	.ascii	"version"
 	.byte	0
-	.word	Command_version,0
+	.quad	Command_version
 
 // End table marker
 	.byte	0,0,0,0,0,0,0,0
-	.word	0,0
+	.quad	0
 Command_TableEnd:
 
 //----------------------------------------
@@ -305,6 +309,39 @@ Command_exit:
 exitMessage:
 	.asciz	"Graceful Exit\n"
 	.align 3
+
+//
+//
+//
+Command_hex:
+	cmp	x0, #0			// Check for argument
+	b.eq	10f			// No argument
+
+	ldrb	w1, [x0]
+	cmp	w1, #0x30		// Check first character of command
+	b.lt	20f			// less than 0? then skip
+	cmp	w1, #0x39		// greater than 9? then skip
+	b.gt	20f
+	bl	IntWordInput		// x0 in binary 64 bit data
+	cmp	x1, #0			// Check for input error
+	b.ne	20f			// yes error
+	cmp	x0, #TOPHAND
+	b.gt	20f
+	mov	x1, x0			// Argument x1 register index			
+	bl	PrintVar		// Display register in hex
+	b	ParseCmd
+10:
+//	bl	PrintHex
+//	b	ParseCmd
+20:
+	ldr	x0, =30f
+	bl	StrOut
+	b	ParseCmd
+30:
+	.asciz	"Hex: Error, invalid argument\n\n"
+	.align 3
+
+
 //
 //
 //
