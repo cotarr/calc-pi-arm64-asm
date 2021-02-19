@@ -183,3 +183,4 @@ git checkout ef153bbb5fa1e279d214abb7029f15f3841bec91
 - math-subr.s - New file for boiler plate arithmetic utilities
 - Added function ClearVariable argument x1 index number of variable to clear
 - Added function CopyVariable argument x1 source x2 destination indexes of variable to clear
+- help.s - New file to hold help utility in the future, added program start welcome message

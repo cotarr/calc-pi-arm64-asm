@@ -11,6 +11,7 @@
 	StrOut
 	CharOut
 	CROut
+	ClrScr
 ----------------------------------------------------------------
 MIT License
 
@@ -58,6 +59,7 @@ KeyBuf:	// Keyboard Input Buffer
 	.global	StrOut
 	.global	CharOut
 	.global	CROut
+	.global	ClrScr
 
 /******************************************************
   KeyIn - Read text line from console input
@@ -193,6 +195,36 @@ CROut:
 	ldr	x0,  [sp, #16]
 	add	sp, sp, #32
 	ret
+
+/* *****************************************************
+  ClrScr - Output control characters to clear screen
+
+  Input:  none
+
+  Output: none
+
+****************************************************** */
+ClrScr:
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+
+	ldr	x0, =Clear_String
+	bl	StrOut
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	add	sp, sp, #32
+	ret
+
+Clear_String:
+	.byte	27
+	.ascii 	"[2J"			// Clear Screen
+	.byte	27
+	.ascii	"[H"			// Home Cursor
+	.byte	0			// End of string
 
 /* ------------------------------------------------------------ */
 	.data

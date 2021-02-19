@@ -44,16 +44,10 @@ _start:
 main:
 
 //
-// Setup terminal screen
-//
-	ldr	x0, =Clear_String
-	bl	StrOut
-//
 // Welcome message
 //
-
-	ldr	x0, =HelloMsg	// Pointer to text string
-	bl	StrOut		// Send string to stdout
+	bl	ClrScr		// Terminal setup
+	bl	Help_Welcome
 
 	bl	FP_Initialize
 
@@ -65,21 +59,8 @@ ProgramExit:
 	svc	#0      	// syscall
 
 // ----------------
-	.data
-	.align 4
+//	.data
+//	.align 4
 // ----------------
-
-HelloMsg:
-	.ascii	"\nW O R K  I N   P R O G R E S S (no calculation yet)\n"
-	.ascii	"\nCalculation of Pi on Raspberry Pi\n"
-	.ascii	"Written in GNU Assembler (as)\n"
-	.asciz	"Assembled arch=armv8-a cpu=cortex-a72\n\n"
-
-Clear_String:
-        .byte	27			// esc
-	.ascii	"[2J"			// Clear Screen
-        .byte	27
-	.ascii	"[H"			// Home Cursor
-        .byte	0			// End of string
 
 .end
