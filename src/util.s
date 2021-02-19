@@ -660,7 +660,7 @@ PrintRegisters:
 	.asciz	"  x30 = "
 	.asciz	"  sp  = "
 
-	.align 2
+	.align 4
 
 /***************************************
 
@@ -789,6 +789,6 @@ IntWordInputError:
 Non_numeric_err:
 	.asciz "\nInput Error:  Expect integer string.\n"
 
-	.align 3
+	.align 4
 
 	.end

@@ -330,7 +330,7 @@ Command_D_fill:
 
 20:
 	.asciz	"D.fill: Error, invalid argument\n\n"
-	.align 2
+	.align 4
 
 //
 //
@@ -341,7 +341,7 @@ Command_exit:
 	b.al	ProgramExit
 exitMessage:
 	.asciz	"Graceful Exit\n"
-	.align 3
+	.align 4
 
 //
 //
@@ -371,7 +371,7 @@ Command_hex:
 	b	ParseCmd
 30:
 	.asciz	"Hex: Error, invalid argument\n\n"
-	.align 3
+	.align 4
 
 
 //
@@ -426,7 +426,7 @@ Command_test:
 
 TestMessageString:
 	.asciz	"\nTest Command execution:\n\n"
-	.align 3
+	.align 4
 
 Command_version:
 	ldr	x0,=versionString
@@ -435,7 +435,7 @@ Command_version:
 
 versionString:
 	.asciz	"\n     Version 1.0 - Debugging in progress\n\n"
-	.align 3
+	.align 4
 
 CodeEnd:
 	.end

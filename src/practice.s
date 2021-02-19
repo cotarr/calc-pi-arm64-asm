@@ -40,7 +40,7 @@ SOFTWARE.
 
 
 	.text
-	.align 3
+	.align 4
 
 practice:
 	sub	sp, sp, #64		// Reserve 8 words
@@ -253,14 +253,14 @@ pracStr001:
 	.asciz	"Practice\n\n"
 pracStr002:
 	.asciz	"EndianCheck\n"
-	.align	3
+	.align	4
 
 // -----------------
 	.data
 // -----------------
 
 endian_test1:
-	.align 3
+	.align 4
 	.quad	0
 word_64bit:
 	.quad	0x1122334455667788

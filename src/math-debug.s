@@ -217,7 +217,7 @@ PrintHex:
 ;
 .HexTabString:
 	.asciz	"REG   Hand M.S. Word                      (no guard) L.S.W"
-	.align 3
+	.align 4
 
 
 /*;--------------------------------------------------------------

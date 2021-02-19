@@ -39,7 +39,7 @@ SOFTWARE.
 
 // -----------------------------------------------------
 	.data   // Section containing initialized data
-	.align	3
+	.align	4
 // -----------------------------------------------------
 
 //
@@ -71,7 +71,7 @@ RegAddTable:
 //
 RegNameTable:
 
-	.align	2
+	.align	4
 	.ascii	"ACC   "
 	.byte	0,0
 	.ascii	"OPR   "
@@ -111,7 +111,7 @@ RegNameTable:
 
 // -----------------------------------------------------
 	.bss	// Section contain un-initialized data
-	.align 3
+	.align 4
 // -----------------------------------------------------
 
 FP_Acc:		.skip	VAR_BSIZE
@@ -136,7 +136,7 @@ FP_Reg7:	.skip	VAR_BSIZE	// If changing, must adjust --> TOPHAND
 //
 //  Miscellaneous program variables
 //
-		.align	3
+		.align	4
 No_Byte:	.skip	BYTE_PER_WORD	// Number of bytes in mantissa (32_64_CHECK align and RESD vs DQ)
 No_Word:	.skip	BYTE_PER_WORD	// Number of words in mantissa
 LSWOfst:	.skip	BYTE_PER_WORD	// Offset address of MS Word at No_Word accuracy
@@ -146,7 +146,7 @@ D_Flt_LSWO:	.skip	BYTE_PER_WORD	// Default Offset address of MS Word
 
 // -----------------------------------------------------
 	.text
-	.align 3
+	.align 4
 // -----------------------------------------------------
 
 /*--------------------------------------------------------------
