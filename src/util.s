@@ -740,7 +740,7 @@ PrintWordB10:
 
 --------------------------------------------------------------*/
 IntWordInput:
-	sub	sp, sp, #80		// Reserve 20 words
+	sub	sp, sp, #80		// Reserve 10 words
 	str	x30, [sp, #0]		// Preserve these registers
 	str	x29, [sp, #8]
 	str	x9, [sp, #16]

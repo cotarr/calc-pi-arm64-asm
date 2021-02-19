@@ -73,6 +73,10 @@ Command_Table:
 	.byte	0,0,0,0
 	.quad	Command_exit
 
+	.ascii	"help"
+	.byte	0,0,0,0
+	.quad	Command_help
+
 	.ascii	"hex"
 	.byte	0,0,0,0,0
 	.quad	Command_hex
@@ -344,6 +348,11 @@ Command_exit:
 exitMessage:
 	.asciz	"Graceful Exit\n"
 	.align 4
+
+
+Command_help:
+	bl	Help
+	b	ParseCmd
 
 //
 //

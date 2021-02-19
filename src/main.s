@@ -36,6 +36,7 @@ SOFTWARE.
 
 	.global	_start
 	.global	ProgramExit
+	.global	FatalError
 
 	.text
 	.align 4
@@ -53,6 +54,8 @@ main:
 
 	bl	ParseCmd	// Infinite loop... user input
 
+FatalError:
+// TBD
 ProgramExit:
 	mov	x0, #0  	// exit with status 0
 	mov	x8, sys_exit 	// exit
