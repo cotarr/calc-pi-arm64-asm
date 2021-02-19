@@ -28,6 +28,7 @@ SOFTWARE.
 
    	.include "arch-include.s"	// .arch and .cpu directives
    	.include "header-include.s"
+	.include "math-subr.s"
 	.include "math-debug.s"
 
 /* ------------------------------------------------------------ */

@@ -4,7 +4,7 @@
 	Sandbox for playing with various code
 
 	Created:   2021-02-17
-	Last edit: 2021-02-18
+	Last edit: 2021-02-19
 
 ----------------------------------------------------------------
 MIT License
@@ -58,7 +58,8 @@ practice:
 //
 // Comment each test as needed
 //
-	b	conditional_branching
+	b	integer_addition
+	// b	conditional_branching
 	// b	EndianCheck
 	// b	print_registers_test
 	// b	print_status_flags
@@ -69,7 +70,47 @@ practice:
 
 
 // -----------------------------------------------
-// Endian check
+//
+//
+integer_addition:
+	movz	x0, #0x1111, lsl 48
+	movk	x0, #0x1111, lsl 32
+	movk	x0, #0x1111, lsl 16
+	movk	x0, #0x1111
+	// x0 = 0x1111111111111111
+	mov	x1, x0
+	// x0 = 0x1111111111111111
+	add	x0, x0, x1
+	// x0 = 0x2222222222222222
+//	bl	PrintWordHex
+
+	movz	x0, #0x1111, lsl 48
+	movk	x0, #0x1111, lsl 32
+	movk	x0, #0x1111, lsl 16
+	movk	x0, #0x1111
+	// 1111111111111111
+	movz	x1, #0x4
+	// 0x0000000000000004
+	add	x0, x0, x1, lsl #2
+	// 0x1111111111111121
+	//bl	PrintWordHex
+
+	movz	x0, #0x1111, lsl 48
+	movk	x0, #0x1111, lsl 32
+	movk	x0, #0x1111, lsl 16
+	movk	x0, #0x1111
+	// 1111111111111111
+	mov	x1, x0
+	// 0x1111111111111111
+	add	x0, x0, x1, lsl #2
+	// 0x5555555555555555
+	bl	PrintWordHex
+
+	b	exit_prac
+
+
+// -----------------------------------------------
+//
 //
 conditional_branching:
 
@@ -192,6 +233,10 @@ load_64_bit_immediate:
 	movk	x0, #0x89ab, lsl 16
 	movk	x0, #0xcdef
 	bl	PrintWordHex
+	bl	CROut
+	movz	x0, #0xF000, lsl 48
+	bl	PrintWordHex
+
 	b	exit_prac
 //
 // -----------------------------------------------

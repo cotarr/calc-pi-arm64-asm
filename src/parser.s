@@ -395,6 +395,19 @@ Command_test:
 	//
 	// ---------------------
 
+//	mov	x1, #3
+//	bl	ClearVariable
+//	b	ParseCmd
+
+	// --------------------------
+
+	mov	x1, #3
+	mov	x2, #5
+	bl	CopyVariable
+	b	ParseCmd
+
+	// --------------------------
+
 	// Argument string located in x0
 	bl	IntWordInput		// x0=value no error then x1=0
 
