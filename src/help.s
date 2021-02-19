@@ -1,11 +1,11 @@
 /* -------------------------------------------------------------
-;	help.s
-;
-; This module contains user help
-;
-;	Created:   2021-02-19
-;	Last Edit: 2021-02-19
-;
+	help.s
+
+ This module contains user help
+
+	Created:   2021-02-19
+	Last Edit: 2021-02-19
+
 ----------------------------------------------------------------
 MIT License
 

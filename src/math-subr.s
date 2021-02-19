@@ -33,13 +33,13 @@ SOFTWARE.
 	.global	CopyVariable
 
 /*--------------------------------------------------------------
-;  Clear F.P. Variable to all zero's,
-;
-;  Input:   x1 = handle number of variable
-;
-;  Output:  none
-;
-;--------------------------------------------------------------*/
+  Clear F.P. Variable to all zero's,
+
+  Input:   x1 = handle number of variable
+
+  Output:  none
+
+--------------------------------------------------------------*/
 ClearVariable:
 
 
@@ -73,14 +73,14 @@ ClearVariable:
 	ret
 
 /*--------------------------------------------------------------
-;  Copy F.P. Variable
-;
-;  Input:   x1 = Source - handle number of variable
-;           x2 = Destination - handle number of variable
-;
-;  Output:  none
-;
-;--------------------------------------------------------------*/
+  Copy F.P. Variable
+
+  Input:   x1 = Source - handle number of variable
+           x2 = Destination - handle number of variable
+
+  Output:  none
+
+--------------------------------------------------------------*/
 CopyVariable:
 	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]

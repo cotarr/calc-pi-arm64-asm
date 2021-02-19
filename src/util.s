@@ -727,18 +727,18 @@ PrintWordB10:
 	add	sp, sp, #80
 	ret
 
-/*;--------------------------------------------------------------
-; Integer input routine
-;
-; This routine will put an integer value from terminal input
-; and convert ASCII to binary, returning 64 bit RAX
-;
-;    Input:    x0 address of input buffer
-;
-;    Output:   x0 contains 64 bit positive integer
-;              x1 0 = no error else > 0 is error
-;
-;--------------------------------------------------------------*/
+/*--------------------------------------------------------------
+ Integer input routine
+
+ This routine will put an integer value from terminal input
+ and convert ASCII to binary, returning 64 bit RAX
+
+    Input:    x0 address of input buffer
+
+    Output:   x0 contains 64 bit positive integer
+              x1 0 = no error else > 0 is error
+
+--------------------------------------------------------------*/
 IntWordInput:
 	sub	sp, sp, #80		// Reserve 20 words
 	str	x30, [sp, #0]		// Preserve these registers

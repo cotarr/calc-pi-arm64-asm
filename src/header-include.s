@@ -31,7 +31,7 @@
 .set	INIT_EXT_DIG,	0
 .set	MINIMUM_DIG,	5				// needed for printing
 
-;
+
 
 /*-------------------------
 Variable Handle Numbers

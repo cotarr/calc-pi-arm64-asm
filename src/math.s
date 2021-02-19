@@ -152,13 +152,13 @@ D_Flt_LSWO:	.skip	BYTE_PER_WORD	// Default Offset address of MS Word
 // -----------------------------------------------------
 
 /*--------------------------------------------------------------
-;  On program start, initialize the variable space
-;
-;  Input:   none
-;
-;  Output:  none
-;
-;--------------------------------------------------------------*/
+  On program start, initialize the variable space
+
+  Input:   none
+
+  Output:  none
+
+--------------------------------------------------------------*/
 FP_Initialize:
 PrintByteHex:
 	sub	sp, sp, #32		// Reserve 4 words
@@ -176,13 +176,13 @@ PrintByteHex:
 
 
 /*--------------------------------------------------------------
-;  Set Number of Words Variables
-;
-;  Input:   x0 - Number of 64 bit words in mantissa
-;
-;  Output:  none
-;
-;--------------------------------------------------------------*/
+  Set Number of Words Variables
+
+  Input:   x0 - Number of 64 bit words in mantissa
+
+  Output:  none
+
+--------------------------------------------------------------*/
 Set_No_Word:
 	sub	sp, sp, #48		// Reserve 6 words
 	str	x30, [sp, #0]

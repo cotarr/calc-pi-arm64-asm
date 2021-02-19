@@ -35,13 +35,13 @@ SOFTWARE.
 // .global	EndianCheck
 
 /*--------------------------------------------------------------
-;   Print specified variable in HEX format
-;
-;   Input:  x1 = variable handle number
-;
-;   Output: none
-;
-;--------------------------------------------------------------*/
+   Print specified variable in HEX format
+
+   Input:  x1 = variable handle number
+
+   Output: none
+
+--------------------------------------------------------------*/
 PrintVar:
 	sub	sp, sp, #80		// Reserve 10 words
 	str	x30, [sp, #0]
@@ -111,14 +111,14 @@ PrintVar:
 	add	sp, sp, #80
 	ret
 
-/*;--------------------------------------------------------------
-;   Print all variables in HEX format
-;
-;   Input:  none
-;
-;   Output: none
-;
-;--------------------------------------------------------------*/
+/*--------------------------------------------------------------
+   Print all variables in HEX format
+
+   Input:  none
+
+   Output: none
+
+--------------------------------------------------------------*/
 PrintHex:
 	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]
@@ -216,22 +216,22 @@ PrintHex:
 	ldr	x13,  [sp, #56]
 	add	sp, sp, #64
 	ret
-;
+
 .HexTabString:
 	.asciz	"REG   Hand M.S. Word                      (no guard) L.S.W"
 	.align 4
 
 
-/*;--------------------------------------------------------------
-;   DEBUG - Fill variable with sequential numbers
-;
-;   MSB = 1 (higher address), then increment value 2, 3, 4  as approach LSB (lower address)
-;
-;   Input:  x1 = handle of variable
-;
-;   Output: none
-;
-;--------------------------------------------------------------*/
+/*--------------------------------------------------------------
+   DEBUG - Fill variable with sequential numbers
+
+   MSB = 1 (higher address), then increment value 2, 3, 4  as approach LSB (lower address)
+
+   Input:  x1 = handle of variable
+
+   Output: none
+
+--------------------------------------------------------------*/
 DebugFillVariable:
 	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]
