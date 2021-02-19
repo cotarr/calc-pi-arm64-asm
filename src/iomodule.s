@@ -5,13 +5,8 @@
 	subroutines.
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-18
+	Last Edit: 2021-02-19
 
-	KeyIn
-	StrOut
-	CharOut
-	CROut
-	ClrScr
 ----------------------------------------------------------------
 MIT License
 
@@ -34,6 +29,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+----------------------------------------------------------------
+	KeyIn
+	StrOut
+	CharOut
+	CROut
+	ClrScr
 ------------------------------------------------------------- */
 
 	.include "arch-include.s"	// .arch and .cpu directives

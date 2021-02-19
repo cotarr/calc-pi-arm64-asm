@@ -28,6 +28,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+----------------------------------------------------------------
+	Help
+	Help_Welcome
 ------------------------------------------------------------- */
 
 	.include "arch-include.s"	// .arch and .cpu directives
@@ -199,9 +202,8 @@ Help:
 	ldr	x0, =Help_Table_End	// Check for byte alignment
 	ands	x0, x0, #0x0f		// Should be zero
 	b.eq	10f
-	ldr	x0, =Command_Error2
-	bl	StrOut
-	mov	x0, #0
+	ldr	x0, =Command_Error2	// Error \message pointer
+	mov	x1, #2732		// 16 bit error code
 	b	FatalError
 10:
 //
@@ -238,9 +240,8 @@ Help_next_char:
 	b.ne	Help_Tab_Next
 	cmp	x10, #8			// Only 7 char + zero allowed
 	b.ne	40f			// 8 Found is fatal error in table
-	ldr	x0, =Command_Error1
-	bl	StrOut
-	mov	x0, #0
+	ldr	x0, =Command_Error1	// Error message pointer
+	mov	x1, #2455		// 16 bit error code
 	b	FatalError
 40:
 	add	X10, X10, #1
@@ -275,10 +276,10 @@ help_exit:
 	ret
 
 Command_Error1:
-	.ascii	"HelpCmd: zero end marker not found in text table\n\n"
+	.ascii	"HelpCmd: zero end marker not found in text table"
 	.byte	0
 Command_Error2:
-	.ascii	"HelpCmd: End of help table not QWord aligned, probably table error\n\n"
+	.ascii	"HelpCmd: End of help table not QWord aligned, probably table error"
 	.byte 	0
 
 /* ----------------------------------------------

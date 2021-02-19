@@ -60,7 +60,8 @@ practice:
 //
 // Comment each test as needed
 //
-	b	integer_addition
+	b	test_error
+	// b	integer_addition
 	// b	conditional_branching
 	// b	EndianCheck
 	// b	print_registers_test
@@ -70,6 +71,15 @@ practice:
 
 // ///////////////////////////////////////////////
 
+//
+//
+//
+test_error:
+	ldr	x0, =TestErrorMsg	// Error message pointer
+	mov	x1, #11			// 16 bit error code
+	b	FatalError
+TestErrorMsg:
+	.asciz "A test error was generated in the practive sandbox"
 
 // -----------------------------------------------
 //

@@ -47,23 +47,60 @@ main:
 //
 // Welcome message
 //
-	bl	ClrScr		// Terminal setup
+	bl	ClrScr			// Terminal setup
 	bl	Help_Welcome
 
 	bl	FP_Initialize
 
-	bl	ParseCmd	// Infinite loop... user input
+	bl	ParseCmd		// Infinite loop... user input
 
-FatalError:
-// TBD
+
 ProgramExit:
-	mov	x0, #0  	// exit with status 0
-	mov	x8, sys_exit 	// exit
-	svc	#0      	// syscall
+	ldr	x0, =NormalExitStr2	// An error code provided
+	bl	StrOut
+	mov	x0, #0  		// exit with status 0
+	mov	x8, sys_exit 		// exit
+	svc	#0      		// syscall
+
+// ------------------------------------------------------
+//   Error Handler
+//
+//   x0 = 0, assume error message already printerd
+//   x0 Pointer to error striong
+//   x1 Error code number
+//
+FatalError:
+	cmp	x0, #0			// is error code zero (assume message already printed
+	b.eq	10f			// nonzero, show message number
+	bl	StrOut			// Print message
+10:
+	cmp	x1, #0
+	b.eq	20f
+	ldr	x0, =ErrorMsg1 		// An error code provided
+	bl	StrOut
+	mov	x0, x1
+	bl	PrintWordB10		// Print the error code
+20:
+	ldr	x0, =ErrorMsg2
+	bl	StrOut
+	mov	x0, #1			// exit with error 1
+	mov	x8, sys_exit		// terminate program
+	svc	#0
 
 // ----------------
-//	.data
-//	.align 4
+	.data
+	.align 4
 // ----------------
+
+NormalExitStr1:
+	.asciz	"     Program run time: "
+NormalExitStr2:
+	.asciz	"\nGraceful Exit\n\n"
+ErrorMsg1:
+	.asciz	"\nError Code: "
+ErrorMsg2:
+	.asciz "\nProgram halted due to error.\n\n"
+
+
 
 .end

@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-02-18
+	Last edit: 2021-02-19
 
 	PrintCommandList
 	ParseCmd
@@ -31,6 +31,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+----------------------------------------------------------------
+ParseCmd
+PrintCommandList
 ------------------------------------------------------------- */
 
    	.include "arch-include.s"	// .arch and .cpu directives
@@ -120,9 +123,10 @@ StackPtrSnapshot:
 
 StackPtrErrorMsg:	.asciz	"\nWarning: Stack pointer moving.\n"
 PromptString:		.asciz	"Op Code: "
-AlignErrorMsg:		.asciz	"\nError: Command table not aligned in 128 bit blocks\n\n"
-Byte8ErrorMsg:		.asciz	"\nError: Command table not zero byte8\n\n"
 OpCodeErrString:	.asciz	"     Input Error: Illegal Op Code.  (Type: cmdlist)\n\n"
+// Fatal error messages
+AlignErrorMsg:		.asciz	"Error: Command table not aligned in 128 bit blocks"
+Byte8ErrorMsg:		.asciz	"Error: Command table not zero byte8"
 
 //----------------------------------------
 	.text
@@ -210,9 +214,9 @@ ParseCmd:
 	ldr	x9, =Command_TableEnd	// get last address of table
 	tst	x9, #0x07		// proper alignment 3 bit are zero
 	b.eq	30f			// zero, no error
-	ldr	x0, =AlignErrorMsg	// Else Fatal error, exit program
-	bl	StrOut
-	b.al	ProgramExit
+	ldr	x0, =AlignErrorMsg	// Error message pointer
+	mov	x1, #2344		// 16 bit rror code
+	b	FatalError
 30:
 //
 // Show prompt string
@@ -244,9 +248,9 @@ ParseCmd:
 	add	x21, x21, #1		// Yes, increment index to next char
 	cmp	x21, #8			// Index > 7 is command table error
 	b.ne	60f			// Command table is valid (< 7 chars)
-	ldr	x0, =Byte8ErrorMsg	// Else: fatal error, exit program
-	bl	StrOut
-	b.al	ProgramExit
+	ldr	x0, =Byte8ErrorMsg	// Error message pointer
+	mov	x1, #1224		// 16 bit error code
+	b	FatalError
 60:
 	ldrb	w10, [x20, x21]		// next character from input
 	ldrb	w11, [x19, x21]		// next character in table
@@ -342,12 +346,7 @@ Command_D_fill:
 //
 //
 Command_exit:
-	ldr	x0, =exitMessage
-	bl	StrOut
 	b.al	ProgramExit
-exitMessage:
-	.asciz	"Graceful Exit\n"
-	.align 4
 
 
 Command_help:
