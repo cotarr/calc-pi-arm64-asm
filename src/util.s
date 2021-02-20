@@ -273,6 +273,9 @@ PrintFlags:
 	mov	x0, #'C'
 	bl	CharOut
 80:
+	mov	x0, #0x020		// ascii space
+	bl	CharOut
+
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]

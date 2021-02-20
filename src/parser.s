@@ -405,6 +405,11 @@ Command_test:
 	//
 	// ---------------------
 
+
+	mov	x1, #3			// handle 3
+	bl	Right1Bit
+	b	ParseCmd
+
 //	mov	x1, #3
 //	bl	ClearVariable
 //	b	ParseCmd

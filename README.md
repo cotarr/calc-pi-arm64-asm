@@ -29,5 +29,5 @@ make
 ## Commands available:
 
 ```
-cmdlist D.fill exit hex prac q quit test version
+cmdlist D.fill exit help hex prac q quit test version
 ```

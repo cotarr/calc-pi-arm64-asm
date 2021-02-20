@@ -243,13 +243,14 @@ DebugFillVariable:
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]
 	str	x2,  [sp, #32]		// Variable handle #
+	str	x3,  [sp, #40]
 
 	ldr	x2, =RegAddTable	// Address of vector table
 	mov	x0, x1, lsl #3		// offset = index * size
 	add	x2, x2, x0
 	ldr	x2, [x2]		// x2 holds variable address
 
-//	push	{x2}
+	mov	x3, x2			// save for add sign bit option
 
 	ldr	x0, =VAR_MSB_OFST
 	add	x2, x2, x0		// x2 point at mantissa M.S.Byte
@@ -262,18 +263,15 @@ DebugFillVariable:
 	add	x0, x0, #1
 	subs	x1, x1, #1
 	b.ne	10b
-	bl	CROut
-	b.al	20f
 //
 // Option to set sign bit, comment out otherwise
 //
-//	pop	{x2}
-//	ldr	x0, =VAR_MSB_OFST
-//	add	x2, x2, x0
-//	ldrb	x0, [x2]
-//	orr	x0, x0, #0x80
+	ldr	x0, =VAR_MSB_OFST
+	add	x2, x3, x0
+	ldrb	w0, [x2]
+	orr	w0, w0, #0x80
 //////////////////// Set Sign Bit //////////////////////////////
-//	strb	x0, [x2]
+//	strb	w0, [x2]
 //////////////////////////////////////////////////////////////////////////////
 
 20:	ldr	x30, [sp, #0]		// Restore registers
@@ -281,5 +279,6 @@ DebugFillVariable:
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
 	ldr	x2,  [sp, #32]
+	ldr	x3,  [sp, #40]
 	add	sp, sp, #64
 	ret

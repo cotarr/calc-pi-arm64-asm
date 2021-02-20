@@ -54,11 +54,11 @@ ClearVariable:
 	str	x10,  [sp, #32]		// Counter
 	str	x11,  [sp, #40]		// Address Pointer
 
-	ldr	x10, =RegAddTable	// Address vector table
-	add	x10, x10, x1, lsl #3	// Index into table
-	ldr	x11, [x10]		// x11 point to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 point at top word
-	ldr	x10, =No_Word		// For word counter
+	ldr	x10, =RegAddTable	// Pointer to vector table
+	add	x10, x10, x1, lsl #3	// handle --> index into table
+	ldr	x11, [x10]		// x11 pointer to variable address
+	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word
+	ldr	x10, =No_Word		// Word counter
 	ldr	x10, [x10]		// Words in mantissa
 10:
 	// Perform the fill using 64 bit words
@@ -95,15 +95,15 @@ CopyVariable:
 	str	x11,  [sp, #48]		// Source Address Pointer
 	str	x12,  [sp, #48]		// Destination Address Pointer
 
-	ldr	x10, =RegAddTable	// Address vector table
-	add	x10, x10, x1, lsl #3	// Index into table
-	ldr	x11, [x10]		// x11 point to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 point at top word (exponent)
+	ldr	x10, =RegAddTable	// Pointer to vector table
+	add	x10, x10, x1, lsl #3	// Handle --> index into table
+	ldr	x11, [x10]		// x11 pointer to variable address
+	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word (exponent)
 
-	ldr	x10, =RegAddTable	// Address vector table
+	ldr	x10, =RegAddTable	// Pointer to vector table
 	add	x10, x10, x2, lsl #3	// Index into table
-	ldr	x12, [x10]		// x12 point to variable address
-	add	x12, x12, #VAR_MSW_OFST	// x1 point at top word (exponent)
+	ldr	x12, [x10]		// x12 pointer to variable address
+	add	x12, x12, #VAR_MSW_OFST	// x12 pointer at n.s, word (exponent)
 
 	ldr	x10, =No_Word		// For word counter
 	ldr	x10, [x10]		// Words in mantissa

@@ -60,7 +60,10 @@ practice:
 //
 // Comment each test as needed
 //
-	b	test_error
+	b	shift_addition
+	b	subtraction
+	b	bit_shift
+	// b	test_error
 	// b	integer_addition
 	// b	conditional_branching
 	// b	EndianCheck
@@ -80,7 +83,41 @@ test_error:
 	b	FatalError
 TestErrorMsg:
 	.asciz "A test error was generated in the practive sandbox"
+	.align 4
 
+shift_addition:
+	// x0 = x11 + x10 lsl 4
+	mov	x10, #0x1000
+	mov	X11, #0x0010
+	adds	x0, x11, x10, lsl 4
+	// NE LO/CC PL VC 0x0000000000010010
+	bl	PrintFlags
+	bl	PrintWordHex
+	b	exit_prac
+
+subtraction:
+	// x0 = x11 - x10
+	mov	x10, #100
+	mov	X11, #5
+	subs	x0, x11, x10
+	// NE LO/CC MI VS 0xFFFFFFFFFFFFFFA1
+	subs	x0, x10, x11
+	// NE HS/CS PL VC 000000000000005F
+	bl	PrintFlags
+	bl	PrintWordHex
+	b	exit_prac
+
+bit_shift:
+	mov	x0, #1
+	ror	x0, x0, #1
+	// 0x8000000000000000
+	mov	x0, #1
+	lsr	x0, x0, #1
+
+	bl	PrintFlags
+	bl	PrintWordHex
+
+	b	exit_prac
 // -----------------------------------------------
 //
 //
