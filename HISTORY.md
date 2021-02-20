@@ -188,3 +188,7 @@ git checkout ef153bbb5fa1e279d214abb7029f15f3841bec91
 - Added function to print error message following fatal errors
 - math-rotate.s - New file to hold bit rotations function
 - Added function Right1Bit to perform shift right 1 bit, copying sign bit
+
+```
+git checkout 019035bfb629efc95ab513a0a3e9ab3990725183
+```
