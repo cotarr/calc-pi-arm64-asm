@@ -30,9 +30,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ----------------------------------------------------------------
 	Right1Bit
+	Left1Bit
 ------------------------------------------------------------- */
 
 	.global	Right1Bit
+	.global	Left1Bit
 
 /* --------------------------------------------------------------
   Rotate Mantissa Right 1 bit (copy sign bit)
@@ -43,31 +45,30 @@ SOFTWARE.
 
 ;--------------------------------------------------------------*/
 Right1Bit:
-	sub	sp, sp, #80		// Reserve 10 words
+	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]		// argument handle number
 	str	x2,  [sp, #32]
-//	str	x9,  [sp, #40]
-	str	x10, [sp, #48]		// word counter
-	str	x11, [sp, #56]		// pointer
+	str	x10, [sp, #40]		// word counter
+	str	x11, [sp, #48]		// pointer
 
 	ldr	x10, =RegAddTable	// Pointer to vector table
 	add	x10, x10, x1, lsl #3	// (handle * 8 bit)
 	ldr	x11, [x10]		// X11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word
+	add	x11, x11, #VAR_MSW_OFST	// x11 pointer to m.s. word
 	ldr	x10, =No_Word		// Pointer to of words in mantissa
-	ldr	x10, [x10]		// Actual number words in mantissa
+	ldr	x10, [x10]		// Number words in mantissa
 	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
-	sub	x11, x11, x10, lsl #3	// Subtract (num words -1) * 8 --> l.s. word
+	sub	x11, x11, x10, lsl #3	// X11 Pointer to l.s. word
 
 	ldr	x0, [x11]		// x0 is first word to shift right
 10:
 	ldr	x1, [x11, #8]		// x1 is next (adjacent) word to shift
 	lsr	x0, x0, #1		// Shift right 1 bit (0 into m.s. bit)
 	add	x0, x0, x1, lsl #63	// Add l.s. bit next word as m.s. bit
-	str	x0, [x11]
+	str	x0, [x11]		// Store shifted word
 	// increment and loop
 	mov	x0, x1			// No need fetch x0 from memory again
 	add	x11, x11, #8		// increment word pointer
@@ -82,8 +83,55 @@ Right1Bit:
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
 	ldr	x2,  [sp, #32]
-//	ldr	x9,  [sp, #40]
-	ldr	x10, [sp, #48]
-	ldr	x11, [sp, #56]
-	add	sp, sp, #80
+	ldr	x10, [sp, #40]
+	ldr	x11, [sp, #48]
+	add	sp, sp, #64
+	ret
+
+
+/* --------------------------------------------------------------
+  Rotate Mantissa Left 1 bit (zero fill l.s. bit)
+
+  Input:   x1 = Handle Number of Variable
+
+  Output:  none
+
+;--------------------------------------------------------------*/
+Left1Bit:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]		// argument handle number
+	str	x2,  [sp, #32]
+	str	x10, [sp, #40]		// word counter
+	str	x11, [sp, #48]		// pointer
+
+	ldr	x10, =RegAddTable	// Pointer to vector table
+	add	x10, x10, x1, lsl #3	// (handle * 8 bit)
+	ldr	x11, [x10]		// X11 pointer to variable address
+	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word
+	ldr	x10, =No_Word		// Pointer to of words in mantissa
+	ldr	x10, [x10]		// number words in mantissa
+
+	ldr	x0, [x11]		// x0 is first word to shift left
+10:
+	ldr	x1, [x11, #-8]		// x1 is next (adjacent) word to shift
+	lsl	x0, x0, #1		// Shift right 1 bit (0 into m.s. bit)
+	add	x0, x0, x1, lsr #63	// Add l.s. bit next word as m.s. bit
+	str	x0, [x11]
+	// increment and loop
+	mov	x0, x1			// No need fetch x0 from memory again
+	sub	x11, x11, #8		// increment word pointer
+	subs	x10, x10, #1		// decrement word counter
+	b.ne	10b			// non-zero, loop back
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x10, [sp, #40]
+	ldr	x11, [sp, #48]
+	add	sp, sp, #64
 	ret

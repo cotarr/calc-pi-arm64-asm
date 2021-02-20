@@ -192,3 +192,7 @@ git checkout ef153bbb5fa1e279d214abb7029f15f3841bec91
 ```
 git checkout 019035bfb629efc95ab513a0a3e9ab3990725183
 ```
+
+### 2021-02-20
+
+- Added function Left1Bit to perform shift right 1 bit, zero fill l.s. bit
