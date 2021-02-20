@@ -405,24 +405,20 @@ Command_test:
 	//
 	// ---------------------
 
+	mov	x1, #3
+	mov	x2, #4
+	mov	x3, #5
 
-	mov	x1, #3			// handle 3
-	bl	TwosCompliment
+//	bl	ClearVariable
+	bl	SetToOne
 //	bl	SetToTwo
 //	bl	Right1Bit
 //	bl	Left1Bit
-	b	ParseCmd
-
-//	mov	x1, #3
-//	bl	ClearVariable
-//	b	ParseCmd
-
-	// --------------------------
-
-	mov	x1, #3
-	mov	x2, #5
-	bl	ExchangeVariable
 //	bl	CopyVariable
+//	bl	ExchangeVariable
+//	bl	TwosCompliment
+//	bl	AddMantissa
+
 	b	ParseCmd
 
 	// --------------------------

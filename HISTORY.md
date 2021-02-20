@@ -225,3 +225,27 @@ WITHOUT changing the flags. I setup a test in practice.s to confirm this. It was
 The two's compliment loop appears successful with SBCS (use carry flag) and CBNS (not impact flag).
 
 - Added function for 2's compliment.
+
+Note about entry with variable equal to zero.
+In scientific notation variables, i usually test the top word
+of a normalized mantissa for zero, then skip the 2's compliment if
+the variable is zero when 2's complment is called.
+Since this is fixed point format, there is no normalized word to check.
+ALso, I have not provided a zero flag for the variable.
+Executing this function with a zero value returns all words zero.
+I have left it at this point, but may revist a zero check in the future (TODO)
+
+- Added function AddMantissa
+- Standardized register use, the clean up all register use for today's work.
+```
+x0 - In/Out argument then scratch when saved
+x1 - In/out argument then scratch
+x2 - In/out argument then scratch
+x3 - In/out argument then scratch
+x8 - Buffer pointer for return values
+x9 - Index offset into word
+x10 - Word counter for loops
+x11 - variable address pointer 1
+x12 - variable address pointer 2
+x13 - variable address pointer 2
+```
