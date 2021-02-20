@@ -29,10 +29,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ----------------------------------------------------------------
 	ClearVariable
+	SetToTwo
 	CopyVariable
 ------------------------------------------------------------- */
 
 	.global	ClearVariable
+	.global SetToOne
+	.global SetToTwo
 	.global	CopyVariable
 
 /*--------------------------------------------------------------
@@ -44,8 +47,6 @@ SOFTWARE.
 
 --------------------------------------------------------------*/
 ClearVariable:
-
-
 	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]
 	str	x29, [sp, #8]
@@ -72,6 +73,72 @@ ClearVariable:
 	ldr	x1,  [sp, #24]
 	ldr	x10,  [sp, #32]
 	ldr	x11,  [sp, #40]
+	add	sp, sp, #64
+	ret
+
+/* --------------------------------------------------------------
+  Set Variable to 1.0 (integer value)
+
+  Input:   x1 = handle number of variable
+
+  Output:  none
+
+------------------------------------------------------------- */
+SetToOne:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]		// Handle number of variable (Argument)
+	str	x11,  [sp, #32]		// Address Pointer
+
+	bl	ClearVariable		// Handle in x1 preserved
+
+	ldr	x11, =RegAddTable	// Pointer to vector table
+	add	x11, x11, x1, lsl #3	// handle --> index into table
+	ldr	x11, [x11]		// x11 pointer to variable address
+	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word
+	mov	x0, #1
+	str	x0, [x11]		// Place 1 in top word
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x11,  [sp, #32]
+	add	sp, sp, #64
+	ret
+
+/* --------------------------------------------------------------
+  Set Variable to 2.0 (integer value)
+
+  Input:   x1 = handle number of variable
+
+  Output:  none
+
+------------------------------------------------------------- */
+SetToTwo:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]		// Handle number of variable (Argument)
+	str	x11,  [sp, #32]		// Address Pointer
+
+	bl	ClearVariable		// Handle in x1 preserved
+
+	ldr	x11, =RegAddTable	// Pointer to vector table
+	add	x11, x11, x1, lsl #3	// handle --> index into table
+	ldr	x11, [x11]		// x11 pointer to variable address
+	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word
+	mov	x0, #2
+	str	x0, [x11]		// Place 2 in top word
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x11,  [sp, #32]
 	add	sp, sp, #64
 	ret
 
