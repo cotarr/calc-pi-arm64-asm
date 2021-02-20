@@ -196,3 +196,32 @@ git checkout 019035bfb629efc95ab513a0a3e9ab3990725183
 ### 2021-02-20
 
 - Added function Left1Bit to perform shift right 1 bit, zero fill l.s. bit
+
+This is a good place to discuss number format. I am assuminig a fixed point binary number.
+On the most significant end, there will be 1 64 bit word for the integer part.
+Using the top bit as a sign bit, this is 63 bits for integer number values.
+All remaining words will be fraction part.
+
+In the integer part, the bits moving upward represent 1, 2, 4, 8, 16 ...
+In the fraction part, moving downward, the bits represent 1/2, 1/4, 1/8, 1/16, 1/32....
+
+```
+  [Most-significant 64 bit word]  -Decimal-Point  [Fraction part 64 bit word][word][word]
+```  
+
+- Added function SetToOne and SetToTwo to enter integer constants (using above assumptions)
+
+I ran into a confusing situation with ARM64 flags. I want to write a Two's Compliment function.
+This is a fancy way of saying, subtract the number from zero.
+For multi-precision calculations, each 64 bit subtraction will borrow the carry flag
+if needed. The next subtraction will subtract both the 64 bit value and the (NOT) carry flag.
+However, a loop also needs a counter. Decrementing the counter needs a test.
+Other processors you can "push" or preserve the flag register. I could not find a
+way to do this in ARM64. I tried complicated ways to save carry in a register, but
+it was too complicated and costly in instructions.
+
+Then I discovered the CBNZ instruction that will check a register and conditionally branch
+WITHOUT changing the flags. I setup a test in practice.s to confirm this. It was successful.
+The two's compliment loop appears successful with SBCS (use carry flag) and CBNS (not impact flag).
+
+- Added function for 2's compliment.

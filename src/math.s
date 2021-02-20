@@ -45,12 +45,12 @@ SOFTWARE.
 
 // -----------------------------------------------------
 	.data   // Section containing initialized data
-	.align	4
 // -----------------------------------------------------
 
 //
 // Pointers to variables  (word address table)
 //
+	.align	4
 RegAddTable:
 	.quad	FP_Acc		// Handle = 0
 	.quad	FP_Opr		// Handle = 1
@@ -75,9 +75,9 @@ RegAddTable:
 // Register names (8 bytes per name, ASCII null terminated)
 // Handle is converted to name address in GetVarNameAdd
 //
-RegNameTable:
 
 	.align	4
+RegNameTable:
 	.ascii	"ACC   "
 	.byte	0,0
 	.ascii	"OPR   "
@@ -117,9 +117,9 @@ RegNameTable:
 
 // -----------------------------------------------------
 	.bss	// Section contain un-initialized data
-	.align 4
 // -----------------------------------------------------
 
+		.align 4
 FP_Acc:		.skip	VAR_BSIZE
 FP_Opr:		.skip	VAR_BSIZE
 FP_WorkA:	.skip	VAR_BSIZE

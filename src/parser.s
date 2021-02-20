@@ -407,7 +407,8 @@ Command_test:
 
 
 	mov	x1, #3			// handle 3
-	bl	SetToTwo
+	bl	TwosCompliment
+//	bl	SetToTwo
 //	bl	Right1Bit
 //	bl	Left1Bit
 	b	ParseCmd
@@ -420,7 +421,8 @@ Command_test:
 
 	mov	x1, #3
 	mov	x2, #5
-	bl	CopyVariable
+	bl	ExchangeVariable
+//	bl	CopyVariable
 	b	ParseCmd
 
 	// --------------------------

@@ -45,10 +45,9 @@ SOFTWARE.
 	.align 4
 
 practice:
-	sub	sp, sp, #64		// Reserve 8 words
+	sub	sp, sp, #32		// Reserve 4 words
 	str	x30, [sp, #0]
 	str	x29, [sp, #8]
-	str	x0,  [sp, #16]
 
 	bl	CROut
 	ldr	x0, =pracStr001
@@ -60,9 +59,10 @@ practice:
 //
 // Comment each test as needed
 //
-	b	shift_addition
-	b	subtraction
-	b	bit_shift
+	b	sub_carry_loop
+	// b	shift_addition
+	// b	subtraction
+	// b	bit_shift
 	// b	test_error
 	// b	integer_addition
 	// b	conditional_branching
@@ -74,8 +74,8 @@ practice:
 
 // ///////////////////////////////////////////////
 
-//
-//
+
+// -----------------------------------------------------------------------------------
 //
 test_error:
 	ldr	x0, =TestErrorMsg	// Error message pointer
@@ -85,6 +85,125 @@ TestErrorMsg:
 	.asciz "A test error was generated in the practive sandbox"
 	.align 4
 
+// -----------------------------------------------------------------------------------
+//
+sub_carry_loop:
+// To perfrom multi-precision subtraction, the carry flag must be preserved.
+// Loops are confusing, subtract impacts carry flag, decrement counter impacts carry flag.
+// At first I tried compex was to preserve the flags (Carry)
+// Then I disconvered the CBNZ instruction, confusing documentation.
+// CBNZ can test register and branch WITHOUT altering flags (Will test here below)
+//
+//    There are 4 pre-test to get familiar with flag operation
+//
+//    Case 1 carry clear to 0 by negative result, counter remain above zero
+//    Case 2 carry clear to 0 by negative result, counter reach zero
+//    Case 3 carry remain 1 positive result, counter remain above zero
+//    Case 4 carry remain 1 positive result, counter reaches zero
+//
+//    NOTE: print statements removed after testing, replaced by result text copy / paste
+
+	// Pre-test 1 - First subtract without carry (0x40 - 0x20 = 0x30)
+	mov	x10, #0x0040
+	mov	X11, #0x0010
+	mov	x4, #2
+	subs	x0, x10, x11
+	// NE HS/CS PL VC 0000000000000030
+
+	// Pre-test 2 - next decrement a counter without (s) added, make sure see flags are not changed
+	mov	x10, #0x0040
+	mov	X11, #0x0010
+	mov	x4, #2
+	subs	x0, x10, x11
+	sub	x4, x4, #1
+	// NE HS/CS PL VC 0000000000000030
+
+	// Pre-test 3 - now reverse the order, "NOT" carry negative result (0x20 - 0x40 = -0x30)
+	mov	x10, #0x0040
+	mov	X11, #0x0010
+	mov	x4, #2
+	subs	x0, x11, x10
+	// NE LO/CC MI VS FFFFFFFFFFFFFFD0
+
+	// pre-test 4 - next decrement a counter without (s) added, make sure see flags are not changed
+	mov	x10, #0x0040
+	mov	X11, #0x0010
+	mov	x4, #2		// this will decrement to 1, not zero
+	subs	x0, x11, x10	// this clears C flag (NOT carry)
+	sub	x4, x4, #1	// this is 1 above zero, flags not impacted
+	// NE LO/CC MI VS FFFFFFFFFFFFFFD0
+
+	// Case 1 carry clear to 0 by negative result, counter remain above zero
+
+	mov	x10, #0x0040
+	mov	X11, #0x0010
+	mov	x4, #2		// this will decrement to 1, not zero
+	subs	x0, x11, x10	// this clears C flag (NOT carry)
+	sub	x4, x4, #1	// this is 1 above zero, flags not impacted
+	cbnz	x4, 20f
+	// * * * condition not met * * *
+	b.al	30f
+20:
+	// NE LO/CC MI VS FFFFFFFFFFFFFFD0 cbnz x4 not zero
+
+30:
+	// Case 2 carry clear to 0 by negative result, counter reach zero
+
+	mov	x10, #0x0040
+	mov	X11, #0x0010
+	mov	x4, #1		// <------ 1 to reach zero
+	subs	x0, x11, x10	// this clears C flag (NOT carry)
+	sub	x4, x4, #1	// This will decrement to zero, but not set flags
+	cbnz	x4, 40f		// <----- x4 will now be zero, (verifiying no flag change)
+	// NE LO/CC MI VS FFFFFFFFFFFFFFD0 cbnz x4 equal zero
+	b.al	50f
+40:
+	// * * * * condition not met * * *
+
+50:
+	// Case 3 carry remain 1 positive result, counter remain above zero
+
+	mov	x10, #0x0040
+	mov	X11, #0x0010
+	mov	x4, #2   	// <------ 2 will go 1, above zero
+	subs	x0, x10, x11	// positive result (0x40 - 0x20 = 0x30) carry not cleared (C=1)
+	sub	x4, x4, #1	// / this is 1 above zero, flags not impacted
+	cbnz	x4, 60f		// <----- this will now be 1, not zero
+	// (* * * * condition not met)
+60:
+	// NE HS/CS PL VC 0000000000000030 cbnz x4 not zero
+70:
+
+	// Case 4 carry remain 1 positive result, counter reaches zero
+
+	mov	x10, #0x0040
+	mov	X11, #0x0010
+	mov	x4, #1   	// <------ 1 to reach zero
+	subs	x0, x10, x11	// positive result (0x40 - 0x20 = 0x30) carry not cleared (C=1)
+	sub	x4, x4, #1	// This will decrement to zero, but not set flags
+	cbnz	x4, 80f		// <----- this will now be zero
+	// NE HS/CS PL VC 0000000000000030 cbnz x4 equal zero
+	bl	PrintFlags
+	bl	PrintWordHex
+	ldr	x0, =140f
+	bl	StrOut
+	b.al	90f
+80:
+	// Case not met
+	bl	PrintFlags
+	bl	PrintWordHex
+	ldr	x0, =130f
+	bl	StrOut
+90:
+	// SUCCESS!!!, no to go write the 2's compliment function and test
+	b	exit_prac
+
+
+130:	.asciz	" cbnz x4 not zero"
+140:	.asciz	" cbnz x4 equal zero"
+
+// -----------------------------------------------------------------------------------
+//
 shift_addition:
 	// x0 = x11 + x10 lsl 4
 	mov	x10, #0x1000
@@ -94,7 +213,8 @@ shift_addition:
 	bl	PrintFlags
 	bl	PrintWordHex
 	b	exit_prac
-
+// -----------------------------------------------------------------------------------
+//
 subtraction:
 	// x0 = x11 - x10
 	mov	x10, #100
@@ -106,7 +226,8 @@ subtraction:
 	bl	PrintFlags
 	bl	PrintWordHex
 	b	exit_prac
-
+// -----------------------------------------------------------------------------------
+//
 bit_shift:
 	mov	x0, #1
 	ror	x0, x0, #1
@@ -118,8 +239,7 @@ bit_shift:
 	bl	PrintWordHex
 
 	b	exit_prac
-// -----------------------------------------------
-//
+// -----------------------------------------------------------------------------------
 //
 integer_addition:
 	movz	x0, #0x1111, lsl 48
@@ -157,9 +277,7 @@ integer_addition:
 
 	b	exit_prac
 
-
-// -----------------------------------------------
-//
+// -----------------------------------------------------------------------------------
 //
 conditional_branching:
 
@@ -208,8 +326,8 @@ conditional_branching:
 
 	b	exit_prac
 
-// -----------------------------------------------
-// Endian check
+// -----------------------------------------------------------------------------------
+//
 //
 EndianCheck:
 	ldr	x0, =pracStr002
@@ -238,13 +356,14 @@ EndianCheck:
 	bl	CROut
 	b	exit_prac
 
-// -----------------------------------------------
-// Print Registers
+// -----------------------------------------------------------------------------------
 //
 print_registers_test:
 	// bl	ClearRegisters
 	bl	PrintRegisters
 	b	exit_prac
+
+// -----------------------------------------------------------------------------------
 //
 // Test print status flags
 //
@@ -263,7 +382,8 @@ print_status_flags:
  	bl	PrintFlags
 	b	exit_prac
 
-// -----------------------------------------------
+// -----------------------------------------------------------------------------------
+//
 // Test of print register in base 10 unsigned integer
 //
 print_reg_base10_unsigned:
@@ -272,7 +392,8 @@ print_reg_base10_unsigned:
 	bl	CROut
 	b 	exit_prac
 
-// -----------------------------------------------
+// -----------------------------------------------------------------------------------
+//
 // Test of print of 64 bit work in hex
 // Load 0x0123456789ABCDEF into x0
 //
@@ -287,14 +408,14 @@ load_64_bit_immediate:
 	bl	PrintWordHex
 
 	b	exit_prac
-//
-// -----------------------------------------------
-//
+
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+
 exit_prac:
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
-	ldr	x0,  [sp, #16]
-	add	sp, sp, #64
+	add	sp, sp, #32
 	ret
 
 
