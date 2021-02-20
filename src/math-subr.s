@@ -305,8 +305,8 @@ TwosCompliment:
 	str	x0, [x11]		// Store shifted word
 	// increment and loop
 	add	x11, x11, #8		// increment word pointer
-	subs	x10, x10, #1		// decrement word counter
-	b.ne	10b			// non-zero, loop back
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 10b		// non-zero, loop back
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
