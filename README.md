@@ -1,6 +1,6 @@
 # WORK IN PROGRESS
 
-View progress to date: [HISTORY.md](../blob/master/HISTORY.md)
+View progress to date: [HISTORY.md](../master/HISTORY.md)
 
 ## No Pi calculation available at this time
 
