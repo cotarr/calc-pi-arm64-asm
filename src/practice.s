@@ -4,7 +4,7 @@
 	Sandbox for playing with various code
 
 	Created:   2021-02-17
-	Last edit: 2021-02-19
+	Last edit: 2021-02-21
 
 ----------------------------------------------------------------
 MIT License
@@ -79,7 +79,7 @@ practice:
 //
 test_error:
 	ldr	x0, =TestErrorMsg	// Error message pointer
-	mov	x1, #11			// 16 bit error code
+	mov	x1, #11			// 12 bit error code
 	b	FatalError
 TestErrorMsg:
 	.asciz "A test error was generated in the practive sandbox"

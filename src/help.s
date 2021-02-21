@@ -227,7 +227,7 @@ Help:
 	ands	x0, x0, #0x0f		// Should be zero
 	b.eq	10f
 	ldr	x0, =Command_Error2	// Error \message pointer
-	mov	x1, #2732		// 16 bit error code
+	mov	x1, #2732		// 12 bit error code
 	b	FatalError
 10:
 //
@@ -265,7 +265,7 @@ Help_next_char:
 	cmp	x10, #8			// Only 7 char + zero allowed
 	b.ne	40f			// 8 Found is fatal error in table
 	ldr	x0, =Command_Error1	// Error message pointer
-	mov	x1, #2455		// 16 bit error code
+	mov	x1, #2455		// 12 bit error code
 	b	FatalError
 40:
 	add	X10, X10, #1

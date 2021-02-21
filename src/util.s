@@ -2,7 +2,7 @@
 	util.s
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-19
+	Last Edit: 2021-02-21
 
 ----------------------------------------------------------------
 MIT License
@@ -85,9 +85,9 @@ SetDigitAccuracy:
 	mov	x9, x0			// requested digits save in 9
 
 	// Check digits lower limit
-	cmp	x9, #MINIMUM_DIG
+	cmp	x9, MINIMUM_DIG
 	b.hs	10f
-	mov	x9, #MINIMUM_DIG	// Replace with minimum
+	mov	x9, MINIMUM_DIG		// Replace with minimum
 10:
 
 	// Digits upper limit from defined variable size
@@ -254,12 +254,11 @@ PrintAccVerbose:
 // Available digits
 	ldr	x0, =sftext5
 	bl	StrOut
-	mov	x0, FCT_WSIZE
+	ldr	x0, =FctWsize
+	ldr	x0, [x0]
 	sub	x0, x0, GUARDWORDS
 	bl	Words_2_Digits
 	bl	PrintWordB10
-
-
 //
 //    Binary Section
 //
@@ -308,7 +307,8 @@ PrintAccVerbose:
 // Integer size Words
 	ldr	x0, =sftext12
 	bl	StrOut
-	mov	x0, INT_WSIZE
+	ldr	x0, =IntWSize
+	ldr	x0, [x0]
 	bl	PrintWordB10
 	ldr	x0, =sftext20
 	bl	StrOut
@@ -316,14 +316,16 @@ PrintAccVerbose:
 	mov	x0, #9			// tab character
 	bl	CharOut
 
-	mov	x0, INT_BSIZE
+	ldr	x0, =IntBSize
+	ldr	x0, [x0]
 	bl	PrintWordB10
 
 // Available size
 
 	ldr	x0, =sftext13
 	bl	StrOut
-	mov	x0, VAR_WSIZE
+	ldr	x0, =VarWSize
+	ldr	x0, [x0]
 	mov	x2, x0
 	bl	PrintWordB10
 	ldr	x0, =sftext20
@@ -336,7 +338,8 @@ PrintAccVerbose:
 	mov	x0, #9			// tab character
 	bl	CharOut
 20:
-	mov	x0, VAR_BSIZE
+	ldr	x0, =VarBSize
+	ldr	x0, [x0]
 	bl	PrintWordB10
 
 	ldr	x0, =sftext14
@@ -1236,6 +1239,5 @@ PrintRegisters:
 	.asciz	"  sp  = "
 
 	.align 4
-
 
 	.end

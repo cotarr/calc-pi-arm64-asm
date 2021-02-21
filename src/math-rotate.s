@@ -55,6 +55,10 @@ Right1Bit:
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
 	str	x12, [sp, #64]		// source 2 address
+	str	x17, [sp, #72]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0
@@ -65,13 +69,15 @@ Right1Bit:
 	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
 
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// (handle * 8 bit)
+	add	x11, x11, x1, lsl WORDSIZEBITS // Add (handle * bit size)
 	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer to m.s. word
-	sub	x11, x11, x10, lsl #3	// X11 Pointer to l.s. word
+		// get VAR_MSW_OFST (too big for immediate value)
+	add	x11, x11, x17		// add VAR_MSW_OFST, point to M.S.Word
+	sub	x11, x11, x10, lsl WORDSIZEBITS // X11 Pointer to l.s. word
+
 
 	// Setup x12 to point 1 word higher than x11
-	add	x12, x11, #BYTE_PER_WORD // x12 pointer l.s. word + 1 word
+	add	x12, x11, BYTE_PER_WORD // x12 pointer l.s. word + 1 word
 
 	// fetch word to setup loop entry
 	ldr	x1, [x11, x9]		// x1 is first word to shift right
@@ -99,6 +105,7 @@ Right1Bit:
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
 	ldr	x12, [sp, #64]
+	ldr	x17, [sp, #72]
 	add	sp, sp, #80
 	ret
 
@@ -121,6 +128,10 @@ Left1Bit:
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
 	str	x12, [sp, #64]		// source 2 address
+	str	x17, [sp, #72]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied to l.s. word
@@ -132,10 +143,10 @@ Left1Bit:
 	ldr	x11, =RegAddTable	// Pointer to vector table
 	add	x11, x11, x1, lsl #3	// (handle * 8 bit)
 	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word
+	add	x11, x11, x17		// add VAR_MSW_OFST, point to M.S. Word
 
 	// Setup x12 to point 1 word lower than x11
-	sub	x12, x11, #BYTE_PER_WORD // x12 pointer l.s. word - 1 word
+	sub	x12, x11, BYTE_PER_WORD // x12 pointer l.s. word - 1 word
 
 	ldr	x1, [x11, x9]		// x0 is first word to shift left
 10:
@@ -145,7 +156,7 @@ Left1Bit:
 	str	x1, [x11, x9]
 	// increment and loop
 	mov	x1, x2			// No need fetch from memory again
-	sub	x9, x9, #BYTE_PER_WORD	// increment word pointer
+	sub	x9, x9, BYTE_PER_WORD	// increment word pointer
 	sub	x10, x10, #1		// decrement word counter
 	cbnz	x10, 10b		// non-zero, loop back
 
@@ -158,5 +169,6 @@ Left1Bit:
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
 	ldr	x12, [sp, #64]
+	ldr	x17, [sp, #72]
 	add	sp, sp, #80
 	ret

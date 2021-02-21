@@ -3,7 +3,7 @@
 	Include file for math.s
 
 	Created:   2021-02-19
-	Last edit: 2021-02-19
+	Last edit: 2021-02-21
 
 ----------------------------------------------------------------
 MIT License
@@ -62,6 +62,10 @@ ClearVariable:
 	str	x9,  [sp, #32]		// word index
 	str	x10, [sp, #40]		// word counter
 	str	x11, [sp, #48]		// source 1 address
+	str	x17, [sp, #56]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied to l.s. word
@@ -72,13 +76,14 @@ ClearVariable:
 
 	// set x11 address of variable m.s. word
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// handle --> index into table
+	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word
+	add	x11, x11, x17	// x11 pointer at m.s. word
+
 10:
 	// Perform the fill using 64 bit words
 	str	xzr, [x11, x9]
-	sub	x9, x9, #BYTE_PER_WORD
+	sub	x9, x9, BYTE_PER_WORD
 	sub	x10, x10, #1		// Decrement counter
 	cbnz	x10, 10b		// Done?
 
@@ -89,6 +94,7 @@ ClearVariable:
 	ldr	x9,  [sp, #32]
 	ldr	x10, [sp, #40]
 	ldr	x11, [sp, #48]
+	ldr	x17, [sp, #56]
 	add	sp, sp, #64
 	ret
 
@@ -107,13 +113,25 @@ SetToOne:
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]		// Handle number of variable (Argument)
 	str	x11,  [sp, #32]		// Address Pointer
+	str	x17, [sp, #40]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 
 	bl	ClearVariable		// Handle in x1 preserved
 
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// handle --> index into table
+	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word
+	add	x11, x11, x17	// x11 pointer at m.s. word
+	ldr	x0, =IntWSize		// Size of integer part in words
+	ldr	x0, [x0]		// size of integer part
+	sub	x11, x11, x0, lsl WORDSIZEBITS
+	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part
+
+	mov	x0, x11
+	bl	PrintWordHex
+
 	mov	x0, #1
 	str	x0, [x11]		// Place 1 in top word
 
@@ -122,6 +140,7 @@ SetToOne:
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
 	ldr	x11,  [sp, #32]
+	ldr	x17,  [sp, #40]
 	add	sp, sp, #64
 	ret
 
@@ -140,13 +159,25 @@ SetToTwo:
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]		// Handle number of variable (Argument)
 	str	x11,  [sp, #32]		// Address Pointer
+	str	x17, [sp, #40]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 
 	bl	ClearVariable		// Handle in x1 preserved
 
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// handle --> index into table
+	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word
+	add	x11, x11, x17	// x11 pointer at m.s. word
+	ldr	x0, =IntWSize		// Size of integer part in words
+	ldr	x0, [x0]		// size of integer part
+	sub	x11, x11, x0, lsl WORDSIZEBITS
+	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part
+
+	mov	x0, x11
+	bl	PrintWordHex
+
 	mov	x0, #2
 	str	x0, [x11]		// Place 2 in top word
 
@@ -155,6 +186,7 @@ SetToTwo:
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
 	ldr	x11,  [sp, #32]
+	ldr	x17,  [sp, #40]
 	add	sp, sp, #64
 	ret
 
@@ -178,6 +210,10 @@ CopyVariable:
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
 	str	x12, [sp, #64]		// source 2 address
+	str	x17, [sp, #72]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied to l.s. word
@@ -188,20 +224,20 @@ CopyVariable:
 
 	// x11 pointer to variable m.s. word
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// Handle --> index into table
+	add	x11, x11, x1, lsl WORDSIZEBITS // Handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word (exponent)
+	add	x11, x11, x17	// x11 pointer at m.s. word (exponent)
 
 	// x12 pointer to variable m.s. word
 	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x2, lsl #3	// Index into table
+	add	x12, x12, x2, lsl WORDSIZEBITS // Index into table
 	ldr	x12, [x12]		// x12 pointer to variable address
-	add	x12, x12, #VAR_MSW_OFST	// x12 pointer at m.s, word (exponent)
+	add	x12, x12, x17	// x12 pointer at m.s, word (exponent)
 10:
 	// Perform the copy using 64 bit words
 	ldr	x1, [x11, x9]
 	str	x1, [x12, x9]
-	sub	x9, x9, #BYTE_PER_WORD
+	sub	x9, x9, BYTE_PER_WORD
 	sub	x10, x10, #1
 	cbnz	x10, 10b
 
@@ -214,6 +250,7 @@ CopyVariable:
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
 	ldr	x12, [sp, #64]
+	ldr	x17, [sp, #72]
 	add	sp, sp, #80
 	ret
 
@@ -237,6 +274,10 @@ ExchangeVariable:
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
 	str	x12, [sp, #64]		// source 2 address
+	str	x17, [sp, #72]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 
 
 	// setup offset index to address within variable
@@ -247,21 +288,21 @@ ExchangeVariable:
 	ldr	x10, [x10]		// Words in mantissa
 	// x11 pointer to source 1 variable
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// Handle --> index into table
+	add	x11, x11, x1, lsl WORDSIZEBITS // Handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer at m.s. word (exponent)
+	add	x11, x11, x17	// x11 pointer at m.s. word (exponent)
 	// x12 pointer to source 2 variable
 	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x2, lsl #3	// Index into table
+	add	x12, x12, x2, lsl WORDSIZEBITS // Index into table
 	ldr	x12, [x12]		// x12 pointer to variable address
-	add	x12, x12, #VAR_MSW_OFST	// x12 pointer at m.s, word (exponent)
+	add	x12, x12, x17	// x12 pointer at m.s, word (exponent)
 10:
 	// Perform the word exchange using 64 bit words
 	ldr	x1, [x11, x9]
 	ldr	x2, [x12, x9]
 	str	x1, [x12, x9]
 	str	x2, [x11, x9]
-	sub	x9, x9, #BYTE_PER_WORD
+	sub	x9, x9, BYTE_PER_WORD
 	sub	x10, x10, #1
 	cbnz	x10, 10b
 
@@ -274,6 +315,7 @@ ExchangeVariable:
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
 	ldr	x12, [sp, #64]
+	ldr	x17, [sp, #72]
 	add	sp, sp, #80
 	ret
 /* --------------------------------------------------------------
@@ -300,6 +342,10 @@ TwosCompliment:
 	str	x9,  [sp, #32]		// word index
 	str	x10, [sp, #40]		// word counter
 	str	x11, [sp, #48]		// source 1 address
+	str	x17, [sp, #56]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0
@@ -311,23 +357,23 @@ TwosCompliment:
 
 	// x11 pointer to variable
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// (handle * 8 bit)
+	add	x11, x11, x1, lsl WORDSIZEBITS // (handle * 8 bit)
 	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer to m.s. word
-	sub	x11, x11, x10, lsl #3	// X11 Pointer to l.s. word
+	add	x11, x11, x17	// x11 pointer to m.s. word
+	sub	x11, x11, x10, lsl WORDSIZEBITS // X11 Pointer to l.s. word
 
 	// First iteration does not subtract carry
 	ldr	x0, [x11, x9]		// x0 is first word
 	subs	x0, xzr, x0		// subtract register from zero (flags set)
 	str	x0, [x11, x9]		// Store shifted word
-	add	x9, x9, #BYTE_PER_WORD	// increment word pointer (no change in flags)
+	add	x9, x9, BYTE_PER_WORD	// increment word pointer (no change in flags)
 	// decrement counter not needed because already count-1 for pointer arithmetic
 10:
 	ldr	x0, [x11, x9]		// x0 is first word
 	sbcs	x0, xzr, x0		// subtract register and NOT carry from zero (flags set)
 	str	x0, [x11, x9]		// Store shifted word
 	// increment and loop
-	add	x9, x9, #BYTE_PER_WORD	// increment word pointer
+	add	x9, x9, BYTE_PER_WORD	// increment word pointer
 	sub	x10, x10, #1		// decrement word counter
 	cbnz	x10, 10b		// non-zero, loop back
 
@@ -338,6 +384,7 @@ TwosCompliment:
 	ldr	x9,  [sp, #32]
 	ldr	x10, [sp, #40]
 	ldr	x11, [sp, #48]
+	ldr	x17, [sp, #56]
 	add	sp, sp, #64
 	ret
 /* --------------------------------------------------------------
@@ -363,34 +410,37 @@ AddMantissa:
 	str	x11, [sp, #64]		// source 1 address
 	str	x12, [sp, #72]		// source 2 address
 	str	x13, [sp, #80]		// desitination address
+	str	x17, [sp, #88]		// VAR_MSW_OFST
 
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied to l.s. word
 
 	// xet x10 to number of words - 1
 	ldr	x10, =No_Word		// Pointer to of words in mantissa
-	ldr	x10, [x10]		// Number words in mantissa
+	ldr	x10, [x10]		// Number words in manti
 	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
 
 	// set variable pointers x11 souce 1
 	ldr	x11, =RegAddTable	// Pointer to vector table
 	add	x11, x11, x1, lsl #3	// (handle * 8 bit)
 	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, #VAR_MSW_OFST	// x11 pointer to m.s. word
+	add	x11, x11, x17	// x11 pointer to m.s. word
 	sub	x11, x11, x10, lsl #3	// X11 Pointer to l.s. word
 
 	// set variable pointer x12 source 2
 	ldr	x12, =RegAddTable	// Pointer to vector table
 	add	x12, x12, x2, lsl #3	// (handle * 8 bit)
 	ldr	x12, [x12]		// x12 pointer to variable address
-	add	x12, x12, #VAR_MSW_OFST	// x12 pointer to m.s. word
+	add	x12, x12, x17	// x12 pointer to m.s. word
 	sub	x12, x12, x10, lsl #3	// x12 Pointer to l.s. word
 
 	// set variable pointer x13 destination
 	ldr	x13, =RegAddTable	// Pointer to vector table
 	add	x13, x13, x3, lsl #3	// (handle * 8 bit)
 	ldr	x13, [x13]		// x13 pointer to variable address
-	add	x13, x13, #VAR_MSW_OFST	// x13 pointer to m.s. word
+	add	x13, x13, x17	// x13 pointer to m.s. word
 	sub	x13, x13, x10, lsl #3	// x13 Pointer to l.s. word
 
 	// First iteration does not add carry
@@ -398,7 +448,7 @@ AddMantissa:
 	ldr	x2, [x12, x9]		// source 2 word
 	adds	x3, x1, x2		// add register from zero (flags set)
 	str	x3, [x13, x9]		// Store shifted word
-	add	x9, x9, #BYTE_PER_WORD	// increment word pointer
+	add	x9, x9, BYTE_PER_WORD	// increment word pointer
 	// decrement counter not needed because already count-1 for pointer arithmetic
 10:
 	ldr	x1, [x11, x9]		// x0 is first word
@@ -406,7 +456,7 @@ AddMantissa:
 	adcs	x3, x1, x2		// subtract register and NOT carry from zero (flags set)
 	str	x3, [x13, x9]		// Store shifted word
 	// increment and loop
-	add	x9, x9, #BYTE_PER_WORD	// increment word offset pointer
+	add	x9, x9, BYTE_PER_WORD	// increment word offset pointer
 	sub	x10, x10, #1		// decrement word counter
 	cbnz	x10, 10b		// non-zero, loop back
 
@@ -421,5 +471,6 @@ AddMantissa:
 	ldr	x11, [sp, #64]
 	ldr	x12, [sp, #72]
 	ldr	x13, [sp, #80]
+	ldr	x17, [sp, #88]
 	add	sp, sp, #96
 	ret

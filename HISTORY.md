@@ -291,3 +291,12 @@ Binary Accuracy:
   Integer Part:   1 Words 		8 Bytes
   Available:      64 Words 		512 Bytes
 ```
+
+Ran into problem. I was using the offset of the most significant word
+as an immediate value VAR_MSW_OFST. However, the assembler only
+allows 12 bits for this immedidate value. I moved several
+of the declared constants to be stored in memory. Then a variable
+is defined by INT_WSISE and FCT_WSIZE in 64 bit words for
+the integer part and fractino part.
+
+- Cleaned up previous function for VAR_MSW_OFFSET --> [VarMsbOfst]

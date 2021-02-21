@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-02-19
+	Last edit: 2021-02-21
 
 	PrintCommandList
 	ParseCmd
@@ -224,7 +224,7 @@ ParseCmd:
 	tst	x9, #0x07		// proper alignment 3 bit are zero
 	b.eq	30f			// zero, no error
 	ldr	x0, =AlignErrorMsg	// Error message pointer
-	mov	x1, #2344		// 16 bit rror code
+	mov	x1, #2344		// 12 bit error code
 	b	FatalError
 30:
 //
@@ -258,7 +258,7 @@ ParseCmd:
 	cmp	x21, #8			// Index > 7 is command table error
 	b.ne	60f			// Command table is valid (< 7 chars)
 	ldr	x0, =Byte8ErrorMsg	// Error message pointer
-	mov	x1, #1224		// 16 bit error code
+	mov	x1, #1224		// 12 bit error code
 	b	FatalError
 60:
 	ldrb	w10, [x20, x21]		// next character from input
@@ -337,7 +337,7 @@ Command_D_fill:
 	bl	IntWordInput		// x0 in binary 32 bit data
 	cmp	x1, #0			// Check for input error
 	b.ne	10f			// yes error
-	cmp	x0, #TOPHAND
+	cmp	x0, TOPHAND
 	b.gt	10f
 	mov	x1, x0
 	bl	DebugFillVariable
@@ -376,7 +376,7 @@ Command_hex:
 	bl	IntWordInput		// x0 in binary 64 bit data
 	cmp	x1, #0			// Check for input error
 	b.ne	20f			// yes error
-	cmp	x0, #TOPHAND
+	cmp	x0, TOPHAND
 	b.gt	20f
 	mov	x1, x0			// Argument x1 register index
 	bl	PrintVar		// Display register in hex
@@ -469,8 +469,8 @@ Command_test:
 	mov	x3, #5
 
 //	bl	ClearVariable
-	bl	SetToOne
-//	bl	SetToTwo
+//	bl	SetToOne
+	bl	SetToTwo
 //	bl	Right1Bit
 //	bl	Left1Bit
 //	bl	CopyVariable

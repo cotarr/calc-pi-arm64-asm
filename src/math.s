@@ -2,7 +2,7 @@
 	math.s
 
 	Created:   2021-02-18
-	Last edit: 2021-02-19
+	Last edit: 2021-02-21
 
 ----------------------------------------------------------------
 MIT License
@@ -41,11 +41,42 @@ SOFTWARE.
 
 	.global	FP_Initialize
 	.global	Set_No_Word
-	.global	No_Word, No_Byte, NoSigDig, NoExtDig
 
+	// data variables
+	.global	No_Word, No_Byte,
+	.global NoSigDig, NoExtDig
+
+	// Constants (too big for immediate values)
+	.global IntWSize, FctWsize, VarWSize
+	.global IntBSize, FctBsize, VarBSize
+	.global VarMswOfst, VarMsbOfst
+	.global InitNoWord
+	.global	MinimumWord
+	.global WordFFFF, Word8000, Word0000
 // -----------------------------------------------------
 	.data   // Section containing initialized data
 // -----------------------------------------------------
+
+/*  = = = = =   Memory Map of Fixed Point Variable = = = = = =
+
+M.S Integer Word       <-- (base addr) + VAR_WSIZE - (1 word)
+  ...
+LS Integer Word        <-- (base addr) + VAR_WSIZE  INT_WSIZE
+  (decimal separator goes here)
+M.S. Fracton word      <-- (base addr) + FCT_WSIZE - (1 word)
+  ...
+  ...
+  ...
+L.S. Fraction word    <-- (base addr) + GUARDWORDS
+  ...
+Guard-words           <-- (base addr) + [LSWOfst]
+  ...
+Unused words
+  ...
+Fraction L.S.Word     <-- (base addr) <-- A variable starts here
+
+ = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
+
 
 //
 // Pointers to variables  (word address table)
@@ -96,7 +127,14 @@ RegNameTable:
 	.byte	0,0
 	.ascii	"TREG  "
 	.byte	0,0
-	.ascii	"REG0  "
+		ldr	x11, =RegAddTable	// Pointer to vector table
+	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	ldr	x11, [x11]		// x11 pointer to variable address
+	add	x11, x11, x17		// x11 pointer at m.s. word
+	ldr	x0, =IntWSize		// Size of integer part in words
+	ldr	x0, [x0]		// size of integer part
+	sub	x11, x11, x0, lsr WORDSIZEBITS
+	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part.ascii	"REG0  "
 	.byte	0,0
 	.ascii	"REG1  "
 	.byte	0,0
@@ -114,6 +152,30 @@ RegNameTable:
 	.ascii	"REG7  "
 	.byte	0,0
 */
+
+// ---------------------------------------------------------
+// ARM64 does not allow 64 bit immediate values.
+// As alternative, I have stored some useful values here.
+// These should be treated as constants
+// ---------------------------------------------------------
+IntWSize:	.quad	INT_WSIZE
+FctWsize:	.quad	FCT_WSIZE
+VarWSize:	.quad	VAR_WSIZE
+
+IntBSize:	.quad	INT_BSIZE
+FctBsize:	.quad	FCT_BSIZE
+VarBSize:	.quad	VAR_BSIZE
+
+VarMswOfst:	.quad	VAR_MSW_OFST
+VarMsbOfst:	.quad	VAR_MSB_OFST
+
+InitNoWord:	.quad	INIT_NO_WORD
+MinimumWord:	.quad	MINIMUM_WORD
+
+WordFFFF:	.quad	0x0FFFFFFFFFFFFFFFF
+Word8000:	.quad	0x08000000000000000
+Word0000:	.quad	0x00000000000000000
+//                         0123456789abcdef <-- Ruler
 
 // -----------------------------------------------------
 	.bss	// Section contain un-initialized data
@@ -143,15 +205,17 @@ FP_Reg7:	.skip	VAR_BSIZE	// If changing, must adjust --> TOPHAND
 //  Miscellaneous program variables
 //
 		.align	4
-No_Byte:	.skip	BYTE_PER_WORD	// Number of bytes in mantissa (32_64_CHECK align and RESD vs DQ)
 No_Word:	.skip	BYTE_PER_WORD	// Number of words in mantissa
+No_Byte:	.skip	BYTE_PER_WORD	// Number of bytes in mantissa (32_64_CHECK align and RESD vs DQ)
 LSWOfst:	.skip	BYTE_PER_WORD	// Offset address of MS Word at No_Word accuracy
-D_Flt_Byte:	.skip	BYTE_PER_WORD	// Default number of bytes in mantissa
 D_Flt_Word:	.skip	BYTE_PER_WORD	// Default number of words in mantissa
+D_Flt_Byte:	.skip	BYTE_PER_WORD	// Default number of bytes in mantissa
 D_Flt_LSWO:	.skip	BYTE_PER_WORD	// Default Offset address of MS Word
 
 NoSigDig:	.skip	BYTE_PER_WORD   // Number of Significant Digits
 NoExtDig:	.skip	BYTE_PER_WORD   // Number of Extended Digits
+
+
 
 // -----------------------------------------------------
 	.text
@@ -174,14 +238,14 @@ FP_Initialize:
 	str	x1, [sp, #24]
 
 	ldr	x1, =NoSigDig		// Initial significatn Digits
-	mov	x0, #INIT_SIG_DIG
+	mov	x0, INIT_SIG_DIG
 	str	x0, [x1]
 
 	ldr	x1, =NoExtDig		// Initial significatn Digits
-	mov	x0, #INIT_EXT_DIG
+	mov	x0, INIT_EXT_DIG
 	str	x0, [x1]
 
-	mov	x0, #INIT_NO_WORD
+	mov	x0, INIT_NO_WORD
 	bl	Set_No_Word
 
 	ldr	x30, [sp, #0]		// Restore registers
@@ -201,12 +265,16 @@ FP_Initialize:
 
 --------------------------------------------------------------*/
 Set_No_Word:
-	sub	sp, sp, #48		// Reserve 6 words
+	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x10,  [sp, #24]
 	str	x11,  [sp, #32]
+	str	x17, [sp, #40]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
 //
 // [No_Word] is variable for number 32 bit words in mantissa
 //
@@ -218,14 +286,14 @@ Set_No_Word:
 // [No_Byte] is variable for number 8 bit bytes in mantissa
 //
 	ldr	x11, =No_Byte
-	mov	x10, x0, lsl #3	// Convert to bytes [No_Byte]
+	mov	x10, x0, lsl WORDSIZEBITS // Convert to bytes [No_Byte]
 	str	x10, [x11]
 	ldr	x11, =D_Flt_Byte	// Default value
 	str	x10, [x11]
 //
 // [LSWOfst] is variable to offset to L.S. Word in mantissa
 //
-	ldr	x11, =VAR_MSW_OFST
+	add	x11, x17, BYTE_PER_WORD
 	sub	x10, x11, x10		// MSByte-[No_Byte]
 	ldr	x11, =LSWOfst
 	str	x10, [x11]
@@ -237,7 +305,8 @@ Set_No_Word:
 	ldr	x0,  [sp, #16]
 	ldr	x10,  [sp, #24]
 	ldr	x11,  [sp, #32]
-	add	sp, sp, #48
+	ldr	x17,  [sp, #40]
+	add	sp, sp, #64
 	ret
 
 // ---------------------------------------------
