@@ -41,7 +41,7 @@ SOFTWARE.
 
 	.global	FP_Initialize
 	.global	Set_No_Word
-	.global	No_word, No_Byte, NoSigDig
+	.global	No_Word, No_Byte, NoSigDig, NoExtDig
 
 // -----------------------------------------------------
 	.data   // Section containing initialized data

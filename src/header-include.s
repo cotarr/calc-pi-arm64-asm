@@ -14,7 +14,7 @@
 // Variable size and Exponent size must be multiple of 4 byte (32 bit) DWord
 //
 //--------------------------------------------------------------------
-.set	VAR_WSIZE,	0x020	// Size of variable in words
+.set	VAR_WSIZE,	0x040	// Size of variable in words
 //--------------------------------------------------------------------
 .set	VAR_BSIZE,	(VAR_WSIZE * BYTE_PER_WORD)	// Maximum size of variable in bytes
 .set	INT_WSIZE, 	1

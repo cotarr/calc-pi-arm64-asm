@@ -410,6 +410,30 @@ Command_sigfigs:
 	b	ParseCmd
 
 10:
+	ldrb	w1, [x0]		// character argument
+	cmp	w1, #'v'		// 'v' --> view verbose
+	b.ne	20f
+	bl	PrintAccVerbose
+	b	ParseCmd
+
+20:
+	ldrb	w1,[x0]			// character argument
+	cmp	w1, #'e'		// 'e' --> enter extended digits
+	b.ne	30f
+	ldrb	w1, [x0, #1]		// next character space
+	cmp	w1, #0x020		// ascii space
+	b.ne	30f
+	ldrb	w1, [x0, #2]		// first digit of numberic input
+	cmp	w1, #0x30		// Check first character of command
+	b.lt	30f			// less than '0'? then skip
+	cmp	w1, #0x39		// greater than '9'? then skip
+	b.gt	30f
+	add	x0, x0, #2		// move pointer 2 digits
+	bl	IntWordInput		// convert ascii to binary
+	bl	SetExtendedDigits	// set extended digits
+	bl	CROut
+	b	ParseCmd
+30:
 	ldrb	w1, [x0]
 	cmp	w1, #0x30		// Check first character of command
 	b.lt	55f			// less than '0'? then skip

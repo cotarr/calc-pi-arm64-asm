@@ -29,12 +29,14 @@ SOFTWARE.
 ----------------------------------------------------------------
 	PrintAccuracy
 	SetDigitAccuracy
+	SetExtendedDigits
+	PrintAccVerbose
 	Words_2_Digits
 	Digits_2_Words
 	PrintByteHex
 	PrintWordHex
 	PrintWordB10
-	IntWordINput
+	IntWordInput
 	ClearRregisters
 	PrintFlags
 	PrintRegisters
@@ -44,23 +46,24 @@ SOFTWARE.
 	.include "header-include.s"
 
 /* ------------------------------------------------------------ */
-
 	.global PrintAccuracy
 	.global SetDigitAccuracy
-        .global	PrintByteHex
-	.global	PrintWordHex
+	.global	SetExtendedDigits
+	.global PrintAccVerbose
 	.global Words_2_Digits
 	.global Digits_2_Words
+        .global	PrintByteHex
+	.global	PrintWordHex
 	.global PrintWordB10
 	.global	IntWordInput
 	.global ClearRegisters
 	.global PrintFlags
 	.global PrintRegisters
+/* ------------------------------------------------------------ */
 
 	.text
 
 	.align 4
-
 
 /* ------------------------------------------------------------------------------------
 
@@ -128,6 +131,41 @@ SetDigitAccuracy:
 	add	sp, sp, #64
 	ret
 
+
+/* ------------------------------------------------------------------------------------
+
+  Function  SetExtendedDigits
+
+  Input:   x0 number of digits to set
+
+  Output:  none
+
+------------------------------------------------------------------------------------ */
+SetExtendedDigits:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]
+	str	x9,  [sp, #32]		// requested digits
+
+	mov	x9, x0			// requested digits save in 9
+
+	cmp	x0, #1000		// arbitrary check for 1000 digits
+	b.ls	20f
+	mov	x0, #1000		// Replace maximum
+20:
+	ldr	x1, =NoExtDig		// pointer
+	str	x0, [x1]		// Save requested digits
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x9,  [sp, #32]
+	add	sp, sp, #64
+	ret
+
 /* -------------------------------------------------------
   Function  PrintAccuracy
 
@@ -159,6 +197,201 @@ PrintAccuracy:
 	ret
 10:	.asciz	"Accuracy: "
 20:	.asciz	" Digits\n"
+
+/* ----------------------------------------------------
+
+  Function  PrintAccuracy
+
+  Input:   none
+
+  Output:  text send to CharOut
+
+//-------------------------------------------------- */
+PrintAccVerbose:
+	sub	sp, sp, #80		// Reserve 10 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]
+	str	x2,  [sp, #32]
+	str	x9,  [sp, #40]
+	str	x10, [sp, #48]
+	str	x11, [sp, #56]
+	str	x12, [sp, #64]
+	str	x13, [sp, #72]
+
+//
+//  Decimal Section
+//
+
+// Digits that print
+	ldr	x0, =sftext1
+	bl	StrOut
+	ldr	x1, =NoSigDig
+	ldr	x0, [x1]
+	bl	PrintWordB10
+// Extended digits
+	ldr	x0, =sftext2
+	bl	StrOut
+	ldr	x1, =NoExtDig
+	ldr	x0, [x1]
+	bl	PrintWordB10
+// Useable digits
+	ldr	x0, =sftext3
+	bl	StrOut
+	ldr	x1, =No_Word
+	ldr	x0, [x1]
+	sub	x0, x0, GUARDWORDS
+	bl	Words_2_Digits
+	bl	PrintWordB10
+// Total digits
+	ldr	x0, =sftext4
+	bl	StrOut
+	ldr	x1, =No_Word
+	ldr	x0, [x1]
+	bl	Words_2_Digits
+	bl	PrintWordB10
+// Available digits
+	ldr	x0, =sftext5
+	bl	StrOut
+	mov	x0, FCT_WSIZE
+	sub	x0, x0, GUARDWORDS
+	bl	Words_2_Digits
+	bl	PrintWordB10
+
+
+//
+//    Binary Section
+//
+// Fraction Part Words
+	ldr	x0, =sftext10
+	bl	StrOut
+	ldr	x1, =No_Word
+	ldr	x0, [x1]
+	sub	x0, x0, GUARDWORDS
+	mov	x2, x0			// save for page formatting
+	bl	PrintWordB10
+	ldr	x0, =sftext20
+	bl	StrOut
+	// 1 millin 1000000 = 0x000F4240
+	movz	x0, #0x000f, lsl 16
+	movk	x0, #0x4240
+	cmp	x2, x0			// more than 1 million 7 digits
+	b.hs	10f
+	mov	x0, #9			// tab character
+	bl	CharOut
+10:
+	ldr	x1, =No_Byte
+	ldr	x0, [x1]
+	sub	x0, x0, GUARDBYTES
+	bl	PrintWordB10
+
+// Guard Words
+	ldr	x0, =sftext11
+	bl	StrOut
+	mov	x0, GUARDWORDS
+	mov	x2, x0
+	bl	PrintWordB10
+	ldr	x0, =sftext20
+	bl	StrOut
+	// 1 millin 1000000 = 0x000F4240
+	movz	x0, #0x000f, lsl 16
+	movk	x0, #0x4240
+	cmp	x2, x0			// more than 1 million 7 digits
+	b.hs	20f
+	mov	x0, #9			// tab character
+	bl	CharOut
+20:
+	mov	x0, GUARDBYTES
+	bl	PrintWordB10
+
+// Integer size Words
+	ldr	x0, =sftext12
+	bl	StrOut
+	mov	x0, INT_WSIZE
+	bl	PrintWordB10
+	ldr	x0, =sftext20
+	bl	StrOut
+
+	mov	x0, #9			// tab character
+	bl	CharOut
+
+	mov	x0, INT_BSIZE
+	bl	PrintWordB10
+
+// Available size
+
+	ldr	x0, =sftext13
+	bl	StrOut
+	mov	x0, VAR_WSIZE
+	mov	x2, x0
+	bl	PrintWordB10
+	ldr	x0, =sftext20
+	bl	StrOut
+	// 1 millin 1000000 = 0x000F4240
+	movz	x0, #0x000f, lsl 16
+	movk	x0, #0x4240
+	cmp	x2, x0			// more than 1 million 7 digits
+	b.hs	20f
+	mov	x0, #9			// tab character
+	bl	CharOut
+20:
+	mov	x0, VAR_BSIZE
+	bl	PrintWordB10
+
+	ldr	x0, =sftext14
+	bl	StrOut
+
+	bl	CROut
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x9,  [sp, #40]
+	ldr	x10, [sp, #48]
+	ldr	x11, [sp, #56]
+	ldr	x12, [sp, #64]
+	ldr	x13, [sp, #72]
+	add	sp, sp, #80
+	ret
+
+	.align 4
+sftext1:
+	.ascii	"\nDecimal (base 10) Accuracy:\n"
+	.asciz	"  Printed Digits:    "
+sftext2:
+	.ascii					" \t(Configurable)\n"
+	.asciz  "  Extended Digits:   "
+sftext3:
+ 	.ascii 					" \t(Shows extra digits)\n"
+	.asciz	"  Useable Digits:    "
+sftext4:
+	.ascii					" \t(Theoretical)\n"
+	.asciz	"  Total Calc Digits: "
+sftext5:
+	.ascii					" \t(With Guard Words)\n"
+	.asciz	"  Available Digits:  "
+
+sftext10:
+	.ascii	"\n\nBinary Accuracy:\n"
+	.asciz	"  Fraction Part:  "
+sftext11:
+	.ascii					" Bytes\n"
+	.asciz	"  Guard Words:    "
+sftext12:
+	.ascii					" Bytes\n"
+	.asciz	"  Integer Part:   "
+sftext13:
+	.ascii					" Bytes\n"
+	.asciz	"  Available:      "
+sftext14:
+	.asciz					" Bytes\n"
+sftext20:
+	.asciz	" Words \t"
+
+	.align 4
 
 /* -----------------------------------------------
 

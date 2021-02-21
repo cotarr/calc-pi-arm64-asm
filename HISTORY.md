@@ -266,3 +266,28 @@ The conversion is 19.2659197224948 digit/(64 bit word)
 
 - Added command sf, sigfigs to set and view current accuracy settings
 - Added sigfigs to help
+
+This is an example of user input of number size, set 1000 digits and 10 extra digits
+
+```
+Op Code: sf 1000
+
+Accuracy: 1000 Digits
+
+Op Code: sf e 10
+
+Op Code: sf v
+
+Decimal (base 10) Accuracy:
+  Printed Digits:    1000 	(Configurable)
+  Extended Digits:   10		(Shows extra digits)
+  Useable Digits:    1002 	(Theoretical)
+  Total Calc Digits: 1079 	(With Guard Words)
+  Available Digits:  1137
+
+Binary Accuracy:
+  Fraction Part:  52 Words 		416 Bytes
+  Guard Words:    4 Words 		32 Bytes
+  Integer Part:   1 Words 		8 Bytes
+  Available:      64 Words 		512 Bytes
+```
