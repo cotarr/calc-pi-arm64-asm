@@ -96,6 +96,15 @@ Command_Table:
 	.byte	0,0,0,0
 	.quad	Command_exit
 
+	.ascii	"sf"
+	.byte	0,0,0,0,0,0
+	.quad	Command_sigfigs
+
+	.ascii	"sigfigs"
+	.byte	0
+	.quad	Command_sigfigs
+
+
 	.ascii	"test"
 	.byte	0,0,0,0
 	.quad	Command_test
@@ -391,6 +400,32 @@ Command_prac:
 	bl	practice
 	bl	CROut
 	b	ParseCmd
+
+Command_sigfigs:
+	cmp	x0, #0			// Check for argument
+	b.ne	10f
+	bl	CROut
+	bl	PrintAccuracy
+	bl	CROut
+	b	ParseCmd
+
+10:
+	ldrb	w1, [x0]
+	cmp	w1, #0x30		// Check first character of command
+	b.lt	55f			// less than '0'? then skip
+	cmp	w1, #0x39		// greater than '9'? then skip
+	b.gt	55f
+	bl	IntWordInput		// x0 in binary 64 bit data
+	bl	SetDigitAccuracy
+	b	ParseCmd
+
+55:	ldr	x0, =60f
+	bl	StrOut
+	b	ParseCmd
+60:
+	.asciz	"\nCommand Parser: sigfigs command invalid argument\n\n"
+
+
 //
 //
 //

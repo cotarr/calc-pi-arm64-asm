@@ -74,6 +74,12 @@ Help_Table:
 	.ascii	"quit"
 	.byte	0, 0, 0, 0
 	.quad	Help_q
+	.ascii	"sf"
+	.byte	0,0,0,0,0,0
+	.quad	Help_sigfigs
+	.ascii	"sigfigs"
+	.byte	0
+	.quad	Help_sigfigs
 
 Help_Table_End:
 	.byte	0, 0, 0, 0, 0, 0, 0, 0
@@ -115,6 +121,24 @@ Help_hex:
 Help_q:
 	.ascii	"Usage: quit\n\n"
 	.ascii	"Description: Quit the program.\n"
+	.byte	0
+
+Help_sigfigs:
+	.ascii	"Usage: sf             (prints current accuracy)\n\n"
+	.ascii	"Usage: sf   <integer> (set new accuracy digits base 10)\n"
+//	.ascii	"Usage: sf w <integer> (set new accuracy 64 bit words)\n"
+//	.ascii	"Usage: sf e <integer> (set new extended digits, 0 for none)\n"
+//	.ascii	"Usage: sf v           (display accuracy verbose)\n"
+//	.ascii	"Usage: sf K           (sets accuracy to 1K 1, 000 digits base 10)\n"
+//	.ascii	"Usage: sf M           (sets accuracy to 1M 1, 000, 000 digits base 10)\n"
+//	.ascii	"Usage: sf x           (sets accuracy to maximum)\n"
+	.ascii	"\nThe sf (and sigfigs) commands aure used to set or display the current\n"
+	.ascii	"precision level (significant digits) for floating point variables.\n"
+	.ascii	"64 bit word size can be converted to base 10 number size by:\n"
+	.ascii	"19.2659197224948 digit/QWord(64 bit) = log_base10(2^64)\n"
+	.ascii	"Guard words provide additional precision to absorb rounding errors.\n"
+	.ascii	"Set extended digits show result past specified accuracy.\n"
+	.ascii	"Variable size VAR_WSIZE and GUARDWORDS specified in var_header.inc.\n"
 	.byte	0
 
 //=====================================

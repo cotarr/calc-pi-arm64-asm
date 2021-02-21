@@ -59,7 +59,7 @@ practice:
 //
 // Comment each test as needed
 //
-	b	sub_carry_loop
+	// b	sub_carry_loop
 	// b	shift_addition
 	// b	subtraction
 	// b	bit_shift
@@ -84,6 +84,7 @@ test_error:
 TestErrorMsg:
 	.asciz "A test error was generated in the practive sandbox"
 	.align 4
+
 
 // -----------------------------------------------------------------------------------
 //

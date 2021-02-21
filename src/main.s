@@ -50,7 +50,10 @@ main:
 	bl	ClrScr			// Terminal setup
 	bl	Help_Welcome
 
-	bl	FP_Initialize
+	bl	FP_Initialize		// Initialize Variab les
+
+	bl	PrintAccuracy		// Show default significatn digits
+	bl	CROut
 
 	bl	ParseCmd		// Infinite loop... user input
 

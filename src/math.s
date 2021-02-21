@@ -41,7 +41,7 @@ SOFTWARE.
 
 	.global	FP_Initialize
 	.global	Set_No_Word
-	.global	No_word, No_Byte
+	.global	No_word, No_Byte, NoSigDig
 
 // -----------------------------------------------------
 	.data   // Section containing initialized data
@@ -150,6 +150,9 @@ D_Flt_Byte:	.skip	BYTE_PER_WORD	// Default number of bytes in mantissa
 D_Flt_Word:	.skip	BYTE_PER_WORD	// Default number of words in mantissa
 D_Flt_LSWO:	.skip	BYTE_PER_WORD	// Default Offset address of MS Word
 
+NoSigDig:	.skip	BYTE_PER_WORD   // Number of Significant Digits
+NoExtDig:	.skip	BYTE_PER_WORD   // Number of Extended Digits
+
 // -----------------------------------------------------
 	.text
 	.align 4
@@ -164,17 +167,27 @@ D_Flt_LSWO:	.skip	BYTE_PER_WORD	// Default Offset address of MS Word
 
 --------------------------------------------------------------*/
 FP_Initialize:
-PrintByteHex:
 	sub	sp, sp, #32		// Reserve 4 words
-	str	x30, [sp, #0]
+	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x1, [sp, #24]
+
+	ldr	x1, =NoSigDig		// Initial significatn Digits
+	mov	x0, #INIT_SIG_DIG
+	str	x0, [x1]
+
+	ldr	x1, =NoExtDig		// Initial significatn Digits
+	mov	x0, #INIT_EXT_DIG
+	str	x0, [x1]
 
 	mov	x0, #INIT_NO_WORD
 	bl	Set_No_Word
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
-	ldr	x0,  [sp, #16]
+	ldr	x0, [sp, #16]
+	ldr	x1, [sp, #24]
 	add	sp, sp, #32
 	ret
 

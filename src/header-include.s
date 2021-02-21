@@ -17,6 +17,10 @@
 .set	VAR_WSIZE,	0x020	// Size of variable in words
 //--------------------------------------------------------------------
 .set	VAR_BSIZE,	(VAR_WSIZE * BYTE_PER_WORD)	// Maximum size of variable in bytes
+.set	INT_WSIZE, 	1
+.set	INT_BSIZE,	(INT_WSIZE * BYTE_PER_WORD)
+.set	FCT_WSIZE, 	(VAR_WSIZE - INT_WSIZE)
+.set	FCT_BSIZE,	(FCT_WSIZE * BYTE_PER_WORD)
 
 .set	VAR_MSB_OFST,	VAR_BSIZE-1			// Offset mantissa most significant byte
 .set	VAR_MSW_OFST,	VAR_BSIZE-(BYTE_PER_WORD)	// Offset mantissa most significant word

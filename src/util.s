@@ -27,13 +27,17 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ----------------------------------------------------------------
+	PrintAccuracy
+	SetDigitAccuracy
+	Words_2_Digits
+	Digits_2_Words
 	PrintByteHex
 	PrintWordHex
-	PrintFlags
-	ClearRregisters
-	PrintRegisters
 	PrintWordB10
 	IntWordINput
+	ClearRregisters
+	PrintFlags
+	PrintRegisters
 ------------------------------------------------------------- */
 
 	.include "arch-include.s"	// .arch and .cpu directives
@@ -41,17 +45,209 @@ SOFTWARE.
 
 /* ------------------------------------------------------------ */
 
+	.global PrintAccuracy
+	.global SetDigitAccuracy
         .global	PrintByteHex
 	.global	PrintWordHex
-	.global PrintFlags
-	.global ClearRegisters
-	.global PrintRegisters
+	.global Words_2_Digits
+	.global Digits_2_Words
 	.global PrintWordB10
 	.global	IntWordInput
+	.global ClearRegisters
+	.global PrintFlags
+	.global PrintRegisters
 
 	.text
 
 	.align 4
+
+
+/* ------------------------------------------------------------------------------------
+
+  Function  SetDigitAccuracy
+
+  Input:   ax number of digits to set
+
+  Output:  none
+
+------------------------------------------------------------------------------------ */
+SetDigitAccuracy:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]
+	str	x9,  [sp, #32]		// requested digits
+
+	mov	x9, x0			// requested digits save in 9
+
+	// Check digits lower limit
+	cmp	x9, #MINIMUM_DIG
+	b.hs	10f
+	mov	x9, #MINIMUM_DIG	// Replace with minimum
+10:
+
+	// Digits upper limit from defined variable size
+	mov	x0, FCT_WSIZE		// words in fraction part
+	sub	x0, x0, GUARDWORDS	// less guard words
+	bl	Words_2_Digits		// 64 bit word --> base 10 digits
+	cmp	x0, x9			// above limit?
+	b.hs	20f
+	mov	x9, x0			// Replace minimum
+20:
+	ldr	x0, =NoSigDig		// pointer
+	str	x9, [x0]		// Save requested digits
+
+	// compute word size
+	mov	x0, x9
+	bl	Digits_2_Words		// Convert base 10 digit to 64 bit words
+	add	x0, x0, GUARDWORDS
+
+	// check minimum word size
+	cmp	x0, MINIMUM_WORD
+	b.hs	30f
+	mov	x0, MINIMUM_WORD
+
+30:
+	// check maximum word size
+	cmp	x0, FCT_WSIZE
+	b.ls	40f
+	mov	x0, FCT_WSIZE
+40:
+	bl	Set_No_Word		// Set all variable word size related vriables
+
+	bl	CROut
+	bl	PrintAccuracy
+	bl	CROut
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x9,  [sp, #32]
+	add	sp, sp, #64
+	ret
+
+/* -------------------------------------------------------
+  Function  PrintAccuracy
+
+  Input:   none
+
+  Output:  text send to CharOut
+
+--------------------------------------------------------- */
+PrintAccuracy:
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+
+	ldr	x0, =10f		// First message
+	bl	StrOut			// Print string
+
+	ldr	x0, =NoSigDig
+	ldr	x0, [x0]		// Get current number significant digits
+	bl	PrintWordB10		// Print digits
+
+	ldr	x0, =20f		// First message
+	bl	StrOut			// Print string
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	add	sp, sp, #32
+	ret
+10:	.asciz	"Accuracy: "
+20:	.asciz	" Digits\n"
+
+/* -----------------------------------------------
+
+  Function  Digits_2_Words
+
+  Input:   x0 = number of decimal digits (32 bit only)
+
+  Output:  x0 = number of binary words
+
+-------------------------------------------------- */
+Words_2_Digits:
+
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x1,  [sp, #16]
+
+// Multiply /divide with 64 bit intermdiate
+//
+// (32 bit) * (32 bit)
+//   --------------
+//       (32 bit)
+//
+//
+	ldr	x1, =DigPer1E8		// Address pointer
+	ldr	x1, [x1]		// x1 = 1926591972 (0x72D575E4 is 32 bit)
+
+	mul	x0, x0, x1		// (digits base 10) * 100000000
+//
+//  19.2659197224948 = log_base10(2^64)
+//
+	ldr	x1, =TempNum1E8		// Address pointer
+	ldr	x1, [x1]		// x1 = x10 = 100000000 (0x05F5E100 is 32 bit)
+	udiv	x0, x0, x1
+	add	x0, x0, #1
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x1,  [sp, #16]
+	add	sp, sp, #32
+	ret
+
+/* -----------------------------------------------
+
+  Function  Digits_2_Words
+
+  Input:   x0 = number of decimal digits (32 bit only)
+
+  Output:  x0 = number of binary words
+
+-------------------------------------------------- */
+Digits_2_Words:
+
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x1,  [sp, #16]
+
+// Multiply /divide with 64 bit intermdiate
+//
+// (32 bit) * (32 bit)
+//   --------------
+//       (32 bit)
+//
+//
+	ldr	x1, =TempNum1E8		// Address pointer
+	ldr	x1, [x1]		// x1 = 100000000 (0x05F5E100 is 32 bit)
+	mul	x0, x0, x1		// (digits base 10) * 100000000
+//
+//  19.2659197224948 = log_base10(2^64)
+//
+	ldr	x1, =DigPer1E8		// Address pointer
+	ldr	x1, [x1]		// x1 = 1926591972 (0x72D575E4 is 32 bit)
+	udiv	x0, x0, x1
+	add	x0, x0, #1
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x1,  [sp, #16]
+	add	sp, sp, #32
+	ret
+
+TempNum1E8:
+	.quad	 100000000
+DigPer1E8:
+ 	.quad	1926591972
+	.align 4
+
+
 
 /* **************************************
 
@@ -175,6 +371,136 @@ PrintByteHex:
 
 /***************************************
 
+   PrintWordB10
+
+   Input:  x0 = Number to print
+
+   Output: none
+
+***************************************/
+PrintWordB10:
+	sub	sp, sp, #80		// Reserve 20 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x9, [sp, #24]
+	str	x10, [sp, #32]
+	str	x11, [sp, #40]
+	str	x12, [sp, #48]
+	str	x13, [sp, #56]
+//
+// Setup counters and variables
+//
+	mov	x9, #10			// x9 Used as constant x9 = #10
+	mov	x10, #0			// x10 Initialize digit counter
+	mov	x11, x0			// x11 Running remainder
+	mov	x12, #1			// x12 initialize multiples of 10
+					// x13 is scratch register
+//
+// Generate powers of 10 until bigger than number to print
+//
+10:
+	udiv	x13, x11, x12		// x13 = x12/x11  (number / 10^?)
+	cmp	x13, x9			// Is result of div < 10 (x9=10)
+	b.lo	20f			// Yes, cf = 0, less than 10, done counting
+	mov	x13, x12, lsl #1	// Mult x 2
+	mov	x12, x12, lsl #3	// Mult x 8
+	add	x12, x12, x13		// x2 + x8 --> x10
+	add	x10, x10, #1		// increment digit counter
+        b.al    10b
+//
+//  Recursively divide by power of 10 to get digits
+//
+20:
+	udiv	x13, x11, x12		// Quotient x13 = x11/x12 (remainder/ power-10)
+	msub	x11, x13, x12, x11	// Rem x11 = (last rem) - (power-10 * quot)
+	and	x0, x13, #0x0F
+	orr 	x0, x0, #0x30		// Form ascii
+	bl	CharOut			// Output character
+	udiv	x12, x12, x9		// Next power of 10 x12=x12/x9 (x9=#10)
+	subs	x10, x10, #1		// Decrement digit counter
+	b.hs 	20b
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0, [sp, #16]
+	ldr	x9, [sp, #24]
+	ldr	x10, [sp, #32]
+	ldr	x11, [sp, #40]
+	ldr	x12, [sp, #48]
+	ldr	x13, [sp, #56]
+	add	sp, sp, #80
+	ret
+
+/*--------------------------------------------------------------
+ Integer input routine
+
+ This routine will put an integer value from terminal input
+ and convert ASCII to binary, returning 64 bit RAX
+
+    Input:    x0 address of input buffer
+
+    Output:   x0 contains 64 bit positive integer
+              x1 0 = no error else > 0 is error
+
+--------------------------------------------------------------*/
+IntWordInput:
+	sub	sp, sp, #80		// Reserve 10 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x9, [sp, #16]
+	str	x10, [sp, #24]
+	str	x11, [sp, #32]
+
+	cbz	x0, IntWordInputError	// Error: Pointer is zero
+
+	mov	x11, x0			// Address to input buffer
+	mov	x10, #0			// Accumulate number here
+
+	ldrb	w0, [x11]		// check for empty string
+	cbz	w0, IntWordInputError	// Error: zero length string
+10:
+	ldrb	w0, [x11]		// Get next character from buffe4
+	add	w11, w11, #1		// Point at next character
+	cmp	w0, #0x3A		// Digit > ascii '9' + 1
+        b.hs     20f			// Yes convert input
+        cmp     w0, #0x30		// Digit < ascii '0'
+        b.lo	20f			// Yes convert input
+        and     x0, x0, #0x0F		// Mask to BCD bits
+	mov	x9, x10, lsl #1		// x 2
+	mov	x10, x10, lsl #3	// x 8
+	add	x10, x10, x9		//  add X 2 value to X 8 value for X 10
+	add	x10, x10, x0		// Add the digit
+	b.al	10b			// Always taken
+20:
+	cmp	w0, #0			// expect null terminated string
+	b.ne	IntWordInputError	// Error non numeric characters
+
+	mov	x0, x10			// Exit X0 = value
+	mov	x1, #0			// Exit X1 = error condition
+	b.al	100f			// Go exit
+
+IntWordInputError:
+	ldr	x0, =Non_numeric_err	// Error message
+	bl	StrOut
+	mov	x0, #0			// Return 0 on error
+	mov	x1, #1			// x1=1 --> error
+
+100:	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x9,  [sp, #16]
+	ldr	x10, [sp, #24]
+	ldr	x11, [sp, #32]
+	add	sp, sp, #80
+	ret
+Non_numeric_err:
+	.asciz "\nInput Error:  Expect integer string.\n"
+
+	.align 4
+
+
+/***************************************
+
    PrintFlags
 
    Print x0-x31 in hexidecimal
@@ -283,6 +609,7 @@ PrintFlags:
 	add	sp, sp, #32
 	ret
 
+
 /***************************************
 
    ClearRegisters
@@ -326,6 +653,7 @@ ClearRegisters:
 	// mov	x30, xzr // link address
 	// mov	x31, xzr // Stack pointer
 	ret
+
 
 /***************************************
 
@@ -676,133 +1004,5 @@ PrintRegisters:
 
 	.align 4
 
-/***************************************
-
-   PrintWordB10
-
-   Input:  x0 = Number to print
-
-   Output: none
-
-***************************************/
-PrintWordB10:
-	sub	sp, sp, #80		// Reserve 20 words
-	str	x30, [sp, #0]		// Preserve these registers
-	str	x29, [sp, #8]
-	str	x0, [sp, #16]
-	str	x9, [sp, #24]
-	str	x10, [sp, #32]
-	str	x11, [sp, #40]
-	str	x12, [sp, #48]
-	str	x13, [sp, #56]
-//
-// Setup counters and variables
-//
-	mov	x9, #10			// x9 Used as constant x9 = #10
-	mov	x10, #0			// x10 Initialize digit counter
-	mov	x11, x0			// x11 Running remainder
-	mov	x12, #1			// x12 initialize multiples of 10
-					// x13 is scratch register
-//
-// Generate powers of 10 until bigger than number to print
-//
-10:
-	udiv	x13, x11, x12		// x13 = x12/x11  (number / 10^?)
-	cmp	x13, x9			// Is result of div < 10 (x9=10)
-	b.lo	20f			// Yes, cf = 0, less than 10, done counting
-	mov	x13, x12, lsl #1	// Mult x 2
-	mov	x12, x12, lsl #3	// Mult x 8
-	add	x12, x12, x13		// x2 + x8 --> x10
-	add	x10, x10, #1		// increment digit counter
-        b.al    10b
-//
-//  Recursively divide by power of 10 to get digits
-//
-20:
-	udiv	x13, x11, x12		// Quotient x13 = x11/x12 (remainder/ power-10)
-	msub	x11, x13, x12, x11	// Rem x11 = (last rem) - (power-10 * quot)
-	and	x0, x13, #0x0F
-	orr 	x0, x0, #0x30		// Form ascii
-	bl	CharOut			// Output character
-	udiv	x12, x12, x9		// Next power of 10 x12=x12/x9 (x9=#10)
-	subs	x10, x10, #1		// Decrement digit counter
-	b.hs 	20b
-
-	ldr	x30, [sp, #0]		// restore registers
-	ldr	x29, [sp, #8]
-	ldr	x0, [sp, #16]
-	ldr	x9, [sp, #24]
-	ldr	x10, [sp, #32]
-	ldr	x11, [sp, #40]
-	ldr	x12, [sp, #48]
-	ldr	x13, [sp, #56]
-	add	sp, sp, #80
-	ret
-
-/*--------------------------------------------------------------
- Integer input routine
-
- This routine will put an integer value from terminal input
- and convert ASCII to binary, returning 64 bit RAX
-
-    Input:    x0 address of input buffer
-
-    Output:   x0 contains 64 bit positive integer
-              x1 0 = no error else > 0 is error
-
---------------------------------------------------------------*/
-IntWordInput:
-	sub	sp, sp, #80		// Reserve 10 words
-	str	x30, [sp, #0]		// Preserve these registers
-	str	x29, [sp, #8]
-	str	x9, [sp, #16]
-	str	x10, [sp, #24]
-	str	x11, [sp, #32]
-
-	cbz	x0, IntWordInputError	// Error: Pointer is zero
-
-	mov	x11, x0			// Address to input buffer
-	mov	x10, #0			// Accumulate number here
-
-	ldrb	w0, [x11]		// check for empty string
-	cbz	w0, IntWordInputError	// Error: zero length string
-10:
-	ldrb	w0, [x11]		// Get next character from buffe4
-	add	w11, w11, #1		// Point at next character
-	cmp	w0, #0x3A		// Digit > ascii '9' + 1
-        b.hs     20f			// Yes convert input
-        cmp     w0, #0x30		// Digit < ascii '0'
-        b.lo	20f			// Yes convert input
-        and     x0, x0, #0x0F		// Mask to BCD bits
-	mov	x9, x10, lsl #1		// x 2
-	mov	x10, x10, lsl #3	// x 8
-	add	x10, x10, x9		//  add X 2 value to X 8 value for X 10
-	add	x10, x10, x0		// Add the digit
-	b.al	10b			// Always taken
-20:
-	cmp	w0, #0			// expect null terminated string
-	b.ne	IntWordInputError	// Error non numeric characters
-
-	mov	x0, x10			// Exit X0 = value
-	mov	x1, #0			// Exit X1 = error condition
-	b.al	100f			// Go exit
-
-IntWordInputError:
-	ldr	x0, =Non_numeric_err	// Error message
-	bl	StrOut
-	mov	x0, #0			// Return 0 on error
-	mov	x1, #1			// x1=1 --> error
-
-100:	ldr	x30, [sp, #0]		// restore registers
-	ldr	x29, [sp, #8]
-	ldr	x9,  [sp, #16]
-	ldr	x10, [sp, #24]
-	ldr	x11, [sp, #32]
-	add	sp, sp, #80
-	ret
-Non_numeric_err:
-	.asciz "\nInput Error:  Expect integer string.\n"
-
-	.align 4
 
 	.end

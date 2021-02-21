@@ -1,6 +1,6 @@
 # Program history
 
-### 2021-02-14 - Initial setup
+### 2021-02-14 - Day 1
 
 - Created empty git repository
 - Installed 64 bit beta Raspberry OS from https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2020-08-24/
@@ -41,8 +41,6 @@ Flags:               fp asimd evtstrm crc32 cpuid
   .cpu  cortex-a72	// Raspberry Pi 4 from lscpu
 ```
 
-### 2021-02-14
-
 - Wrote Hello World, print string with address in X0, first commit:
 
 - main.s - assembler file with program entry point
@@ -55,7 +53,7 @@ Flags:               fp asimd evtstrm crc32 cpuid
 git checkout d5188777cda71522eb2428c5fdba4ab9a0a63314
 ```
 
-### 2021-02-15
+### 2021-02-15 - Day-2
 
 - Fixed several errors preserving registers in Hello World
 - Added Keyboard input function KeyIn, reads line from console terminal with address in X0
@@ -80,7 +78,7 @@ that the command addresses are in byte alignment.
 git checkout e54339d9f52c790d3e19fe42b6c0cc32b8e141d0
 ```
 
-### 2021-02-16
+### 2021-02-16 - Day 3
 
 Spent many hours reading asm64 docs. Following docs, cleaned up register use
 following convention for register numbering. Cleaned up command parsing code in parser.s
@@ -94,7 +92,7 @@ following convention for register numbering. Cleaned up command parsing code in 
 git checkout 8b2540ab1f30d5fda32fc68e5f4d54e65f19bc59
 ```
 
-### 2021-02-17
+### 2021-02-17 - Day 4
 
 - practice.s - New file as sandbox to try learning ARM64 code.
 - Added endian check for 32 bit w0 and 64 bit x0 memory load to register
@@ -110,7 +108,7 @@ Error checking added for empty string and non-numeric characters.
 git checkout fd759390c4cd42e42855eef002c2da5b597838f4
 ```
 
-### 2021-02-18
+### 2021-02-18 - Day 5
 
 - math.s - New file to hold variable declarations
 - math-debug.s New file to hold debug tools used to write the program.
@@ -146,7 +144,7 @@ for math arithmetic functions, but all calculations will be within one object mo
 In order to view variables while writing the program, a tool is needed to display
 variables in hexadecimal. This is useful when testing future code, such as integer addition.
 
-- Add command with optional argument 'hex [<reg-no>]` used to fully display one variable or abbreviate display all variables in hexadecimal
+- Add command with optional argument `hex [<reg-no>]` used to fully display one variable or abbreviate display all variables in hexadecimal
 
 ```
 Op Code: hex
@@ -172,13 +170,15 @@ WORKC  (4)
 0000000000000000 0000000000000000
 Op Code:
 ```
+
 - Added command `D.fill <reg number>` and to fill a variable with incremental bytes values, 11, 12, 13, ...
+
 
 ```
 git checkout ef153bbb5fa1e279d214abb7029f15f3841bec91
 ```
 
-### 2021-02-19
+### 2021-02-19 - Day 6
 
 - math-subr.s - New file for boiler plate arithmetic utilities
 - Added function ClearVariable argument x1 index number of variable to clear
@@ -193,7 +193,7 @@ git checkout ef153bbb5fa1e279d214abb7029f15f3841bec91
 git checkout 019035bfb629efc95ab513a0a3e9ab3990725183
 ```
 
-### 2021-02-20
+### 2021-02-20 Day 7
 
 - Added function Left1Bit to perform shift right 1 bit, zero fill l.s. bit
 
@@ -249,3 +249,20 @@ x11 - variable address pointer 1
 x12 - variable address pointer 2
 x13 - variable address pointer 2
 ```
+
+```
+git checkout d4207c8eea4d0921b38d41f9b2b87f3e8710ee07
+```
+
+### 2021-02-21 - Day 8
+
+Before going further, I need to add some utilities to configure
+the different variables related to the current setting
+for accuracy. The program uses a number of base 10 digits
+in the fraction part of the number. This is adjustable by
+user input. Functions in the program convert between
+binary 64 bit words and human readable base 10 printed digits.
+The conversion is 19.2659197224948 digit/(64 bit word)
+
+- Added command sf, sigfigs to set and view current accuracy settings
+- Added sigfigs to help
