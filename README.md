@@ -1,5 +1,6 @@
 # WORK IN PROGRESS
-# See HISTORY.md
+
+View progress to date: [HISTORY.md](../blob/master/HISTORY.md)
 
 ## No Pi calculation available at this time
 
@@ -29,5 +30,5 @@ make
 ## Commands available:
 
 ```
-cmdlist D.fill exit help hex prac q quit sf sigfigs test version 
+cmdlist D.fill exit help hex prac q quit sf sigfigs test version
 ```
