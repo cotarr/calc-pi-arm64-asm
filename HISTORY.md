@@ -321,3 +321,21 @@ base-10 to binary.
 - Added function to divide by 10 using 64 bit / 32 bit = 32 bit quotient and 32 bit remainder
 - Added function TestIfNegative looking at top bit of number
 - Added function TestIfZero, 2's compliment if needed, then all word except guard words.
+- Added function SubtractVariable
+
+The binary to decimal conversion is now working. Basically it functions as follows:
+
+```
+1 - Check if zero, output "+0.0"
+2 - Check if negative, print minus sign and perform 2's compliment
+3 - Add rounding addition to L.S. word in guard words
+4 - Check if integer part less than 10, if greater divide by 10 until less.
+5 - In a loop multiply the number by 10.0 to eject digits one at a time.
+```
+
+- Test print 2.0 to 100,000 digits, elapsed about 7.5 seconds
+- Test print 2.0 to 1,000,000 digits, elapsed time about 10 minutes
+
+```
+git checkout (tbd)
+```

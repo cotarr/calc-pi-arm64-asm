@@ -55,52 +55,214 @@ SOFTWARE.
 
 -------------------------------------------------------------- */
 PrintVariable:
-	sub	sp, sp, #80		// Reserve 10 words
+	sub	sp, sp, #128		// Reserve 16 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]
 	str	x2,  [sp, #32]
-	str	x9,  [sp, #40]
+	str	x3,  [sp, #40]
 	str	x10, [sp, #48]
 	str	x11, [sp, #56]
 	str	x12, [sp, #64]
-	str	x13, [sp, #72]
+	str	x15, [sp, #72]
+	str	x16, [sp, #80]
+	str	x17, [sp, #88]		// VAR_MSW_OFST
 
-	mov	x0, #'X'
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]
+
+	//
+	// First check for zero
+	//
+	mov	x1, HAND_ACC		// test ACC to see if zero
+	bl	TestIfZero
+	cbz	x0, 10f			// not zero, skip past zero case
+
+	//
+	// Case of zero, output "+0.0"
+	//
+	mov	x0, #'+'
 	bl	CharOutFmt
+	mov	x0, #'0'
 	bl	CharOutFmt
+	mov	x0, #'.'
 	bl	CharOutFmt
+	mov	x0, #'0'
+	bl	CharOutFmt
+	b.al	done_print
+
+10:	//
+	// CHeck if negative
+	mov	x1, HAND_ACC
+	bl	TestIfNegative
+	cbz	x0, 20f
+
+	mov	x0, #'-'
+	bl	CharOutFmt
+
+	mov	x1, HAND_ACC
+	bl	TwosCompliment		// perform 2's compiment before print
+	b.al	21f
+20:
+	mov	x0, #'+'
+	bl	CharOutFmt
+21:
+	//
+	// Option to round off
+	//
+	mov	x0, GUARDWORDS		// If no guard words, then don't round
+	cbz	x0, 25f
+
+	mov	x1, HAND_OPR		// Clear OPR
+	bl	ClearVariable
+	mov	x1, HAND_OPR
+	ldr	x11, =RegAddTable	// Pointer to vector table
+	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	ldr	x11, [x11]
+	add	x11, x11, x17		// x11 pointer at m.s. word
+	ldr	x12, =No_Word
+	ldr	x12, [x12]		// x12 is count integer words
+	sub	x12, x12, #1		// subtract 1 word
+	sub	x11, x11, x12, lsl WORDSIZEBITS // x11 point at L.S. word (should be guard word)
+
+	// ----- select this to round off -------------
+	movz	x0, #0x1000, lsl #16
+	str	x0, [x11]
+	// --------------------------------------------
+
+	// add the round value ACC = ACC + OPR
+	mov	x1, HAND_ACC
+	mov	x2, HAND_OPR
+	mov	x3, HAND_ACC
+	bl	AddVariable
+
+25:
+	// In this next section, there is a loop that will divide
+	// the input number by 10 until the integer part of the
+	// number is less that 10. A counter is used to count
+	// the loops so that during digit output, the decimal
+	// point character can be issued at the proper place
+	//
+	mov	x15, #0			// decimal point counter
+30:
+	add	x15, x15, #1		// decimal point conter
+	mov	x1, HAND_OPR
+	bl	ClearVariable
+
+	mov	x1, HAND_OPR
+	ldr	x11, =RegAddTable	// Pointer to vector table
+	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	ldr	x11, [x11]		// x11 is address of variable
+	add	x11, x11, x17		// x11 pointer at m.s. word
+	ldr	x12, =IntWSize
+	ldr	x12, [x12]		// x12 is count integer words
+	sub	x11, x11, x12, lsl WORDSIZEBITS // subtract number of integer words
+	add	x11, x11, BYTE_PER_WORD	// x11 point at L.S. integer word
+	mov	x0, #10			// the OPR variable has value of 10.0
+	str	x0, [x11]		// L.S. integer word is 10
+	//
+	// first subtract to see if less than 10.0
+	//
+	mov	x1, HAND_ACC
+	mov	x2, HAND_OPR
+	mov	x3, HAND_OPR
+	bl	SubtractVariable	// subtract 10 from ACC
+	mov	x1, HAND_OPR
+	bl	TestIfNegative		// set x0 to 1 if negative
+	cbnz	x0, 40f			// Yes negative, stop
+	//
+	// Divide by 10 and loop
+	//
+	mov	x1, HAND_ACC
+	bl	DivideByTen		// divide by power of 10
+	b.al	30b			// loop back
+40:
+	//
+	// setup counters and pointers to print digits
+	//
+	ldr	x16, =NoSigDig		// number of digits (in fraction part)
+	ldr	x16, [x16]
+
+	ldr	x12, =IntWSize
+	ldr	x12, [x12]		// x12 is count integer words
+	ldr	x11, =RegAddTable	// Pointer to vector table
+	ldr	x11, [x11]		// x11 is address of variable
+	add	x11, x11, x17		// x11 pointer at m.s. word
+	sub	x11, x11, x12, lsl WORDSIZEBITS // subtract number of integer words
+	add	x11, x11, BYTE_PER_WORD	// x11 point at L.S. integer word
+	//
+	// Digit loop... Get next digit and form ascii
+	//
+50:
+	ldrb	w0, [x11]
+	orr	w0, w0, #'0'		// or 0x030 ascii space character
+	bl	CharOutFmt
+	mov	w0, #0			// erase the printed character before next loop
+	strb	w0, [x11]
+	//
+	// check desimal separator
+	//
+	cbz	x15, 60f		// branch if already output
+	sub	x15, x15, #1
+	cbnz	x15, 60f
+	mov	x0, #'.'
+	bl	CharOutFmt
+60:
+	//
+	// multi by 10 to emit the binary coded decimal value
+	//
+	mov	x1, HAND_ACC
+	bl	MultiplyByTen
+	sub	x16, x16, #1
+	cbnz	x16, 50b		// loop back to next digit
+	//
+	// Options for extended digits
+	//
+	ldr	x16, =NoExtDig
+	ldr	x16, [x16]
+	cbz	x16, done_print		// No etended digits skip to end
+
+	// extended digit delimeter
+	mov	x0, #'('
+	bl	CharOutFmt
+	//
+	// Get next digit and form ascii
+	//
+70:
+	ldrb	w0, [x11]
+	orr	w0, w0, #'0'
+	bl	CharOutFmt
+	mov	w0, #0
+	strb	w0, [x11]
+	// multi by 10
+	mov	x1, HAND_ACC
+	bl	MultiplyByTen
+	sub	x16, x16, #1
+	cbnz	x16, 70b
+	// extended digit delimiter
+	mov	x0, #')'
+	bl	CharOutFmt
+
+done_print:
 	bl	CROut
-
-//	mov	x1, 5
-//	bl	TestIfZero
-//	bl	PrintWordHex
-
-	// TEMPORARY FOR TEST  MULT 10 AND  DIVIDE 10
-/*	mov	x1, HAND_ACC
-	bl	SetToOne
-	bl	DivideByTen
-	bl	DivideByTen
-	bl	DivideByTen
-	bl	DivideByTen
-	bl	MultiplyByTen
-	bl	MultiplyByTen
-	bl	MultiplyByTen
-	bl	MultiplyByTen */
+	bl	CROut
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
 	ldr	x2,  [sp, #32]
-	ldr	x9,  [sp, #40]
+	ldr	x3,  [sp, #40]
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
 	ldr	x12, [sp, #64]
-	ldr	x13, [sp, #72]
-	add	sp, sp, #80
+	ldr	x15, [sp, #72]
+	ldr	x16, [sp, #80]
+	ldr	x17, [sp, #96]
+	add	sp, sp, #128
 	ret
+
 
 
 /* ----------------------------------------------------
@@ -187,11 +349,12 @@ MultiplyByTen:
 	str	x1,  [sp, #24]
 	str	x2,  [sp, #32]
 	str	x3,  [sp, #40]
-	str	x9,  [sp, #48]
-	str	x10, [sp, #56]
-	str	x11, [sp, #64]
-	str	x12, [sp, #72]
-	str	x17, [sp, #80]		// VAR_MSW_OFST
+	str	x4,  [sp, #48]
+	str	x9,  [sp, #56]
+	str	x10, [sp, #64]
+	str	x11, [sp, #72]
+	str	x12, [sp, #80]
+	str	x17, [sp, #88]		// VAR_MSW_OFST
 
 	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
@@ -237,11 +400,12 @@ MultiplyByTen:
 	ldr	x1,  [sp, #24]
 	ldr	x2,  [sp, #32]
 	ldr	x3,  [sp, #40]
-	ldr	x9,  [sp, #48]
-	ldr	x10, [sp, #56]
-	ldr	x11, [sp, #64]
-	ldr	x12, [sp, #72]
-	ldr	x17, [sp, #80]
+	ldr	x4,  [sp, #48]
+	ldr	x9,  [sp, #56]
+	ldr	x10, [sp, #64]
+	ldr	x11, [sp, #72]
+	ldr	x12, [sp, #80]
+	ldr	x17, [sp, #88]
 	add	sp, sp, #96
 	ret
 

@@ -147,9 +147,6 @@ SetExtendedDigits:
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]
-	str	x9,  [sp, #32]		// requested digits
-
-	mov	x9, x0			// requested digits save in 9
 
 	cmp	x0, #1000		// arbitrary check for 1000 digits
 	b.ls	20f
@@ -162,7 +159,6 @@ SetExtendedDigits:
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
-	ldr	x9,  [sp, #32]
 	add	sp, sp, #64
 	ret
 

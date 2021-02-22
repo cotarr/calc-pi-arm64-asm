@@ -18,6 +18,7 @@
 //--------------------------------------------------------------------
 .set	INT_WSIZE, 	0x2
 .set	FCT_WSIZE, 	0x40
+// .set	FCT_WSIZE, 	0x40000
 .set	VAR_WSIZE,	(INT_WSIZE + FCT_WSIZE)
 //--------------------------------------------------------------------
 .set	VAR_BSIZE,	(VAR_WSIZE * BYTE_PER_WORD)	// Maximum size of variable in bytes

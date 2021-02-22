@@ -602,10 +602,16 @@ Command_test:
 	//
 
 	// ---- Disabled ------------
-	ldr	x0, =NoTestString
-	bl	StrOut
-	b	ParseCmd
+	// ldr	x0, =NoTestString
+	// bl	StrOut
+	// b	ParseCmd
 	// --------------------------
+
+	mov	x1, HAND_XREG
+	bl	SetToTwo
+	b	ParseCmd
+
+	// ----------------------
 
 	mov	x1, #3
 	mov	x2, #4
