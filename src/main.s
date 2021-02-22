@@ -6,7 +6,7 @@
 	David Bolenbaugh
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-18
+	Last Edit: 2021-02-21
 --------------------------------------------------------------
 MIT License
 
@@ -103,7 +103,7 @@ ErrorMsg1:
 	.asciz	"\nError Code: "
 ErrorMsg2:
 	.asciz "\nProgram halted due to error.\n\n"
-
+	.align 4
 
 
 .end

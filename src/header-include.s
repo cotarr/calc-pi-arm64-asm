@@ -1,9 +1,9 @@
 
 // .nolist
 
-.set	sys_read,	63
-.equ	sys_write,	64
-.equ  sys_exit, 93
+.set	sys_read, 63
+.equ	sys_write, 64
+.equ	sys_exit, 93
 
 .equ	stdout, 1
 .equ	stdin,  1
@@ -11,8 +11,9 @@
 .set	BIT_PER_WORD,	0x040   // 020H for 32 Bit, 040H for 64 Bit
 .set	BYTE_PER_WORD,	0x08    // 004H for 32 Bit, 008H for 64 Bit
 .set	WORDSIZEBITS,	0x03	// how many bit to shift for multiply by 8 (word size)
+
 //
-// Variable (integer part) and (fractino part)
+// Variable (integer part) and (fraction part)
 //
 //--------------------------------------------------------------------
 .set	INT_WSIZE, 	0x2

@@ -5,7 +5,7 @@
 	subroutines.
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-19
+	Last Edit: 2021-02-21
 
 ----------------------------------------------------------------
 MIT License
@@ -226,6 +226,7 @@ Clear_String:
 	.byte	27
 	.ascii	"[H"			// Home Cursor
 	.byte	0			// End of string
+	.align 4
 
 /* ------------------------------------------------------------ */
 	.data

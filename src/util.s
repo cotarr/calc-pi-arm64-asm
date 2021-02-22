@@ -196,7 +196,7 @@ PrintAccuracy:
 	add	sp, sp, #32
 	ret
 10:	.asciz	"Accuracy: "
-20:	.asciz	" Digits\n"
+20:	.asciz	" Digits (fraction part)\n"
 
 /* ----------------------------------------------------
 
@@ -333,7 +333,7 @@ sftext5:
 
 sftext11:
 	.ascii	" \tDigits\n\n"
-	.ascii	"Binary Accuracy:\n"
+	.ascii	"Binary (64 bit word) Accuracy:\n"
 	.asciz	        "  Integer Part:        "
 sftext12:
 	.asciz	" \tWords\n  Fraction Part:       "

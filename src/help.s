@@ -4,7 +4,7 @@
  This module contains user help
 
 	Created:   2021-02-19
-	Last Edit: 2021-02-19
+	Last Edit: 2021-02-21
 
 ----------------------------------------------------------------
 MIT License
@@ -306,7 +306,7 @@ Command_Error1:
 Command_Error2:
 	.ascii	"HelpCmd: End of help table not QWord aligned, probably table error"
 	.byte 	0
-
+	.align 4
 /* ----------------------------------------------
 
  Print Command List

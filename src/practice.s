@@ -67,7 +67,7 @@ practice:
 	// b	integer_addition
 	// b	conditional_branching
 	// b	EndianCheck
-	// b	print_registers_test
+	b	print_registers_test
 	// b	print_status_flags
 	// b	print_reg_base10_unsigned
 	// b	load_64_bit_immediate
@@ -202,6 +202,7 @@ sub_carry_loop:
 
 130:	.asciz	" cbnz x4 not zero"
 140:	.asciz	" cbnz x4 equal zero"
+	.align 4
 
 // -----------------------------------------------------------------------------------
 //

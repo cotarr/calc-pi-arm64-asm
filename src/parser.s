@@ -136,7 +136,7 @@ OpCodeErrString:	.asciz	"     Input Error: Illegal Op Code.  (Type: cmdlist)\n\n
 // Fatal error messages
 AlignErrorMsg:		.asciz	"Error: Command table not aligned in 128 bit blocks"
 Byte8ErrorMsg:		.asciz	"Error: Command table not zero byte8"
-
+			.align 4
 //----------------------------------------
 	.text
 	.align 4
@@ -448,7 +448,7 @@ Command_sigfigs:
 	b	ParseCmd
 60:
 	.asciz	"\nCommand Parser: sigfigs command invalid argument\n\n"
-
+	.align 4
 
 //
 //
@@ -462,7 +462,12 @@ Command_test:
 	//  I N S E R T   T E S T   H  E R E
 	//-------------------------------------
 	//
-	// ---------------------
+
+	// ---- Disabled ------------
+	ldr	x0, =NoTestString
+	bl	StrOut
+	b	ParseCmd
+	// --------------------------
 
 	mov	x1, #3
 	mov	x2, #4
@@ -470,7 +475,7 @@ Command_test:
 
 //	bl	ClearVariable
 //	bl	SetToOne
-	bl	SetToTwo
+// 	bl	SetToTwo
 //	bl	Right1Bit
 //	bl	Left1Bit
 //	bl	CopyVariable
@@ -500,6 +505,8 @@ Command_test:
 
 TestMessageString:
 	.asciz	"\nTest Command execution:\n\n"
+NoTestString:
+	.asciz	"No test is select in parser.s\n\n"
 	.align 4
 
 Command_version:

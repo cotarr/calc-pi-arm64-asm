@@ -127,14 +127,7 @@ RegNameTable:
 	.byte	0,0
 	.ascii	"TREG  "
 	.byte	0,0
-		ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
-	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, x17		// x11 pointer at m.s. word
-	ldr	x0, =IntWSize		// Size of integer part in words
-	ldr	x0, [x0]		// size of integer part
-	sub	x11, x11, x0, lsr WORDSIZEBITS
-	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part.ascii	"REG0  "
+	.ascii	"REG0  "
 	.byte	0,0
 	.ascii	"REG1  "
 	.byte	0,0
@@ -152,7 +145,7 @@ RegNameTable:
 	.ascii	"REG7  "
 	.byte	0,0
 */
-
+	.align 4
 // ---------------------------------------------------------
 // ARM64 does not allow 64 bit immediate values.
 // As alternative, I have stored some useful values here.
