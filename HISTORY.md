@@ -317,3 +317,5 @@ base-10 to binary.
 - Update help file for print and "." commands ("." = "print")
 - Tested this far and git commit leaving PrintVariable and InputVariable empty
 - Added commands clrx and clrstk to set X register and X,Y,Z,T registers (variables) to zero
+- Added function to multiply by 10 using 32 bit x 32 bit = 64 bit process arithmetic
+- Added function to divide by 10 using 64 bit / 32 bit = 32 bit quotient and 32 bit remainder

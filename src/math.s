@@ -56,6 +56,7 @@ SOFTWARE.
 	.global InitNoWord
 	.global	MinimumWord
 	.global WordFFFF, Word8000, Word0000
+	.global Word0123, Word1122
 // -----------------------------------------------------
 	.data   // Section containing initialized data
 // -----------------------------------------------------
@@ -171,6 +172,8 @@ MinimumWord:	.quad	MINIMUM_WORD
 WordFFFF:	.quad	0x0FFFFFFFFFFFFFFFF
 Word8000:	.quad	0x08000000000000000
 Word0000:	.quad	0x00000000000000000
+Word0123:	.quad	0x00123456789abcdef
+Word1122:	.quad	0x01122334455667788
 //                         0123456789abcdef <-- Ruler
 
 // -----------------------------------------------------

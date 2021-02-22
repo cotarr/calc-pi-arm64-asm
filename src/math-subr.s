@@ -129,9 +129,6 @@ SetToOne:
 	sub	x11, x11, x0, lsl WORDSIZEBITS
 	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part
 
-	mov	x0, x11
-	bl	PrintWordHex
-
 	mov	x0, #1
 	str	x0, [x11]		// Place 1 in top word
 
@@ -174,9 +171,6 @@ SetToTwo:
 	ldr	x0, [x0]		// size of integer part
 	sub	x11, x11, x0, lsl WORDSIZEBITS
 	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part
-
-	mov	x0, x11
-	bl	PrintWordHex
 
 	mov	x0, #2
 	str	x0, [x11]		// Place 2 in top word
