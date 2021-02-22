@@ -59,30 +59,47 @@ Help_Table:
 	.ascii	"."
 	.byte	0,0,0,0,0,0,0
 	.quad	Help_print
+
+	.ascii	"clrstk"
+	.byte	0,0
+	.quad	Help_clrstk
+
+	.ascii	"clrx"
+	.byte	0,0,0,0
+	.quad	Help_clrx
+
 	.ascii	"cmdlist"
 	.byte	0
 	.quad	Help_cmdlist
+
 	.ascii	"D.fill"
 	.byte	 0, 0
 	.quad	Help_D.fill
+
 	.ascii	"exit"
 	.byte	0, 0, 0, 0
 	.quad	Help_exit
+
 	.ascii	"hex"
 	.byte	0, 0, 0, 0, 0
 	.quad	Help_hex
+
 	.ascii	"print"
 	.byte	0,0,0
 	.quad	Help_print
+
 	.ascii	"q"
 	.byte	0, 0, 0, 0, 0, 0, 0
 	.quad	Help_q
+
 	.ascii	"quit"
 	.byte	0, 0, 0, 0
 	.quad	Help_q
+
 	.ascii	"sf"
 	.byte	0,0,0,0,0,0
 	.quad	Help_sigfigs
+
 	.ascii	"sigfigs"
 	.byte	0
 	.quad	Help_sigfigs
@@ -90,6 +107,18 @@ Help_Table:
 Help_Table_End:
 	.byte	0, 0, 0, 0, 0, 0, 0, 0
 	.quad	0			// End of list
+
+
+Help_clrstk:
+	.ascii	"Usage: clrstk\n\n"
+	.ascii	"Description: Clear floating point stack to zero.\n"
+	.ascii	"(XReg, YReg, Zreg, Treg)\n"
+	.byte	0
+
+Help_clrx:
+	.ascii	"Usage: clrx\n\n"
+	.ascii	"Description: Clear X, floating point XReg\n"
+	.byte 	0
 
 Help_cmdlist:
 	.ascii	"Usage: cmdlist <optional first letter>\n\n"

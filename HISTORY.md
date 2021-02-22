@@ -316,3 +316,4 @@ base-10 to binary.
 - Added command . and print, calling empty PrintVariable
 - Update help file for print and "." commands ("." = "print")
 - Tested this far and git commit leaving PrintVariable and InputVariable empty
+- Added commands clrx and clrstk to set X register and X,Y,Z,T registers (variables) to zero

@@ -68,6 +68,14 @@ Command_Table:
 	.byte	0,0,0,0,0,0,0
 	.quad	Command_print
 
+	.ascii	"clrstk"
+	.byte	0,0
+	.quad	Command_clrstk
+
+	.ascii	"clrx"
+	.byte	0,0,0,0
+	.quad	Command_clrx
+
 	.ascii	"cmdlist"
 	.byte	0
 	.quad	Command_cmdlist
@@ -111,7 +119,6 @@ Command_Table:
 	.ascii	"sigfigs"
 	.byte	0
 	.quad	Command_sigfigs
-
 
 	.ascii	"test"
 	.byte	0,0,0,0
@@ -414,6 +421,29 @@ ParseCmdEnd:
     Command Handlers
 -------------------------------------------------------------*/
 	.align 4
+
+//
+//
+//
+Command_clrx:
+	mov	x1, HAND_XREG
+	bl	ClearVariable
+	b	ParseCmd
+
+//
+//
+//
+Command_clrstk:
+	mov	x1, HAND_XREG
+	bl	ClearVariable
+	mov	x1, HAND_YREG
+	bl	ClearVariable
+	mov	x1, HAND_ZREG
+	bl	ClearVariable
+	mov	x1, HAND_TREG
+	bl	ClearVariable
+	b	ParseCmd
+
 //
 //
 //
