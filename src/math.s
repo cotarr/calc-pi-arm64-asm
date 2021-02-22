@@ -35,6 +35,7 @@ SOFTWARE.
    	.include "header-include.s"
 	.include "math-subr.s"
 	.include "math-rotate.s"
+	.include "math-output.s"
 	.include "math-debug.s"
 
 /* ------------------------------------------------------------ */
@@ -43,8 +44,10 @@ SOFTWARE.
 	.global	Set_No_Word
 
 	// data variables
-	.global	No_Word, No_Byte,
+	.global	No_Word, No_Byte, LSWOfst
+	.global D_Flt_Word, D_Flt_Byte, D_Flt_LSWO
 	.global NoSigDig, NoExtDig
+
 
 	// Constants (too big for immediate values)
 	.global IntWSize, FctWsize, VarWSize

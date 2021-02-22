@@ -304,3 +304,15 @@ the integer part and fractino part.
 ```
 git checkout 6775622f14c2687e3d7c0d35df9dc4cbe5aea585
 ```
+
+### 2021-02-22 - Day 9 (20 to go)
+
+The next task is creation of conversion routines from binary to base-10 and
+base-10 to binary.
+
+- math-output.s - New file to contain number conversion (input conversion and print conversion)
+- Added empty functions for PrintVariable and InputVariable
+- Setup number detection in parser.s to differentiate "+", "-" and "." as number or command
+- Added command . and print, calling empty PrintVariable
+- Update help file for print and "." commands ("." = "print")
+- Tested this far and git commit leaving PrintVariable and InputVariable empty

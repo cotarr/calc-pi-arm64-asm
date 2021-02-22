@@ -56,6 +56,9 @@ SOFTWARE.
 
 	.align 4
 Help_Table:
+	.ascii	"."
+	.byte	0,0,0,0,0,0,0
+	.quad	Help_print
 	.ascii	"cmdlist"
 	.byte	0
 	.quad	Help_cmdlist
@@ -68,6 +71,9 @@ Help_Table:
 	.ascii	"hex"
 	.byte	0, 0, 0, 0, 0
 	.quad	Help_hex
+	.ascii	"print"
+	.byte	0,0,0
+	.quad	Help_print
 	.ascii	"q"
 	.byte	0, 0, 0, 0, 0, 0, 0
 	.quad	Help_q
@@ -89,7 +95,7 @@ Help_cmdlist:
 	.ascii	"Usage: cmdlist <optional first letter>\n\n"
 	.ascii	"Description: Prints a list of availble commands. \n"
 	.ascii	"To shorten the list provide the  first letter as a\n"
-	.ascii	"command argument.\n\n"
+	.ascii	"command argument.\n"
 	.byte	0
 
 Help_D.fill:
@@ -115,7 +121,17 @@ Help_hex:
 	.ascii	"without an argument, all the registers are printed showing\n"
 	.ascii	"showing the first 3 words, the last word, and exponent in\n"
 	.ascii	"64-bit words in hexidecimal. If a variable hands is \n"
-	.ascii	"is provided, the entire variable is printed.\n\n"
+	.ascii	"is provided, the entire variable is printed.\n"
+	.byte	0
+
+Help_print:
+	.ascii	"Usage: .   (print X-Reg, equivalent command is 'print')\n\n"
+//	.ascii	"Usage: . f (formated - 10 and 1000 digit block output.\n"
+//	.ascii	"Usage: . q (quiet - terminal output suppressed, 10 1000 format\n"
+//	.ascii	"Usage: . u (unformatted - no line feed or page formatting\n"
+	.ascii	"Description: The . (period character) or 'print' will convert\n"
+	.ascii	"the contents of X-reg from binary to decimail. The output\n"
+	.ascii	"will be printed to stdout.\n"
 	.byte	0
 
 Help_q:
@@ -169,7 +185,7 @@ HelpNotFound:
 WelcomeMsg:
 	.ascii	"SINGLE THREAD FLOATING POINT MULTI-PRECISION CALCULATOR\n\n"
 	.ascii	"MIT License\n\n"
-	.ascii	"Copyright 2014-2020 David Bolenbaugh\n\n",
+	.ascii	"Copyright 2021 David Bolenbaugh\n\n",
 	.ascii	"Permission is hereby granted, free of charge, to any person obtaining a copy\n"
 	.ascii	"of this software and associated documentation files (the \"Software\"), to deal\n"
 	.ascii	"in the Software without restriction, including without limitation the rights\n"

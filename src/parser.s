@@ -64,6 +64,10 @@ PrintCommandList
 //
 //------------------------
 Command_Table:
+	.ascii	"."
+	.byte	0,0,0,0,0,0,0
+	.quad	Command_print
+
 	.ascii	"cmdlist"
 	.byte	0
 	.quad	Command_cmdlist
@@ -87,6 +91,10 @@ Command_Table:
 	.ascii	"prac"
 	.byte	0,0,0,0
 	.quad	Command_prac
+
+	.ascii	"print"
+	.byte	0,0,0
+	.quad	Command_print
 
 	.ascii	"q"
 	.byte	0,0,0,0,0,0,0
@@ -136,6 +144,17 @@ OpCodeErrString:	.asciz	"     Input Error: Illegal Op Code.  (Type: cmdlist)\n\n
 // Fatal error messages
 AlignErrorMsg:		.asciz	"Error: Command table not aligned in 128 bit blocks"
 Byte8ErrorMsg:		.asciz	"Error: Command table not zero byte8"
+ACC_Error:		.asciz	"\n     Warning: [No_Word] not equal [D_Flt_Word]\n"
+
+message_input_error:
+			// red text
+			.byte	27
+			.ascii	"[31m"
+			.ascii	"\n  Error converting string to floating point number, stack not rotated.\n\n"
+			.byte	27
+			.ascii	"[0m"
+			.byte 0
+
 			.align 4
 //----------------------------------------
 	.text
@@ -227,6 +246,18 @@ ParseCmd:
 	mov	x1, #2344		// 12 bit error code
 	b	FatalError
 30:
+
+	ldr	x0, =No_Word
+	ldr	x1, =D_Flt_Word
+	ldr	x0, [x0]
+	ldr	x1, [x1]
+	cmp	x0, x1
+	b.eq	35f
+	ldr	x0, =ACC_Error		// Error message pointer
+	mov	x1, #2345		// 12 bit error code
+	b	FatalError
+35:
+
 //
 // Show prompt string
 //
@@ -236,6 +267,76 @@ ParseCmd:
 // Get input line from stdin
 //
 	bl	KeyIn			// Return pointer in x8
+//
+// check for number input
+//
+//
+// Assume number start with '+' or '-' or '.' or digit '0' to '9'
+//
+// Case of '+' or '-' or '.' followed by 0x00 (string length = 1)
+// In this case, it must be addition, subtraction or print command
+//
+// check 16 bit word  '+' + 00
+//
+	ldrh	w0, [x8]		// get 16 bit (character + next character)
+	cmp	w0, #0x002b		// Compare '+' + 00
+	b.eq	not_number
+	cmp	w0, #0x002D		// Compare '-' + 00
+	b.eq	not_number
+	cmp	w0, #0x002E		// Compare '.' + 00
+	b.eq	not_number
+	// cmp	w0, #0x0020		// Compare ' ' + 00
+	// b.eq	not_number
+//
+// Now check numeric characters
+//
+	ldrb	w0, [x8]		// get 8 bit character
+	cmp	w0, #'+'
+	b.eq	is_numeric
+	cmp	w0, #'+'
+	b.eq	is_numeric
+	cmp	w0, #'-'
+	b.eq	is_numeric
+	cmp	w0, #'.'
+	b.eq	is_numeric
+	// cmp	w0, #' '
+	// b.eq	is_numeric
+
+	cmp	w0, #'0'
+	b.lt	not_number
+	cmp	w0, #'9'
+	b.gt	not_number
+//
+// Must be a number, convert it
+//
+is_numeric:
+	mov	x1, #0
+	bl	InputVariable
+	cmp	x1, #0			// Check for input error
+	b.eq	100f
+	ldr	x0, =message_input_error
+	bl	StrOut
+	b	ParseCmd
+100:
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_TREG
+	bl	CopyVariable
+
+	mov	x1, HAND_YREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	mov	x1, HAND_ACC
+	mov	x2, HAND_XREG
+	bl	CopyVariable
+
+	b	ParseCmd
+
+not_number:
 	mov	x20,  x8		// x20 pointer to input buffer
 	ldr	x19,  =Command_Table	// x19 pointer to command table
 //
@@ -399,6 +500,13 @@ Command_hex:
 Command_prac:
 	bl	practice
 	bl	CROut
+	b	ParseCmd
+
+Command_print:
+	mov	x1, HAND_XREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+	bl	PrintVariable
 	b	ParseCmd
 
 Command_sigfigs:

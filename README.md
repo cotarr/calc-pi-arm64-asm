@@ -30,5 +30,6 @@ make
 ## Commands available:
 
 ```
-cmdlist D.fill exit help hex prac q quit sf sigfigs test version
+. cmdlist D.fill exit help hex prac
+print q quit sf sigfigs test version
 ```

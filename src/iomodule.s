@@ -33,6 +33,7 @@ SOFTWARE.
 	KeyIn
 	StrOut
 	CharOut
+	CharOutFmt
 	CROut
 	ClrScr
 ------------------------------------------------------------- */
@@ -59,6 +60,7 @@ KeyBuf:	// Keyboard Input Buffer
 	.global KeyIn
 	.global	StrOut
 	.global	CharOut
+	.global CharOutFmt
 	.global	CROut
 	.global	ClrScr
 
@@ -141,9 +143,9 @@ StrOut:
 	ret
 
 /* *****************************************************
-  CharOut - Output character in R0 to stdout
+  CharOut - Output character in x0 to stdout
 
-  Input: low byte of X0 contains ASCII character to print
+  Input: low byte of x0 contains ASCII character to print
 
   Output: none
 
@@ -170,6 +172,33 @@ CharOut:
 	ldr	x1,  [sp, #24]
 	ldr	x2,  [sp, #32]
 	ldr	x8,  [sp, #40]
+	add	sp, sp, #64
+	ret
+
+/* *****************************************************
+  CharOut - Output character in x0 to stdout
+
+  Input: low byte of x0 contains ASCII character to print
+
+  Output: none
+
+****************************************************** */
+CharOutFmt:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x1, [sp, #24]
+	str	x2, [sp, #32]
+
+	// temporary output, formatting TBD
+	bl	CharOut
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
 	add	sp, sp, #64
 	ret
 
