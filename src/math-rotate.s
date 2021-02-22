@@ -134,7 +134,7 @@ Left1Bit:
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
-	mov	x9, #0			// offset applied to l.s. word
+	mov	x9, #0			// offset applied to address
 
 	// x10 counter to number words
 	ldr	x10, =No_Word		// For word counter

@@ -73,8 +73,12 @@ PrintVariable:
 	bl	CharOutFmt
 	bl	CROut
 
+//	mov	x1, 5
+//	bl	TestIfZero
+//	bl	PrintWordHex
+
 	// TEMPORARY FOR TEST  MULT 10 AND  DIVIDE 10
-	mov	x1, HAND_ACC
+/*	mov	x1, HAND_ACC
 	bl	SetToOne
 	bl	DivideByTen
 	bl	DivideByTen
@@ -83,7 +87,7 @@ PrintVariable:
 	bl	MultiplyByTen
 	bl	MultiplyByTen
 	bl	MultiplyByTen
-	bl	MultiplyByTen
+	bl	MultiplyByTen */
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]

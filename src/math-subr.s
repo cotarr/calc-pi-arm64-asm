@@ -35,6 +35,8 @@ SOFTWARE.
 	ExchangeVariable
 	TwosCompliment
 	AddMantissa
+	TestIfNegative
+	TestIfZero
 ------------------------------------------------------------- */
 
 	.global	ClearVariable
@@ -44,6 +46,8 @@ SOFTWARE.
 	.global	ExchangeVariable
 	.global	TwosCompliment
 	.global	AddMantissa
+	.global TestIfNegative
+	.global TestIfZero
 
 /*--------------------------------------------------------------
   Clear F.P. Variable to all zero's,
@@ -68,7 +72,7 @@ ClearVariable:
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
-	mov	x9, #0			// offset applied to l.s. word
+	mov	x9, #0			// offset applied address
 
 	// set x10 count number of words
 	ldr	x10, =No_Word		// Word counter
@@ -210,7 +214,7 @@ CopyVariable:
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
-	mov	x9, #0			// offset applied to l.s. word
+	mov	x9, #0			// offset applied address
 
 	// x10 count number of words
 	ldr	x10, =No_Word		// For word counter
@@ -275,7 +279,7 @@ ExchangeVariable:
 
 
 	// setup offset index to address within variable
-	mov	x9, #0			// offset applied to l.s. word
+	mov	x9, #0			// offset applied address
 
 	// x10 counter to number words
 	ldr	x10, =No_Word		// For word counter
@@ -409,7 +413,7 @@ AddMantissa:
 	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 	// setup offset index to address within variable
-	mov	x9, #0			// offset applied to l.s. word
+	mov	x9, #0			// offset applied address
 
 	// xet x10 to number of words - 1
 	ldr	x10, =No_Word		// Pointer to of words in mantissa
@@ -467,4 +471,154 @@ AddMantissa:
 	ldr	x13, [sp, #80]
 	ldr	x17, [sp, #88]
 	add	sp, sp, #96
+	ret
+
+/* --------------------------------------------------------------
+  Test function to see if negative (top bit = 1)
+
+  Input:    x1 = Handle Number of source 1 variable
+
+  Output:   x0 = 0 if positive, 1 if negative
+
+---------------------------------------------------------------- */
+TestIfNegative:
+	sub	sp, sp, #48		// Reserve 6 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x1,  [sp, #16]		// input argument / scratch
+	str	x11, [sp, #24]		// source 1 address
+	str	x17, [sp, #32]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
+
+	//
+	// First check if negative, if so perform 2's compliment
+	//
+	// set x11 address of variable m.s. word
+	ldr	x11, =RegAddTable	// Pointer to vector table
+	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	ldr	x11, [x11]		// x11 pointer to variable address
+	add	x11, x11, x17		// x11 pointer at m.s. word
+
+	ldr	x1, =Word8000
+	ldr	x1, [x1]
+	ldr	x0, [x11]		// get M.S. word
+	tst	x0, x1			// text with AND 0x8000000000000
+
+	// Set return values
+	mov	x0, #0			// Default 0 for positive
+	b.eq	10f			// is it positive, skip?
+	mov	x0, #1			// No, set 1 for negative
+10:
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x1,  [sp, #16]
+	ldr	x11, [sp, #24]
+	ldr	x17, [sp, #32]
+	add	sp, sp, #48
+	ret
+
+/* --------------------------------------------------------------
+  Test function to see if zero
+
+  Input:    x1 = Handle Number of source 1 variable
+
+  Output:   x0  1 if zero, 0 in non-zero
+
+---------------------------------------------------------------- */
+TestIfZero:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x1,  [sp, #16]		// input argument / scratch
+	str	x9,  [sp, #24]		// word index
+	str	x10, [sp, #32]		// word counter
+	str	x11, [sp, #40]		// source 1 address
+	str	x17, [sp, #48]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
+
+	// setup offset index to address within variable
+	mov	x9, #0			// offset applied to address
+
+	// set x10 count number of words
+	ldr	x10, =No_Word		// Word counter
+	ldr	x10, [x10]		// Words in mantissa
+	sub	x10, x10, #1		// Count - 1
+
+	// set x11 address of variable m.s. word
+	ldr	x11, =RegAddTable	// Pointer to vector table
+	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	ldr	x11, [x11]		// x11 pointer to variable address
+	add	x11, x11, x17	// x11 pointer at m.s. word
+
+	bl	TestIfNegative		// test if negative using handle in x1
+	cbz	x0, 50f			// Positive number from previous test
+// ------------------
+// Case of negative
+// ------------------
+	sub	x11, x11, x10, lsl WORDSIZEBITS // X11 Pointer to l.s. word
+
+	mov	x1, #1			// sign flag, default 1 for zero
+
+	mov	x0, #0
+	subs	x0, x0, x0		// set carry C=1  (NOT carry)
+
+	mov	x10, GUARDWORDS		// first loop guard words
+	cbz	x10, 15f		// skip if no guardwords
+10:
+	// loop ignoring guard words
+	ldr	x0, [x11, x9]		// x0 is first word
+	sbcs	x0, xzr, x0		// subtract register and NOT carry from zero (flags set)
+	add	x9, x9, BYTE_PER_WORD	// increment word pointer
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 10b		// Done Guard words?
+15:
+	// set x10 count number of other (non-guard) words
+	ldr	x10, =No_Word		// Word counter
+	ldr	x10, [x10]		// Words in mantissa
+	sub	x10, x10, GUARDWORDS	// Subtract guard words, already checked
+20:
+	ldr	x0, [x11, x9]		// x0 is first word
+	sbcs	x0, xzr, x0		// subtract register and NOT carry from zero (flags set)
+	cbz	x0, 15f			// test if word is zero
+	mov	x1, #0			// clear zero flag if non zero
+15:
+	add	x9, x9, BYTE_PER_WORD	// increment word pointer
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 20b		// Done?
+	b.al	100f			// yes done exit
+//
+// Case of Positive
+//
+50:
+	add	x10, x10, #1		// x10 word count  ( (count-1) + 1)
+	sub	x10, x10, GUARDWORDS	// less guard words
+
+	mov	x1, #1			// default flag 1 = zero
+60:
+	ldr	x0, [x11, x9]		// get word
+	cbz	x0, 70f
+	mov	x1, #0			// set flag for non-zero found
+70:
+	sub	x9, x9, BYTE_PER_WORD
+	sub	x10, x10, #1		// Decrement counter
+	cbnz	x10, 60b		// Done?
+//
+// Done
+//
+100:
+	mov	x0, x1			// return x0 result 0=positive 1=negative
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x1,  [sp, #16]
+	ldr	x9,  [sp, #24]
+	ldr	x10, [sp, #32]
+	ldr	x11, [sp, #40]
+	ldr	x17, [sp, #48]
+	add	sp, sp, #64
 	ret
