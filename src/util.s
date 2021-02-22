@@ -224,31 +224,31 @@ PrintAccVerbose:
 //  Decimal Section
 //
 
-// Digits that print
+// Integer digits
 	ldr	x0, =sftext1
 	bl	StrOut
-	ldr	x1, =NoSigDig
-	ldr	x0, [x1]
+	ldr	x0, =IntWSize
+	ldr	x0, [x0]
+	bl	Words_2_Digits
+	sub	x0, x0, #1
 	bl	PrintWordB10
-// Extended digits
+// Fraction digits
 	ldr	x0, =sftext2
 	bl	StrOut
-	ldr	x1, =NoExtDig
-	ldr	x0, [x1]
+	ldr	x0, =NoSigDig
+	ldr	x0, [x0]
 	bl	PrintWordB10
-// Useable digits
+// Extended digits
 	ldr	x0, =sftext3
 	bl	StrOut
-	ldr	x1, =No_Word
-	ldr	x0, [x1]
-	sub	x0, x0, GUARDWORDS
-	bl	Words_2_Digits
+	ldr	x0, =NoExtDig
+	ldr	x0, [x0]
 	bl	PrintWordB10
 // Total digits
 	ldr	x0, =sftext4
 	bl	StrOut
-	ldr	x1, =No_Word
-	ldr	x0, [x1]
+	ldr	x0, =No_Word
+	ldr	x0, [x0]
 	bl	Words_2_Digits
 	bl	PrintWordB10
 // Available digits
@@ -262,90 +262,46 @@ PrintAccVerbose:
 //
 //    Binary Section
 //
-// Fraction Part Words
-	ldr	x0, =sftext10
-	bl	StrOut
-	ldr	x1, =No_Word
-	ldr	x0, [x1]
-	sub	x0, x0, GUARDWORDS
-	mov	x2, x0			// save for page formatting
-	bl	PrintWordB10
-	ldr	x0, =sftext20
-	bl	StrOut
-	// 1 millin 1000000 = 0x000F4240
-	movz	x0, #0x000f, lsl 16
-	movk	x0, #0x4240
-	cmp	x2, x0			// more than 1 million 7 digits
-	b.hs	10f
-	mov	x0, #9			// tab character
-	bl	CharOut
-10:
-	ldr	x1, =No_Byte
-	ldr	x0, [x1]
-	sub	x0, x0, GUARDBYTES
-	bl	PrintWordB10
-
-// Guard Words
+// Integer Part Words
 	ldr	x0, =sftext11
-	bl	StrOut
-	mov	x0, GUARDWORDS
-	mov	x2, x0
-	bl	PrintWordB10
-	ldr	x0, =sftext20
-	bl	StrOut
-	// 1 millin 1000000 = 0x000F4240
-	movz	x0, #0x000f, lsl 16
-	movk	x0, #0x4240
-	cmp	x2, x0			// more than 1 million 7 digits
-	b.hs	20f
-	mov	x0, #9			// tab character
-	bl	CharOut
-20:
-	mov	x0, GUARDBYTES
-	bl	PrintWordB10
-
-// Integer size Words
-	ldr	x0, =sftext12
 	bl	StrOut
 	ldr	x0, =IntWSize
 	ldr	x0, [x0]
+	mov	x1, x0			// save for next
 	bl	PrintWordB10
-	ldr	x0, =sftext20
+
+// Fraction Part Words
+	ldr	x0, =sftext12
 	bl	StrOut
+	ldr	x0, =No_Word
+	ldr	x0, [x0]
+	sub	x0, x0, GUARDWORDS
+	sub	x0, x0, x1
+	bl	PrintWordB10
 
-	mov	x0, #9			// tab character
-	bl	CharOut
+// Guard Words
+	ldr	x0, =sftext13
+	bl	StrOut
+	mov	x0, GUARDWORDS
+	bl	PrintWordB10
 
-	ldr	x0, =IntBSize
+// Combined Words
+	ldr	x0, =sftext14
+	bl	StrOut
+	ldr	x0, =[No_Word]
 	ldr	x0, [x0]
 	bl	PrintWordB10
 
 // Available size
 
-	ldr	x0, =sftext13
+	ldr	x0, =sftext15
 	bl	StrOut
 	ldr	x0, =VarWSize
 	ldr	x0, [x0]
-	mov	x2, x0
 	bl	PrintWordB10
+
 	ldr	x0, =sftext20
 	bl	StrOut
-	// 1 millin 1000000 = 0x000F4240
-	movz	x0, #0x000f, lsl 16
-	movk	x0, #0x4240
-	cmp	x2, x0			// more than 1 million 7 digits
-	b.hs	20f
-	mov	x0, #9			// tab character
-	bl	CharOut
-20:
-	ldr	x0, =VarBSize
-	ldr	x0, [x0]
-	bl	PrintWordB10
-
-	ldr	x0, =sftext14
-	bl	StrOut
-
-	bl	CROut
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
@@ -362,37 +318,33 @@ PrintAccVerbose:
 
 	.align 4
 sftext1:
+	// .ascii	"\n1234567812345678123456781234567812345678"
 	.ascii	"\nDecimal (base 10) Accuracy:\n"
-	.asciz	"  Printed Digits:    "
-sftext2:
-	.ascii					" \t(Configurable)\n"
-	.asciz  "  Extended Digits:   "
-sftext3:
- 	.ascii 					" \t(Shows extra digits)\n"
-	.asciz	"  Useable Digits:    "
-sftext4:
-	.ascii					" \t(Theoretical)\n"
-	.asciz	"  Total Calc Digits: "
-sftext5:
-	.ascii					" \t(With Guard Words)\n"
-	.asciz	"  Available Digits:  "
+	.asciz	"  Integer Part:        "
 
-sftext10:
-	.ascii	"\n\nBinary Accuracy:\n"
-	.asciz	"  Fraction Part:  "
+sftext2:
+	.asciz	" \tDigits\n  Fraction Part:       "
+sftext3:
+	.asciz  " \tDigits\n  Extended Digits:     "
+sftext4:
+	.asciz	" \tDigits\n  Calculation Digits:  "
+sftext5:
+	.asciz	" \tDigits\n  Available Digits:    "
+
 sftext11:
-	.ascii					" Bytes\n"
-	.asciz	"  Guard Words:    "
+	.ascii	" \tDigits\n\n"
+	.ascii	"Binary Accuracy:\n"
+	.asciz	        "  Integer Part:        "
 sftext12:
-	.ascii					" Bytes\n"
-	.asciz	"  Integer Part:   "
+	.asciz	" \tWords\n  Fraction Part:       "
 sftext13:
-	.ascii					" Bytes\n"
-	.asciz	"  Available:      "
+	.asciz	" \tWords\n  Guard Words:         "
 sftext14:
-	.asciz					" Bytes\n"
+	.asciz	" \tWords\n  Combined:            "
+sftext15:
+	.asciz	" \tWords\n  Available:           "
 sftext20:
-	.asciz	" Words \t"
+	.asciz	" \tWords\n\n"
 
 	.align 4
 

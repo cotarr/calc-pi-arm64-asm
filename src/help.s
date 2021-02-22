@@ -127,8 +127,8 @@ Help_sigfigs:
 	.ascii	"Usage: sf             (prints current accuracy)\n\n"
 	.ascii	"Usage: sf   <integer> (set new accuracy digits base 10)\n"
 //	.ascii	"Usage: sf w <integer> (set new accuracy 64 bit words)\n"
-//	.ascii	"Usage: sf e <integer> (set new extended digits, 0 for none)\n"
-//	.ascii	"Usage: sf v           (display accuracy verbose)\n"
+	.ascii	"Usage: sf e <integer> (set new extended digits, 0 for none)\n"
+	.ascii	"Usage: sf v           (display accuracy verbose)\n"
 //	.ascii	"Usage: sf K           (sets accuracy to 1K 1, 000 digits base 10)\n"
 //	.ascii	"Usage: sf M           (sets accuracy to 1M 1, 000, 000 digits base 10)\n"
 //	.ascii	"Usage: sf x           (sets accuracy to maximum)\n"
@@ -138,7 +138,8 @@ Help_sigfigs:
 	.ascii	"19.2659197224948 digit/QWord(64 bit) = log_base10(2^64)\n"
 	.ascii	"Guard words provide additional precision to absorb rounding errors.\n"
 	.ascii	"Set extended digits show result past specified accuracy.\n"
-	.ascii	"Variable size VAR_WSIZE and GUARDWORDS specified in var_header.inc.\n"
+	.ascii	"Variable size INT_WSIZE, FCT_WSIZE and GUARDWORDS specified \n"
+	.ascii	"in var_header.inc.\n"
 	.byte	0
 
 //=====================================
@@ -150,8 +151,8 @@ DefaultHelp:
 	.ascii	"Description: help will provide description and\n"
 	.ascii	"instructions for the use of a specific command.\n"
 	.ascii	"To see a list of all commands, type 'cmdlist'. \n\n"
-	.ascii	"Help in html format is in the docs/ folder or on the web at \n"
-	.ascii      "https://cotarr.github.io/calc-pi-x86-64-asm/docs/\n\n"
+//	.ascii	"Help in html format is in the docs/ folder or on the web at \n"
+//	.ascii      "https://cotarr.github.io/calc-pi-x86-64-asm/docs/\n\n"
 	.ascii	"Help is available for the following commands:\n\n"
 	.byte	0
 

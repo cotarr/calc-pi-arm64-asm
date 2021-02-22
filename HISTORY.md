@@ -274,22 +274,22 @@ Op Code: sf 1000
 
 Accuracy: 1000 Digits
 
-Op Code: sf e 10
-
 Op Code: sf v
 
 Decimal (base 10) Accuracy:
-  Printed Digits:    1000 	(Configurable)
-  Extended Digits:   10		(Shows extra digits)
-  Useable Digits:    1002 	(Theoretical)
-  Total Calc Digits: 1079 	(With Guard Words)
-  Available Digits:  1137
+  Integer Part:        38 	Digits
+  Fraction Part:       1000 	Digits
+  Extended Digits:     10 	Digits
+  Calculation Digits:  1079 	Digits
+  Available Digits:    1156 	Digits
 
 Binary Accuracy:
-  Fraction Part:  52 Words 		416 Bytes
-  Guard Words:    4 Words 		32 Bytes
-  Integer Part:   1 Words 		8 Bytes
-  Available:      64 Words 		512 Bytes
+  Integer Part:        2 	Words
+  Fraction Part:       50 	Words
+  Guard Words:         4 	Words
+  Combined:            56 	Words
+  Available:           66 	Words
+
 ```
 
 Ran into problem. I was using the offset of the most significant word
