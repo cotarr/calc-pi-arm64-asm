@@ -619,7 +619,7 @@ Command_test:
 //	bl	CopyVariable
 //	bl	ExchangeVariable
 //	bl	TwosCompliment
-//	bl	AddMantissa
+//	bl	AddVariable
 
 	b	ParseCmd
 

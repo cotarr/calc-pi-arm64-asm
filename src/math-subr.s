@@ -34,7 +34,8 @@ SOFTWARE.
 	CopyVariable
 	ExchangeVariable
 	TwosCompliment
-	AddMantissa
+	AddVariable
+	SubtractVariable
 	TestIfNegative
 	TestIfZero
 ------------------------------------------------------------- */
@@ -45,7 +46,8 @@ SOFTWARE.
 	.global	CopyVariable
 	.global	ExchangeVariable
 	.global	TwosCompliment
-	.global	AddMantissa
+	.global	AddVariable
+	.global	SubtractVariable
 	.global TestIfNegative
 	.global TestIfZero
 
@@ -395,7 +397,7 @@ TwosCompliment:
 
 
 ---------------------------------------------------------------- */
-AddMantissa:
+AddVariable:
 	sub	sp, sp, #96		// Reserve 12 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
@@ -472,6 +474,96 @@ AddMantissa:
 	ldr	x17, [sp, #88]
 	add	sp, sp, #96
 	ret
+
+/* --------------------------------------------------------------
+  Perform Floating Point subtraction of 3 variables
+
+  Input:    x1 = Handle Number of source 1 variable
+            x2 = Handle number of source 2 variable
+	    x3 = Handle number of destination variable
+
+  Output:   none
+
+  (3) = (1) - (2)
+ ---------------------------------------------------------------- */
+SubtractVariable:
+	sub	sp, sp, #96		// Reserve 12 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]		// input argument / scratch
+	str	x2,  [sp, #32]		// input argument / scratch
+	str	x3,  [sp, #40]		// input argument / scratch
+	str	x9,  [sp, #48]		// word index
+	str	x10, [sp, #56]		// word counter
+	str	x11, [sp, #64]		// source 1 address
+	str	x12, [sp, #72]		// source 2 address
+	str	x13, [sp, #80]		// desitination address
+	str	x17, [sp, #88]		// VAR_MSW_OFST
+
+	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, [x17]		// Store in register as constant value
+	// setup offset index to address within variable
+	mov	x9, #0			// offset applied address
+
+	// xet x10 to number of words - 1
+	ldr	x10, =No_Word		// Pointer to of words in mantissa
+	ldr	x10, [x10]		// Number words in manti
+	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
+
+	// set variable pointers x11 souce 1
+	ldr	x11, =RegAddTable	// Pointer to vector table
+	add	x11, x11, x1, lsl #3	// (handle * 8 bit)
+	ldr	x11, [x11]		// X11 pointer to variable address
+	add	x11, x11, x17	// x11 pointer to m.s. word
+	sub	x11, x11, x10, lsl #3	// X11 Pointer to l.s. word
+
+	// set variable pointer x12 source 2
+	ldr	x12, =RegAddTable	// Pointer to vector table
+	add	x12, x12, x2, lsl #3	// (handle * 8 bit)
+	ldr	x12, [x12]		// x12 pointer to variable address
+	add	x12, x12, x17	// x12 pointer to m.s. word
+	sub	x12, x12, x10, lsl #3	// x12 Pointer to l.s. word
+
+	// set variable pointer x13 destination
+	ldr	x13, =RegAddTable	// Pointer to vector table
+	add	x13, x13, x3, lsl #3	// (handle * 8 bit)
+	ldr	x13, [x13]		// x13 pointer to variable address
+	add	x13, x13, x17	// x13 pointer to m.s. word
+	sub	x13, x13, x10, lsl #3	// x13 Pointer to l.s. word
+
+	// First iteration does not add carry
+	ldr	x1, [x11, x9]		// Source 1 word
+	ldr	x2, [x12, x9]		// source 2 word
+	subs	x3, x1, x2		// add register from zero (flags set)
+	str	x3, [x13, x9]		// Store shifted word
+	add	x9, x9, BYTE_PER_WORD	// increment word pointer
+	// decrement counter not needed because already count-1 for pointer arithmetic
+10:
+	ldr	x1, [x11, x9]		// x0 is first word
+	ldr	x2, [x12, x9]		// x0 is first word
+	sbcs	x3, x1, x2		// subtract register and NOT carry from zero (flags set)
+	str	x3, [x13, x9]		// Store shifted word
+	// increment and loop
+	add	x9, x9, BYTE_PER_WORD	// increment word offset pointer
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 10b		// non-zero, loop back
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x3,  [sp, #40]
+	ldr	x9,  [sp, #48]
+	ldr	x10, [sp, #56]
+	ldr	x11, [sp, #64]
+	ldr	x12, [sp, #72]
+	ldr	x13, [sp, #80]
+	ldr	x17, [sp, #88]
+	add	sp, sp, #96
+	ret
+
 
 /* --------------------------------------------------------------
   Test function to see if negative (top bit = 1)
