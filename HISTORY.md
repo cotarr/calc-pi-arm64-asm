@@ -300,3 +300,7 @@ is defined by INT_WSISE and FCT_WSIZE in 64 bit words for
 the integer part and fractino part.
 
 - Cleaned up previous function for VAR_MSW_OFFSET --> [VarMsbOfst]
+
+```
+git checkout 6775622f14c2687e3d7c0d35df9dc4cbe5aea585
+```
