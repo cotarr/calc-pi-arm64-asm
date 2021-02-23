@@ -278,14 +278,120 @@ done_print:
 	add	sp, sp, #128
 	ret
 
-;--------------------------------------------------------------
-;
-;  Print Calculation Result (abbreviated format)
-;
-;  During command input, this routine is intended
-;  to show the user an abbreviated view of the stack
-;
-;--------------------------------------------------------------
+/* --------------------------------------------------------------
+
+  Print Calculation Result (abbreviated format)
+
+  During command input, this routine is intended
+  to show the user an abbreviated view of the stack
+
+-------------------------------------------------------------- */
 PrintResult:
-	// placeholder
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]
+
+	// Temporarily save existing variables on the stack
+	// Assign an new value to each one
+
+	sub	sp, sp, #80
+
+	ldr	x1, =No_Word
+	ldr	x0, [x1]
+	str	x0, [sp, #0]
+	mov	x0, #7
+	str	x0, [x1]
+
+	ldr	x1, =No_Byte
+	ldr	x0, [x1]
+	str	x0, [sp, #8]
+	mov	x0, #56
+	str	x0, [x1]
+
+	ldr	x1, =D_Flt_Word
+	ldr	x0, [x1]
+	str	x0, [sp, #16]
+	mov	x0, #7
+	str	x0, [x1]
+
+	ldr	x1, =D_Flt_Byte
+	ldr	x0, [x1]
+	str	x0, [sp, #24]
+	mov	x0, #56
+	str	x0, [x1]
+
+	ldr	x1, =NoSigDig
+	ldr	x0, [x1]
+	str	x0, [sp, #32]
+	mov	x0, #50
+	str	x0, [x1]
+
+	ldr	x1, =NoExtDig
+	ldr	x0, [x1]
+	str	x0, [sp, #40]
+	mov	x0, #0
+	str	x0, [x1]
+
+	ldr	x1, =LSWOfst
+	ldr	x0, [x1]
+	str	x0, [sp, #48]
+	mov	x0, #464
+	str	x0, [x1]
+
+	ldr	x1, =D_Flt_LSWO
+	ldr	x0, [x1]
+	str	x0, [sp, #56]
+	mov	x0, #464
+	str	x0, [x1]
+
+	//
+	// Print result at reduced accuracy
+	//
+	bl	CROut
+	bl	PrintVariable
+
+	//
+	// Restore accuracy varaibles
+	//
+	ldr	x1, =No_Word
+	ldr	x0, [sp, #0]
+	str	x0, [x1]
+
+	ldr	x1, =No_Byte
+	ldr	x0, [sp, #8]
+	str	x0, [x1]
+
+	ldr	x1, =D_Flt_Word
+	ldr	x0, [sp, #16]
+	str	x0, [x1]
+
+	ldr	x1, =D_Flt_Byte
+	ldr	x0, [sp, #24]
+	str	x0, [x1]
+
+	ldr	x1, =NoSigDig
+	ldr	x0, [sp, #32]
+	str	x0, [x1]
+
+	ldr	x1, =NoExtDig
+	ldr	x0, [sp, #40]
+	str	x0, [x1]
+
+	ldr	x1, =LSWOfst
+	ldr	x0, [sp, #48]
+	str	x0, [x1]
+
+	ldr	x1, =D_Flt_LSWO
+	ldr	x0, [sp, #56]
+	str	x0, [x1]
+
+	add	sp, sp, #80
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	add	sp, sp, #64
 	ret

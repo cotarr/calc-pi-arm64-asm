@@ -337,7 +337,7 @@ The binary to decimal conversion is now working. Basically it functions as follo
 - Test print 2.0 to 1,000,000 digits, elapsed time about 10 minutes
 
 ```
-git checkout (tbd)
+git checkout feff7da331abe0d37f38856384f0539babc8241b
 ```
 
 ### 2021-02-23 - Day 10 (19 days to go until pi day)
@@ -345,3 +345,41 @@ git checkout (tbd)
 - math-input.s - New file to hold decimal to binary conversion
 - Arranged code, moved MultiplyByTen and DivideByTen to math-subr.s
 - Add debug function D.accv to show accuracy variable current values
+
+- Added function InputVariable to convert base-10 decimal digits to binary
+
+```
+Character processing flow
+
+1 - Detect End of string null byte (Go to step 5)
+2 - Detect characters plus, minus, and decimal point, set state variable as needed
+3 - Case of integer part digits:
+   3A - Multiply previous accumulated number 10
+   3B - Convert ascii to BCD
+   3C - Add BCD btye to accumulated number
+4 - Case of fraction part
+  4A - Increment power of 10 decade counter
+  4B - Convert ascii to BCD
+  4C -  In loop for count of decade counter
+       Divide BCD digit by 10
+  4D - Add Divided BCD digit to accumulated result
+5 - Perform 2's compliment if negative
+```
+
+Example (printing 50 digits):
+
+```
+Op Code: -123.456777345354
+-123.45677734535400000000000000000000000000000000000
+Op Code: 0
++0.0
+Op Code: 0.1
++0.1000000000000000000000000000000000000000000000000
+```
+
+- Added function PrintResult to temporarily set accuracy to 50 digits and print result
+- Input Decimal to binary and Output binary to base-10 decimal are working now.
+
+```
+git clone
+```

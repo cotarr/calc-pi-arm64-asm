@@ -826,7 +826,7 @@ PrintAccuracyVars:
 
 	ldr	x0, =112f
 	bl	StrOut
-	ldr	x1, =VarMswOfst
+	ldr	x1, =LSWOfst
 	ldr	x0, [x1]
 	bl	PrintWordHex
 	mov	x0, #0x20
@@ -836,7 +836,7 @@ PrintAccuracyVars:
 
 	ldr	x0, =113f
 	bl	StrOut
-	ldr	x1, =VarMsbOfst
+	ldr	x1, =D_Flt_LSWO
 	ldr	x0, [x1]
 	bl	PrintWordHex
 	mov	x0, #0x20
@@ -846,7 +846,7 @@ PrintAccuracyVars:
 
 	ldr	x0, =114f
 	bl	StrOut
-	ldr	x1, =InitNoWord
+	ldr	x1, =VarMswOfst
 	ldr	x0, [x1]
 	bl	PrintWordHex
 	mov	x0, #0x20
@@ -855,6 +855,26 @@ PrintAccuracyVars:
 	bl	PrintWordB10
 
 	ldr	x0, =115f
+	bl	StrOut
+	ldr	x1, =VarMsbOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =116f
+	bl	StrOut
+	ldr	x1, =InitNoWord
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =117f
 	bl	StrOut
 	ldr	x1, =MinimumWord
 	ldr	x0, [x1]
@@ -891,11 +911,14 @@ PrintAccuracyVars:
 110:	.asciz	"\nFctBsize       "
 111:	.asciz	"\nVarBsize       "
 
-112:	.asciz	"\nVarMswOfst     "
-113:	.asciz	"\nVarMsbOfst     "
+112:	.asciz	"\nLSWOfst        "
+113:	.asciz	"\nD_FltLSWO      "
 
-114:	.asciz	"\nInitNoWord     "
-115:	.asciz	"\nMinimumWord    "
+114:	.asciz	"\nVarMswOfst     "
+115:	.asciz	"\nVarMsbOfst     "
+
+116:	.asciz	"\nInitNoWord     "
+117:	.asciz	"\nMinimumWord    "
 	.align 4
 
 /***************************************

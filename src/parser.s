@@ -346,6 +346,7 @@ is_numeric:
 	mov	x2, HAND_XREG
 	bl	CopyVariable
 
+	bl	PrintResult
 	b	ParseCmd
 
 not_number:
@@ -433,6 +434,8 @@ ParseCmdEnd:
 Command_clrx:
 	mov	x1, HAND_XREG
 	bl	ClearVariable
+
+	bl	PrintResult
 	b	ParseCmd
 
 //
@@ -447,6 +450,7 @@ Command_clrstk:
 	bl	ClearVariable
 	mov	x1, HAND_TREG
 	bl	ClearVariable
+	bl	PrintResult
 	b	ParseCmd
 
 //
@@ -546,6 +550,8 @@ Command_print:
 	mov	x1, HAND_XREG
 	mov	x2, HAND_ACC
 	bl	CopyVariable
+
+	bl	CROut
 	bl	PrintVariable
 	b	ParseCmd
 
