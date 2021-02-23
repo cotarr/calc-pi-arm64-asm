@@ -35,6 +35,7 @@ SOFTWARE.
    	.include "header-include.s"
 	.include "math-subr.s"
 	.include "math-rotate.s"
+	.include "math-input.s"
 	.include "math-output.s"
 	.include "math-debug.s"
 
@@ -285,7 +286,7 @@ Set_No_Word:
 // [No_Byte] is variable for number 8 bit bytes in mantissa
 //
 	ldr	x11, =No_Byte
-	mov	x10, x0, lsl WORDSIZEBITS // Convert to bytes [No_Byte]
+	mov	x10, x0, lsl X8SHIFT3BIT // Convert to bytes [No_Byte]
 	str	x10, [x11]
 	ldr	x11, =D_Flt_Byte	// Default value
 	str	x10, [x11]

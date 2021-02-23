@@ -80,6 +80,10 @@ Command_Table:
 	.byte	0
 	.quad	Command_cmdlist
 
+	.ascii	"D.accv"
+	.byte	0,0
+	.quad	Command_D_accv
+
 	.ascii	"D.fill"
 	.byte	0,0
 	.quad	Command_D_fill
@@ -456,6 +460,12 @@ Command_cmdlist:
 //
 //
 //
+Command_D_accv:
+	bl	PrintAccuracyVars
+	b	ParseCmd
+//
+//
+//
 Command_D_fill:
 
 	cmp	x0, #0			// Check for argument
@@ -609,6 +619,9 @@ Command_test:
 
 	mov	x1, HAND_XREG
 	bl	SetToTwo
+//	bl	DivideByTen
+//	bl	MultiplyByTen
+
 	b	ParseCmd
 
 	// ----------------------

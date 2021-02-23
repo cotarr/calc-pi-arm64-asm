@@ -72,9 +72,13 @@ Help_Table:
 	.byte	0
 	.quad	Help_cmdlist
 
+	.ascii	"D.accv"
+	.byte	 0, 0
+	.quad	Help_D_accv
+
 	.ascii	"D.fill"
 	.byte	 0, 0
-	.quad	Help_D.fill
+	.quad	Help_D_fill
 
 	.ascii	"exit"
 	.byte	0, 0, 0, 0
@@ -127,7 +131,12 @@ Help_cmdlist:
 	.ascii	"command argument.\n"
 	.byte	0
 
-Help_D.fill:
+Help_D_accv:
+	.ascii	"Usage: D.accv\n\n"
+	.ascii	"Description: Show accuracy variables in hex and decimal\n"
+	.byte	0
+
+Help_D_fill:
 	.ascii	"Usage: D.fill <handle>\n\n"
 	.ascii	"Description: This is a debug command to fill a variable with\n"
 	.ascii	"sequential byte value numbers. It starts with the exponent \n"

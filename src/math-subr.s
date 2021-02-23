@@ -86,7 +86,7 @@ ClearVariable:
 
 	// set x11 address of variable m.s. word
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
 	add	x11, x11, x17	// x11 pointer at m.s. word
 
@@ -131,12 +131,12 @@ SetToOne:
 	bl	ClearVariable		// Handle in x1 preserved
 
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
 	add	x11, x11, x17	// x11 pointer at m.s. word
 	ldr	x0, =IntWSize		// Size of integer part in words
 	ldr	x0, [x0]		// size of integer part
-	sub	x11, x11, x0, lsl WORDSIZEBITS
+	sub	x11, x11, x0, lsl X8SHIFT3BIT
 	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part
 
 	mov	x0, #1
@@ -174,12 +174,12 @@ SetToTwo:
 	bl	ClearVariable		// Handle in x1 preserved
 
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
 	add	x11, x11, x17	// x11 pointer at m.s. word
 	ldr	x0, =IntWSize		// Size of integer part in words
 	ldr	x0, [x0]		// size of integer part
-	sub	x11, x11, x0, lsl WORDSIZEBITS
+	sub	x11, x11, x0, lsl X8SHIFT3BIT
 	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part
 
 	mov	x0, #2
@@ -228,13 +228,13 @@ CopyVariable:
 
 	// x11 pointer to variable m.s. word
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // Handle --> index into table
+	add	x11, x11, x1, lsl X8SHIFT3BIT // Handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
 	add	x11, x11, x17	// x11 pointer at m.s. word (exponent)
 
 	// x12 pointer to variable m.s. word
 	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x2, lsl WORDSIZEBITS // Index into table
+	add	x12, x12, x2, lsl X8SHIFT3BIT // Index into table
 	ldr	x12, [x12]		// x12 pointer to variable address
 	add	x12, x12, x17	// x12 pointer at m.s, word (exponent)
 10:
@@ -292,12 +292,12 @@ ExchangeVariable:
 	ldr	x10, [x10]		// Words in mantissa
 	// x11 pointer to source 1 variable
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // Handle --> index into table
+	add	x11, x11, x1, lsl X8SHIFT3BIT // Handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
 	add	x11, x11, x17	// x11 pointer at m.s. word (exponent)
 	// x12 pointer to source 2 variable
 	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x2, lsl WORDSIZEBITS // Index into table
+	add	x12, x12, x2, lsl X8SHIFT3BIT // Index into table
 	ldr	x12, [x12]		// x12 pointer to variable address
 	add	x12, x12, x17	// x12 pointer at m.s, word (exponent)
 10:
@@ -348,7 +348,7 @@ TestIfNegative:
 	//
 	// set x11 address of variable m.s. word
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
 	add	x11, x11, x17		// x11 pointer at m.s. word
 
@@ -402,7 +402,7 @@ TestIfZero:
 
 	// set x11 address of variable m.s. word
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // handle --> index into table
+	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
 	add	x11, x11, x17	// x11 pointer at m.s. word
 
@@ -411,7 +411,7 @@ TestIfZero:
 // ------------------
 // Case of negative
 // ------------------
-	sub	x11, x11, x10, lsl WORDSIZEBITS // X11 Pointer to l.s. word
+	sub	x11, x11, x10, lsl X8SHIFT3BIT // X11 Pointer to l.s. word
 
 	mov	x1, #1			// sign flag, default 1 for zero
 
@@ -513,10 +513,10 @@ TwosCompliment:
 
 	// x11 pointer to variable
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // (handle * 8 bit)
+	add	x11, x11, x1, lsl X8SHIFT3BIT // (handle * 8 bit)
 	ldr	x11, [x11]		// X11 pointer to variable address
 	add	x11, x11, x17	// x11 pointer to m.s. word
-	sub	x11, x11, x10, lsl WORDSIZEBITS // X11 Pointer to l.s. word
+	sub	x11, x11, x10, lsl X8SHIFT3BIT // X11 Pointer to l.s. word
 
 	// First iteration does not subtract carry
 	ldr	x0, [x11, x9]		// x0 is first word
@@ -761,10 +761,10 @@ MultiplyByTen:
 	sub	x10, x10, #1		// count - 1 ( address calculation nexxt)
 
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // Add (handle * bit size)
+	add	x11, x11, x1, lsl X8SHIFT3BIT // Add (handle * bit size)
 	ldr	x11, [x11]		// X11 pointer to variable address
 	add	x11, x11, x17		// add VAR_MSW_OFST, point to M.S.Word
-	sub	x11, x11, x10, lsl WORDSIZEBITS	// X11 Point at L.S. word64
+	sub	x11, x11, x10, lsl X8SHIFT3BIT	// X11 Point at L.S. word64
 
 	add	x10, x10, #1		// add back in, x10 = count 64 bit words
 	lsl	x10, x10, #2		// Multiply * 2 to address 32 bit word size
@@ -849,7 +849,7 @@ DivideByTen:
 	sub	x10, x10, #1		// Count - 1
 
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // Add (handle * bit size)
+	add	x11, x11, x1, lsl X8SHIFT3BIT // Add (handle * bit size)
 	ldr	x11, [x11]		// X11 pointer to variable address
 	add	x11, x11, x17		// add VAR_MSW_OFST, point to M.S.Word
 

@@ -69,11 +69,11 @@ Right1Bit:
 	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
 
 	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl WORDSIZEBITS // Add (handle * bit size)
+	add	x11, x11, x1, lsl X8SHIFT3BIT // Add (handle * bit size)
 	ldr	x11, [x11]		// X11 pointer to variable address
 		// get VAR_MSW_OFST (too big for immediate value)
 	add	x11, x11, x17		// add VAR_MSW_OFST, point to M.S.Word
-	sub	x11, x11, x10, lsl WORDSIZEBITS // X11 Pointer to l.s. word
+	sub	x11, x11, x10, lsl X8SHIFT3BIT // X11 Pointer to l.s. word
 
 
 	// Setup x12 to point 1 word higher than x11

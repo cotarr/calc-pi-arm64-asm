@@ -33,7 +33,7 @@ SOFTWARE.
 
 ------------------------------------------------------------- */
 
-	.global	PrintVariable
+	.global	InputVariable
 
 /* ----------------------------------------------------
  Floating Point Input

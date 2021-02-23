@@ -341,3 +341,7 @@ git checkout (tbd)
 ```
 
 ### 2021-02-23 - Day 10 (19 days to go until pi day)
+
+- math-input.s - New file to hold decimal to binary conversion
+- Arranged code, moved MultiplyByTen and DivideByTen to math-subr.s
+- Add debug function D.accv to show accuracy variable current values

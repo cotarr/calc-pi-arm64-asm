@@ -37,6 +37,7 @@ SOFTWARE.
 	PrintWordHex
 	PrintWordB10
 	IntWordInput
+	PrintAccuracyVars
 	PrintFlags
 	ClearRregisters
 	PrintRegisters
@@ -56,6 +57,7 @@ SOFTWARE.
 	.global	PrintWordHex
 	.global PrintWordB10
 	.global	IntWordInput
+	.global PrintAccuracyVars
 	.global PrintFlags
 	.global ClearRegisters
 	.global PrintRegisters
@@ -685,6 +687,216 @@ Non_numeric_err:
 
 	.align 4
 
+/***************************************
+
+   PrintAccuracyVars
+
+   Input:  none
+
+   Output: none
+
+***************************************/
+PrintAccuracyVars:
+
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #16]
+
+	ldr	x0, =100f
+	bl	StrOut
+	ldr	x1, =No_Word
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =101f
+	bl	StrOut
+	ldr	x1, =No_Byte
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =102f
+	bl	StrOut
+	ldr	x1, =D_Flt_Word
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =103f
+	bl	StrOut
+	ldr	x1, =D_Flt_Byte
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =104f
+	bl	StrOut
+	ldr	x1, =NoSigDig
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =105f
+	bl	StrOut
+	ldr	x1, =NoExtDig
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =106f
+	bl	StrOut
+	ldr	x1, =IntWSize
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =107f
+	bl	StrOut
+	ldr	x1, =FctWsize
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =108f
+	bl	StrOut
+	ldr	x1, =VarWSize
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =109f
+	bl	StrOut
+	ldr	x1, =IntBSize
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =110f
+	bl	StrOut
+	ldr	x1, =FctBsize
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =111f
+	bl	StrOut
+	ldr	x1, =VarBSize
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =112f
+	bl	StrOut
+	ldr	x1, =VarMswOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =113f
+	bl	StrOut
+	ldr	x1, =VarMsbOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =114f
+	bl	StrOut
+	ldr	x1, =InitNoWord
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =115f
+	bl	StrOut
+	ldr	x1, =MinimumWord
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+	bl	CROut
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #16]
+	add	sp, sp, #32
+	ret
+
+
+//                 1234567812345678 <-- ruler
+100:	.asciz	"\nNo_Word        "
+101:	.asciz	"\nNo_Byte        "
+
+102:	.asciz	"\nD_Flt_Word     "
+103:	.asciz	"\nD_Flt_Byte     "
+
+104:	.asciz	"\nNoSigDig       "
+105:	.asciz	"\nNoExtDig       "
+
+106:	.asciz	"\nIntWsize       "
+107:	.asciz	"\nFctWsize       "
+108:	.asciz	"\nVarWsize       "
+
+109:	.asciz	"\nIntBsize       "
+110:	.asciz	"\nFctBsize       "
+111:	.asciz	"\nVarBsize       "
+
+112:	.asciz	"\nVarMswOfst     "
+113:	.asciz	"\nVarMsbOfst     "
+
+114:	.asciz	"\nInitNoWord     "
+115:	.asciz	"\nMinimumWord    "
+	.align 4
 
 /***************************************
 

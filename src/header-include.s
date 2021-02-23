@@ -10,7 +10,8 @@
 
 .set	BIT_PER_WORD,	0x040   // 020H for 32 Bit, 040H for 64 Bit
 .set	BYTE_PER_WORD,	0x08    // 004H for 32 Bit, 008H for 64 Bit
-.set	WORDSIZEBITS,	0x03	// how many bit to shift for multiply by 8 (word size)
+.set	X8SHIFT3BIT,	0x03	// how many bit to shift for multiply by 8 (word size)
+.set	X16SHIFT4BIT,	0x04	// how many bit to shift for multiply by 8 (word size)
 
 //
 // Variable (integer part) and (fraction part)
