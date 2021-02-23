@@ -1,6 +1,6 @@
 # Program history
 
-### 2021-02-14 - Day 1
+### 2021-02-14 - Day 1 (28 days to go until pi day)
 
 - Created empty git repository
 - Installed 64 bit beta Raspberry OS from https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2020-08-24/
@@ -53,7 +53,7 @@ Flags:               fp asimd evtstrm crc32 cpuid
 git checkout d5188777cda71522eb2428c5fdba4ab9a0a63314
 ```
 
-### 2021-02-15 - Day-2
+### 2021-02-15 - Day-2 (27 days to go until pi day)
 
 - Fixed several errors preserving registers in Hello World
 - Added Keyboard input function KeyIn, reads line from console terminal with address in X0
@@ -78,7 +78,7 @@ that the command addresses are in byte alignment.
 git checkout e54339d9f52c790d3e19fe42b6c0cc32b8e141d0
 ```
 
-### 2021-02-16 - Day 3
+### 2021-02-16 - Day 3 (26 days to go until pi day)
 
 Spent many hours reading asm64 docs. Following docs, cleaned up register use
 following convention for register numbering. Cleaned up command parsing code in parser.s
@@ -92,7 +92,7 @@ following convention for register numbering. Cleaned up command parsing code in 
 git checkout 8b2540ab1f30d5fda32fc68e5f4d54e65f19bc59
 ```
 
-### 2021-02-17 - Day 4
+### 2021-02-17 - Day 4 (25 days to go until pi day)
 
 - practice.s - New file as sandbox to try learning ARM64 code.
 - Added endian check for 32 bit w0 and 64 bit x0 memory load to register
@@ -108,7 +108,7 @@ Error checking added for empty string and non-numeric characters.
 git checkout fd759390c4cd42e42855eef002c2da5b597838f4
 ```
 
-### 2021-02-18 - Day 5
+### 2021-02-18 - Day 5 (24 days to go until pi day)
 
 - math.s - New file to hold variable declarations
 - math-debug.s New file to hold debug tools used to write the program.
@@ -178,7 +178,7 @@ Op Code:
 git checkout ef153bbb5fa1e279d214abb7029f15f3841bec91
 ```
 
-### 2021-02-19 - Day 6
+### 2021-02-19 - Day 6 (23 days to go until pi day)
 
 - math-subr.s - New file for boiler plate arithmetic utilities
 - Added function ClearVariable argument x1 index number of variable to clear
@@ -193,7 +193,7 @@ git checkout ef153bbb5fa1e279d214abb7029f15f3841bec91
 git checkout 019035bfb629efc95ab513a0a3e9ab3990725183
 ```
 
-### 2021-02-20 Day 7
+### 2021-02-20 Day 7 (22 days to go until pi day)
 
 - Added function Left1Bit to perform shift right 1 bit, zero fill l.s. bit
 
@@ -254,7 +254,7 @@ x13 - variable address pointer 2
 git checkout d4207c8eea4d0921b38d41f9b2b87f3e8710ee07
 ```
 
-### 2021-02-21 - Day 8
+### 2021-02-21 - Day 8 (21 days to go until pi day)
 
 Before going further, I need to add some utilities to configure
 the different variables related to the current setting
@@ -305,7 +305,7 @@ the integer part and fractino part.
 git checkout 6775622f14c2687e3d7c0d35df9dc4cbe5aea585
 ```
 
-### 2021-02-22 - Day 9 (20 to go)
+### 2021-02-22 - Day 9 (20 days to go until pi day)
 
 The next task is creation of conversion routines from binary to base-10 and
 base-10 to binary.
@@ -339,3 +339,5 @@ The binary to decimal conversion is now working. Basically it functions as follo
 ```
 git checkout (tbd)
 ```
+
+### 2021-02-23 - Day 10 (19 days to go until pi day)

@@ -3,7 +3,7 @@
 	Include file for math.s
 
 	Created:   2021-02-18
-	Last edit: 2021-02-19
+	Last edit: 2021-02-23
 
 ----------------------------------------------------------------
 MIT License
@@ -36,7 +36,6 @@ SOFTWARE.
 	.global	PrintVar
 	.global	PrintHex
 	.global	DebugFillVariable
-// .global	EndianCheck
 
 /*--------------------------------------------------------------
    Print specified variable in HEX format

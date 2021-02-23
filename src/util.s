@@ -2,7 +2,7 @@
 	util.s
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-21
+	Last Edit: 2021-02-23
 
 ----------------------------------------------------------------
 MIT License
@@ -28,17 +28,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ----------------------------------------------------------------
 	PrintAccuracy
+	PrintAccVerbose
 	SetDigitAccuracy
 	SetExtendedDigits
-	PrintAccVerbose
 	Words_2_Digits
 	Digits_2_Words
 	PrintByteHex
 	PrintWordHex
 	PrintWordB10
 	IntWordInput
-	ClearRregisters
 	PrintFlags
+	ClearRregisters
 	PrintRegisters
 ------------------------------------------------------------- */
 
@@ -47,120 +47,23 @@ SOFTWARE.
 
 /* ------------------------------------------------------------ */
 	.global PrintAccuracy
+	.global PrintAccVerbose
 	.global SetDigitAccuracy
 	.global	SetExtendedDigits
-	.global PrintAccVerbose
 	.global Words_2_Digits
 	.global Digits_2_Words
         .global	PrintByteHex
 	.global	PrintWordHex
 	.global PrintWordB10
 	.global	IntWordInput
-	.global ClearRegisters
 	.global PrintFlags
+	.global ClearRegisters
 	.global PrintRegisters
 /* ------------------------------------------------------------ */
 
 	.text
 
 	.align 4
-
-/* ------------------------------------------------------------------------------------
-
-  Function  SetDigitAccuracy
-
-  Input:   ax number of digits to set
-
-  Output:  none
-
------------------------------------------------------------------------------------- */
-SetDigitAccuracy:
-	sub	sp, sp, #64		// Reserve 8 words
-	str	x30, [sp, #0]		// Preserve Registers
-	str	x29, [sp, #8]
-	str	x0,  [sp, #16]
-	str	x1,  [sp, #24]
-	str	x9,  [sp, #32]		// requested digits
-
-	mov	x9, x0			// requested digits save in 9
-
-	// Check digits lower limit
-	cmp	x9, MINIMUM_DIG
-	b.hs	10f
-	mov	x9, MINIMUM_DIG		// Replace with minimum
-10:
-
-	// Digits upper limit from defined variable size
-	mov	x0, FCT_WSIZE		// words in fraction part
-	sub	x0, x0, GUARDWORDS	// less guard words
-	bl	Words_2_Digits		// 64 bit word --> base 10 digits
-	cmp	x0, x9			// above limit?
-	b.hs	20f
-	mov	x9, x0			// Replace minimum
-20:
-	ldr	x0, =NoSigDig		// pointer
-	str	x9, [x0]		// Save requested digits
-
-	// compute word size
-	mov	x0, x9
-	bl	Digits_2_Words		// Convert base 10 digit to 64 bit words
-	add	x0, x0, GUARDWORDS
-
-	// check minimum word size
-	cmp	x0, MINIMUM_WORD
-	b.hs	30f
-	mov	x0, MINIMUM_WORD
-
-30:
-	// check maximum word size
-	cmp	x0, FCT_WSIZE
-	b.ls	40f
-	mov	x0, FCT_WSIZE
-40:
-	bl	Set_No_Word		// Set all variable word size related vriables
-
-	bl	CROut
-	bl	PrintAccuracy
-	bl	CROut
-
-	ldr	x30, [sp, #0]		// Restore registers
-	ldr	x29, [sp, #8]
-	ldr	x0,  [sp, #16]
-	ldr	x1,  [sp, #24]
-	ldr	x9,  [sp, #32]
-	add	sp, sp, #64
-	ret
-
-
-/* ------------------------------------------------------------------------------------
-
-  Function  SetExtendedDigits
-
-  Input:   x0 number of digits to set
-
-  Output:  none
-
------------------------------------------------------------------------------------- */
-SetExtendedDigits:
-	sub	sp, sp, #64		// Reserve 8 words
-	str	x30, [sp, #0]		// Preserve Registers
-	str	x29, [sp, #8]
-	str	x0,  [sp, #16]
-	str	x1,  [sp, #24]
-
-	cmp	x0, #1000		// arbitrary check for 1000 digits
-	b.ls	20f
-	mov	x0, #1000		// Replace maximum
-20:
-	ldr	x1, =NoExtDig		// pointer
-	str	x0, [x1]		// Save requested digits
-
-	ldr	x30, [sp, #0]		// Restore registers
-	ldr	x29, [sp, #8]
-	ldr	x0,  [sp, #16]
-	ldr	x1,  [sp, #24]
-	add	sp, sp, #64
-	ret
 
 /* -------------------------------------------------------
   Function  PrintAccuracy
@@ -193,6 +96,7 @@ PrintAccuracy:
 	ret
 10:	.asciz	"Accuracy: "
 20:	.asciz	" Digits (fraction part)\n"
+	.align 4
 
 /* ----------------------------------------------------
 
@@ -343,6 +247,105 @@ sftext20:
 	.asciz	" \tWords\n\n"
 
 	.align 4
+
+/* ------------------------------------------------------------------------------------
+
+  Function  SetDigitAccuracy
+
+  Input:   ax number of digits to set
+
+  Output:  none
+
+------------------------------------------------------------------------------------ */
+SetDigitAccuracy:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]
+	str	x9,  [sp, #32]		// requested digits
+
+	mov	x9, x0			// requested digits save in 9
+
+	// Check digits lower limit
+	cmp	x9, MINIMUM_DIG
+	b.hs	10f
+	mov	x9, MINIMUM_DIG		// Replace with minimum
+10:
+
+	// Digits upper limit from defined variable size
+	mov	x0, FCT_WSIZE		// words in fraction part
+	sub	x0, x0, GUARDWORDS	// less guard words
+	bl	Words_2_Digits		// 64 bit word --> base 10 digits
+	cmp	x0, x9			// above limit?
+	b.hs	20f
+	mov	x9, x0			// Replace minimum
+20:
+	ldr	x0, =NoSigDig		// pointer
+	str	x9, [x0]		// Save requested digits
+
+	// compute word size
+	mov	x0, x9
+	bl	Digits_2_Words		// Convert base 10 digit to 64 bit words
+	add	x0, x0, GUARDWORDS
+
+	// check minimum word size
+	cmp	x0, MINIMUM_WORD
+	b.hs	30f
+	mov	x0, MINIMUM_WORD
+
+30:
+	// check maximum word size
+	cmp	x0, FCT_WSIZE
+	b.ls	40f
+	mov	x0, FCT_WSIZE
+40:
+	bl	Set_No_Word		// Set all variable word size related vriables
+
+	bl	CROut
+	bl	PrintAccuracy
+	bl	CROut
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x9,  [sp, #32]
+	add	sp, sp, #64
+	ret
+
+
+/* ------------------------------------------------------------------------------------
+
+  Function  SetExtendedDigits
+
+  Input:   x0 number of digits to set
+
+  Output:  none
+
+------------------------------------------------------------------------------------ */
+SetExtendedDigits:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]
+
+	cmp	x0, #1000		// arbitrary check for 1000 digits
+	b.ls	20f
+	mov	x0, #1000		// Replace maximum
+20:
+	ldr	x1, =NoExtDig		// pointer
+	str	x0, [x1]		// Save requested digits
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	add	sp, sp, #64
+	ret
+
+
 
 /* -----------------------------------------------
 
