@@ -31,9 +31,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ----------------------------------------------------------------
 	PrintVariable
+	PrintResult
 ------------------------------------------------------------- */
 
 	.global	PrintVariable
+	.global PrintResult
 
 // -------------------------------------------------------------
 
@@ -74,15 +76,17 @@ PrintVariable:
 	//
 	// x11 is constant (address of ACC M.S. World)
 	//
+	mov	x1, HAND_ACC		// Variable handle number
 	ldr	x11, =RegAddTable	// Pointer to vector table
+	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x11, [x11]		// x12 is address of variable
 	add	x11, x11, x17		// x12 pointer at m.s. word
 	//
 	// x12 is constant (address of OPR M.S. World)
 	//
-	mov	x1, HAND_OPR		// Variable handle number
+	mov	x2, HAND_OPR		// Variable handle number
 	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x1, lsl X8SHIFT3BIT // handle --> index into table
+	add	x12, x12, x2, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x12, [x12]		// x12 is address of variable
 	add	x12, x12, x17		// x12 pointer at m.s. word
 
@@ -132,7 +136,7 @@ PrintVariable:
 	mov	x1, HAND_OPR		// Handle number to variable
 	bl	ClearVariable
 
-	// Need x9 offset from address of variable M.S.word
+	// Need x9 offset from address of variable L.S.word
 	ldr	x9, =No_Word
 	ldr	x9, [x9]		// x0 is count integer words
 	sub	x9, x9, #1		// subtract 1 now x0 = (words - 1)
@@ -163,7 +167,7 @@ PrintVariable:
 	mov	x1, HAND_OPR		// Variable handle number
 	bl	ClearVariable
 
-	// Need x9 offset from address of variable M.S.word
+	// Need x9 offset from address of integer part L.S.word
 	ldr	x9, =IntWSize
 	ldr	x9, [x9]		// x9 is count integer words
 	sub	x9, x9, #1		// Integer part (words- 1) to align pointer
@@ -195,7 +199,7 @@ PrintVariable:
 	ldr	x16, =NoSigDig		// number of digits (in fraction part)
 	ldr	x16, [x16]
 
-	// Need x9 offset from address of variable M.S.word
+	// Need x9 offset from address of Integer Part L.S.word
 	ldr	x9, =IntWSize
 	ldr	x9, [x9]		// x11 is count integer words
 	sub	x9, x9, #1		// Subtract 1 now x9 = (words -1)
@@ -272,4 +276,16 @@ done_print:
 	ldr	x16, [sp, #88]
 	ldr	x17, [sp, #96]
 	add	sp, sp, #128
+	ret
+
+;--------------------------------------------------------------
+;
+;  Print Calculation Result (abbreviated format)
+;
+;  During command input, this routine is intended
+;  to show the user an abbreviated view of the stack
+;
+;--------------------------------------------------------------
+PrintResult:
+	// placeholder
 	ret

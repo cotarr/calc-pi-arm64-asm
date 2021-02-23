@@ -321,6 +321,7 @@ ParseCmd:
 // Must be a number, convert it
 //
 is_numeric:
+	mov	x0, x8			// pointer to input string
 	mov	x1, #0
 	bl	InputVariable
 	cmp	x1, #0			// Check for input error
@@ -532,7 +533,6 @@ Command_hex:
 30:
 	.asciz	"Hex: Error, invalid argument\n\n"
 	.align 4
-
 
 //
 //
