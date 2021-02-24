@@ -73,48 +73,27 @@ InputVariable:
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
-	str	x1,  [sp, #24]
-	str	x2,  [sp, #32]
-	str	x3,  [sp, #40]
-	str	x9,  [sp, #48]		// Offset pointer relative M.S. Word
-	str	x10, [sp, #56]		// fraction power of 10 counter
-	str	x11, [sp, #64]		// Point ACC M.S. Word
-	str	x12, [sp, #72]		// Point OPR M.S. Word
-	str	x15, [sp, #80]		// Pointer to input string
-	str	x16, [sp, #88]		// Input status flag showing state bits
-	str	x17, [sp, #96]		// VAR_MSW_OFST
+	str	x2,  [sp, #24]
+	str	x3,  [sp, #32]
+	str	x10, [sp, #40]		// fraction power of 10 counter
+	str	x11, [sp, #48]		// Point ACC M.S. Word
+	str	x15, [sp, #56]		// Pointer to input string
+	str	x16, [sp, #64]		// Input status flag showing state bits
 	//
 	// Set x15 pointer to input string
 	//
 	mov	x15, x0
-	//
-	// x17 is constant (Offset to M.S. word of variable)
-	//
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Treat this as a constant in this function
-	lsl	x17, x17, X8SHIFT3BIT
+
 	//
 	// x11 is constant (address of ACC M.S. World)
 	//
 	mov	x1, HAND_ACC		// Variable handle number
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
-	ldr	x11, [x11]		// x12 is address of variable
-	add	x11, x11, x17		// x12 pointer at m.s. word
+	bl	set_x11_to_Int_LS_Word_Address
 	//
-	// x12 is constant (address of OPR M.S. World)
+	// x11 is constant (address of OPR M.S. World)
 	//
-	mov	x2, HAND_OPR		// Variable handle number
-	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x2, lsl X8SHIFT3BIT // handle --> index into table
-	ldr	x12, [x12]		// x12 is address of variable
-	add	x12, x12, x17		// x12 pointer at m.s. word
-
-	// x9 is constant address of Integer Part L.S.word
-	ldr	x9, =IntWSize
-	ldr	x9, [x9]		// x11 is count integer words
-	sub	x9, x9, #1		// Subtract 1 now x9 = (words -1)
-	sub	x9, xzr, x9, lsl X8SHIFT3BIT // (0 - (x9 * 8) = Neg offset to L.S. word
+	mov	x1, HAND_OPR		// Variable handle number
+	bl	set_x11_to_Int_LS_Word_Address
 
 	mov	x16, #0x00		// State of input process
 	sub	x15, x15, #1		// Decrement so it can increment start of loop
@@ -130,7 +109,7 @@ InputVariable:
 
 	// Input character from buffer
 next_character:
-	add	x15, x15, #1			// Point to next character
+	add	x15, x15, #1		// Point to next character
 	ldrb	w0, [x15]		// get character
 	cmp	w0, #0			// end of string?
 	b.eq	end_of_string		// yes
@@ -200,10 +179,10 @@ next_character:
 
 	// this places character in OPR
 	mov	x0, #0
-	str	x0, [x12, x9]		// [address, offset] L.S Word on integer part
+	str	x0, [x11]		// [address, offset] L.S Word on integer part
 	ldrb	w0, [x15]		// get character
 	and	w0, w0, 0x0f		// ASCII --> BCD
-	strb	w0, [x12, x9]		// save digit as BCD number in OPR
+	strb	w0, [x11]		// save digit as BCD number in OPR
 	// This is addition of variables
 	mov	x1, HAND_ACC		// Variable handle number
 	mov	x2, HAND_OPR
@@ -219,7 +198,7 @@ next_character:
 	// this places character in OPR
 	ldrb	w0, [x15]		// get character
 	and	w0, w0, 0x0f		// ASCII --> BCD
-	strb	w0, [x12, x9]		// save digit as BCD number in OPR
+	strb	w0, [x11]		// save digit as BCD number in OPR
 	// Multiplication loop
 	mov	x2, x10			// division counter
 710:	mov	x1, HAND_OPR
@@ -251,15 +230,11 @@ end_of_string:
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
-	// ldr	x1,  [sp, #24]		// return error code
-	ldr	x2,  [sp, #32]
-	ldr	x3,  [sp, #40]
-	ldr	x9,  [sp, #48]
-	ldr	x10, [sp, #56]
-	ldr	x11, [sp, #64]
-	ldr	x12, [sp, #72]
-	ldr	x15, [sp, #80]
-	ldr	x16, [sp, #88]
-	ldr	x17, [sp, #96]
-	add	sp, sp, #128
+	ldr	x2,  [sp, #24]
+	ldr	x3,  [sp, #32]
+	ldr	x10, [sp, #40]
+	ldr	x11, [sp, #48]
+	ldr	x15, [sp, #56]
+	ldr	x16, [sp, #64]
+	add	sp, sp, #80
 	ret
