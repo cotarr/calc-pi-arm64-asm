@@ -59,6 +59,7 @@ Right1Bit:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
+	lsl	x17, x17, X8SHIFT3BIT
 
 	// setup offset index to address within variable
 	mov	x9, #0
@@ -132,6 +133,7 @@ Left1Bit:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
+	lsl	x17, x17, X8SHIFT3BIT
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied to address

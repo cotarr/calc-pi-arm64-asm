@@ -69,31 +69,18 @@ ClearVariable:
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]		// input argument / scratch
-	str	x9,  [sp, #32]		// word index
-	str	x10, [sp, #40]		// word counter
-	str	x11, [sp, #48]		// source 1 address
-	str	x17, [sp, #56]		// VAR_MSW_OFST
-
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-
-	// setup offset index to address within variable
-	mov	x9, #0			// offset applied address
+	str	x10, [sp, #32]		// word counter
+	str	x11, [sp, #40]		// source 1 address
 
 	// set x10 count number of words
 	ldr	x10, =Word_Size_Static		// Word counter
 	ldr	x10, [x10]		// Words in mantissa
 
-	// set x11 address of variable m.s. word
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
-	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, x17	// x11 pointer at m.s. word
-
+	// Argument in x1 is variable handle (preserved)
+	bl	set_x11_to_Fct_LS_Word_Address_Static
 10:
 	// Perform the fill using 64 bit words
-	str	xzr, [x11, x9]
-	sub	x9, x9, BYTE_PER_WORD
+	str	xzr, [x11], BYTE_PER_WORD
 	sub	x10, x10, #1		// Decrement counter
 	cbnz	x10, 10b		// Done?
 
@@ -101,10 +88,8 @@ ClearVariable:
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
-	ldr	x9,  [sp, #32]
-	ldr	x10, [sp, #40]
-	ldr	x11, [sp, #48]
-	ldr	x17, [sp, #56]
+	ldr	x10, [sp, #32]
+	ldr	x11, [sp, #40]
 	add	sp, sp, #64
 	ret
 
@@ -123,21 +108,10 @@ SetToOne:
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]		// Handle number of variable (Argument)
 	str	x11,  [sp, #32]		// Address Pointer
-	str	x17, [sp, #40]		// VAR_MSW_OFST
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-
-	bl	ClearVariable		// Handle in x1 preserved
-
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
-	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, x17	// x11 pointer at m.s. word
-	ldr	x0, =IntWSize		// Size of integer part in words
-	ldr	x0, [x0]		// size of integer part
-	sub	x11, x11, x0, lsl X8SHIFT3BIT
-	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part
+	// Argument in x1 is variable handle (preserved)
+	bl	ClearVariable
+	bl	set_x11_to_Int_LS_Word_Address
 
 	mov	x0, #1
 	str	x0, [x11]		// Place 1 in top word
@@ -147,7 +121,6 @@ SetToOne:
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
 	ldr	x11,  [sp, #32]
-	ldr	x17,  [sp, #40]
 	add	sp, sp, #64
 	ret
 
@@ -166,21 +139,10 @@ SetToTwo:
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]		// Handle number of variable (Argument)
 	str	x11,  [sp, #32]		// Address Pointer
-	str	x17, [sp, #40]		// VAR_MSW_OFST
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-
-	bl	ClearVariable		// Handle in x1 preserved
-
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
-	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, x17	// x11 pointer at m.s. word
-	ldr	x0, =IntWSize		// Size of integer part in words
-	ldr	x0, [x0]		// size of integer part
-	sub	x11, x11, x0, lsl X8SHIFT3BIT
-	add	x11, x11, BYTE_PER_WORD	// x11 pointer to L.S word of integer part
+	// Argument in x1 is variable handle (preserved)
+	bl	ClearVariable
+	bl	set_x11_to_Int_LS_Word_Address
 
 	mov	x0, #2
 	str	x0, [x11]		// Place 2 in top word
@@ -190,7 +152,6 @@ SetToTwo:
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
 	ldr	x11,  [sp, #32]
-	ldr	x17,  [sp, #40]
 	add	sp, sp, #64
 	ret
 
@@ -218,6 +179,7 @@ CopyVariable:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
+	lsl	x17, x17, X8SHIFT3BIT
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied address
@@ -282,7 +244,7 @@ ExchangeVariable:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
-
+	lsl	x17, x17, X8SHIFT3BIT
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied address
@@ -342,7 +304,7 @@ TestIfNegative:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
-
+	lsl	x17, x17, X8SHIFT3BIT
 	//
 	// First check if negative, if so perform 2's compliment
 	//
@@ -391,6 +353,7 @@ TestIfZero:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
+	lsl	x17, x17, X8SHIFT3BIT
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied to address
@@ -504,6 +467,7 @@ TwosCompliment:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
+	lsl	x17, x17, X8SHIFT3BIT
 
 	// setup offset index to address within variable
 	mov	x9, #0
@@ -572,6 +536,8 @@ AddVariable:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
+	lsl	x17, x17, X8SHIFT3BIT
+
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied address
 
@@ -661,6 +627,8 @@ SubtractVariable:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
+	lsl	x17, x17, X8SHIFT3BIT
+
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied address
 
@@ -753,6 +721,8 @@ MultiplyByTen:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
+	lsl	x17, x17, X8SHIFT3BIT
+
 
 	// setup offset index to address within variable
 	mov	x9, #0
@@ -840,6 +810,7 @@ DivideByTen:
 
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
+	lsl	x17, x17, X8SHIFT3BIT
 
 	// setup offset index to address within variable
 	mov	x9, #0

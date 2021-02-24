@@ -73,6 +73,7 @@ PrintVariable:
 	//
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Treat this as a constant in this function
+	lsl	x17, x17, X8SHIFT3BIT
 	//
 	// x11 is constant (address of ACC M.S. World)
 	//
@@ -287,52 +288,58 @@ done_print:
 
 -------------------------------------------------------------- */
 PrintResult:
-	sub	sp, sp, #64		// Reserve 8 words
+	sub	sp, sp, #48		// Reserve 6 words
 	str	x30, [sp, #0]
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]
+	str	x2,  [sp, #32]
+
+	mov	x0, PREVIEW_DIG		// Printing word size
+	bl	Digits_2_Words		// Convert base 10 digit to 64 bit words
+	ldr	x2, =IntMSW_WdPtr	// Top word offset
+	ldr	x2, [x2]
+	add	x2, x2, #1		// point 1 past, then subtract word-size
+	sub	x2, x2, x0		// point at LS word for reduced digits
 
 	// Temporarily save existing variables on the stack
 	// Assign an new value to each one
 
-	sub	sp, sp, #80
-
-	ldr	x1, =Word_Size_Static
-	ldr	x0, [x1]
-	str	x0, [sp, #0]
-	mov	x0, #7
-	str	x0, [x1]
-
-	ldr	x1, =Word_Size_Optimized
-	ldr	x0, [x1]
-	str	x0, [sp, #16]
-	mov	x0, #7
-	str	x0, [x1]
+	sub	sp, sp, #64		// Room for 8 more words
 
 	ldr	x1, =NoSigDig
 	ldr	x0, [x1]
-	str	x0, [sp, #32]
+	str	x0, [sp, #0]
 	mov	x0, #50
 	str	x0, [x1]
 
 	ldr	x1, =NoExtDig
 	ldr	x0, [x1]
-	str	x0, [sp, #40]
+	str	x0, [sp, #8]
 	mov	x0, #0
+	str	x0, [x1]
+
+	ldr	x1, =Word_Size_Static
+	ldr	x0, [x1]
+	str	x0, [sp, #16]
+	mov	x0, #7
+	str	x0, [x1]
+
+	ldr	x1, =Word_Size_Optimized
+	ldr	x0, [x1]
+	str	x0, [sp, #24]
+	mov	x0, #7
 	str	x0, [x1]
 
 	ldr	x1, =FctLSW_WdPtr_Static
 	ldr	x0, [x1]
-	str	x0, [sp, #48]
-	mov	x0, #464
-	str	x0, [x1]
+	str	x0, [sp, #32]
+	str	x2, [x1]		// store FCTLSW from x2 from above
 
 	ldr	x1, =FctLSW_WdPtr_Optimized
 	ldr	x0, [x1]
-	str	x0, [sp, #56]
-	mov	x0, #464
-	str	x0, [x1]
+	str	x0, [sp, #40]
+	str	x2, [x1]		// // store FCTLSW from x2 from above
 
 	//
 	// Print result at reduced accuracy
@@ -345,35 +352,36 @@ PrintResult:
 	//
 	// Restore accuracy varaibles
 	//
-	ldr	x1, =Word_Size_Static
+	ldr	x1, =NoSigDig
 	ldr	x0, [sp, #0]
 	str	x0, [x1]
 
-	ldr	x1, =Word_Size_Optimized
+	ldr	x1, =NoExtDig
+	ldr	x0, [sp, #8]
+	str	x0, [x1]
+
+	ldr	x1, =Word_Size_Static
 	ldr	x0, [sp, #16]
 	str	x0, [x1]
 
-	ldr	x1, =NoSigDig
-	ldr	x0, [sp, #32]
-	str	x0, [x1]
-
-	ldr	x1, =NoExtDig
-	ldr	x0, [sp, #40]
+	ldr	x1, =Word_Size_Optimized
+	ldr	x0, [sp, #24]
 	str	x0, [x1]
 
 	ldr	x1, =FctLSW_WdPtr_Static
-	ldr	x0, [sp, #48]
+	ldr	x0, [sp, #32]
 	str	x0, [x1]
 
 	ldr	x1, =FctLSW_WdPtr_Optimized
-	ldr	x0, [sp, #56]
+	ldr	x0, [sp, #40]
 	str	x0, [x1]
 
-	add	sp, sp, #80
+	add	sp, sp, #64
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
-	add	sp, sp, #64
+	ldr	x2,  [sp, #32]
+	add	sp, sp, #48
 	ret

@@ -81,6 +81,7 @@ PrintVar:
 	ldr	x11, [x11]		// x11 point to variable address
 	ldr	x12, =IntMSW_WdPtr	// Offset pointer
 	ldr	x12, [x12]
+	lsl	x12, x12, X8SHIFT3BIT
 
 	mov	x14, #0			// line feed counter
 	ldr	x13, =Word_Size_Static
@@ -169,8 +170,20 @@ PrintHex:
 	mov	x1, x10, lsl #3		// 8 byte / 64 bit address
 	add	x11, x11, x1		// offset from handle
 	ldr	x11, [x11]		// x11 point at variable
+
+	mov	x0, '['
+	bl	CharOut
+	mov	x0, x11			// This is address of variable
+	bl	Print0xWordHex		// print variable address
+	mov	x0, ']'
+	bl	CharOut
+	mov	x0, ' '
+	bl	CharOut
+
+
 	ldr	x12, =IntMSW_WdPtr	// Offset pointer
 	ldr	x12, [x12]
+	lsl	x12, x12, X8SHIFT3BIT
 
 	mov	x13, #4			// count for words to show
 30:
@@ -228,7 +241,7 @@ PrintHex:
 	ret
 
 .HexTabString:
-	.asciz	"REG   Hand M.S. Word                      (no guard) L.S.W"
+	.asciz	"REG   Hand Address              M.S. Word                                          (no guard) L.S.W"
 	.align 4
 
 
@@ -260,6 +273,7 @@ DebugFillVariable:
 
 	ldr	x0, =IntMSW_WdPtr
 	ldr	x0, [x0]
+	lsl	x0, x0, X8SHIFT3BIT
 	add	x0, x0, #7		// shift to type byte
 	add	x2, x2, x0		// x2 point at mantissa M.S.Byte
 	mov	x0, #0x11		// fill value 11,12,13...
@@ -277,6 +291,7 @@ DebugFillVariable:
 //
 	ldr	x0, =IntMSW_WdPtr
 	ldr	x0, [x0]
+	lsl	x0, x0, X8SHIFT3BIT
 	add	x0, x0, #7		// shift to type 8 bit byte
 	add	x2, x3, x0		// restore X3 from above
 	ldrb	w0, [x2]

@@ -92,6 +92,7 @@ InputVariable:
 	//
 	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Treat this as a constant in this function
+	lsl	x17, x17, X8SHIFT3BIT
 	//
 	// x11 is constant (address of ACC M.S. World)
 	//

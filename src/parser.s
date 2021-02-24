@@ -637,18 +637,25 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
+
+
+//	sub	x11, x11, BYTE_PER_WORD
+//	sub	x11, x11, BYTE_PER_WORD
+
+
+
 	mov	x1, HAND_XREG
 	bl	SetToTwo
-	bl	DivideByTen
-	bl	DivideByTen
-	bl	DivideByTen
-	bl	DivideByTen
+//	bl	DivideByTen
+//	bl	DivideByTen
+//	bl	DivideByTen
+//	bl	DivideByTen
 //	bl	MultiplyByTen
 //	bl	MultiplyByTen
 //	bl	MultiplyByTen
 //	bl	MultiplyByTen
 
-	b	ParseCmd
+//	b	ParseCmd
 
 	// ----------------------
 
@@ -661,7 +668,7 @@ Command_test:
 // 	bl	SetToTwo
 //	bl	Right1Bit
 //	bl	Left1Bit
-//	bl	CopyVariable
+	bl	CopyVariable
 //	bl	ExchangeVariable
 //	bl	TwosCompliment
 //	bl	AddVariable

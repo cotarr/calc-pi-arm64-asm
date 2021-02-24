@@ -294,9 +294,9 @@ Set_Word_Size:
 //
 	ldr	x10, =IntMSW_WdPtr	// Offset Top Word in Integer part
 	ldr	x10, [x10]
-	add	x10, x10, BYTE_PER_WORD	// Point 1 past
-	sub	x10, x10, x0, lsl X8SHIFT3BIT // subtrat no words
-	ldr	x11, =FctLSW_WdPtr_Static
+	add	x10, x10, #1		// Point 1 past
+	sub	x10, x10, x0 // subtrat word size
+ 	ldr	x11, =FctLSW_WdPtr_Static
 	str	x10, [x11]
 	ldr	x11, =FctLSW_WdPtr_Optimized
 	str	x10, [x11]

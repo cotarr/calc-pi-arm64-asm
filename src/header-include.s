@@ -15,9 +15,10 @@
 .set	X8SHIFT3BIT,	0x03	// how many bit to shift for multiply by 8 (word size)
 .set	X16SHIFT4BIT,	0x04	// how many bit to shift for multiply by 8 (word size)
 
-//
+// -------------------------------------------------------------------
 // Variable (integer part) and (fraction part)
-//
+// NOTE: these are too big to be used as ARM64 immediate,
+// so they are also stored in math.s as constants.
 //--------------------------------------------------------------------
 .set	INT_WSIZE, 	0x2
 
@@ -27,10 +28,8 @@
 
 .set	VAR_WSIZE,	(INT_WSIZE + FCT_WSIZE)
 //--------------------------------------------------------------------
-.set	FCT_BSIZE,	(FCT_WSIZE * BYTE_PER_WORD)
 
 .set	VAR_MSW_OFST,	VAR_WSIZE * BYTE_PER_WORD - BYTE_PER_WORD // Offset mantissa most significant word
-.set	VAR_MSB_OFST,	VAR_WSIZE * BYTE_PER_WORD - 1			// Offset mantissa most significant byte
 
 .set	GUARDWORDS,	4
 .set	GUARDBYTES,	(GUARDWORDS*BYTE_PER_WORD)
@@ -39,7 +38,8 @@
 
 .set	INIT_SIG_DIG,	60
 .set	INIT_EXT_DIG,	10
-.set	MINIMUM_DIG,	5				// needed for printing
+.set	MINIMUM_DIG,	5
+.set	PREVIEW_DIG,	50
 
 /*-------------------------
 Variable Handle Numbers

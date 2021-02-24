@@ -411,3 +411,5 @@ The goal for today is to re-organize the calculation of addresses and offset poi
 After yesterday, I have gained a lot of understanding about ARM64 addressing and
 range limitations of immediate values. My goal today is to consolidate these
 address calculations into functions in address.s.
+
+- Preliminary address calculation working in address.s (debugging in progress)
