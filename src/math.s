@@ -28,7 +28,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ----------------------------------------------------------------
 	FP_Initialize
-	Set_No_Word
+	Set_Word_Size
 ------------------------------------------------------------- */
 
    	.include "arch-include.s"	// .arch and .cpu directives
@@ -42,46 +42,56 @@ SOFTWARE.
 /* ------------------------------------------------------------ */
 	// Functions
 	.global	FP_Initialize
-	.global	Set_No_Word
+	.global	Set_Word_Size
 
-	// Sata variables
+	// Data Tables
+	.global RegAddTable
+
+	// Data Configuration Variables
 	.global	NoSigDig, NoExtDig
-	.global	F_No_Word, V_No_Word
-	.global	F_VarLSWOfst, V_VarLSWOfst
-	.global	F_FctLSWOfst, V_FctLSWOfst
+	.global	FctLSW_WdPtr_Static, FctLSW_WdPtr_Optimized
+	.global	Word_Size_Static, Word_Size_Optimized
 
-	// ----------------------------------------------------
-	// These 4 don't change after initialization, treated like constants
-	.global F_VarMSWOfst
-	.global F_IntMSWOfst
-	.global F_IntLSWOfst
-	.global F_FctMSWOfst
-
-	// ----------------------------------------------------
-	// Constants (too big for immediate values)
+	//  Constants, do not change
 	.global IntWSize, FctWsize, VarWSize
+	.global IntMSW_WdPtr
+	.global IntLSW_WdPtr
+	.global FctMSW_WdPtr
+	.global	VarLSW_WdPtr
 	.global	MinimumWord
 	.global WordFFFF, Word8000, Word0000
 	.global Word0123, Word1122
 
+
+// ----------------- Memory Map of Typical Variable ------------
+//
+//			============	Next Variable start here
+//	Int_MS_Word	------------	Top word in Integer Part
+//	     		------------
+//	Int_LS_Word	------------	Bottom word in integer part
+//	Fct_MS_Word	------------	Top Word in Fraction Part
+//			------------
+//			    . . .
+//			------------	Bottom word Optimized Accuracy
+//			------------
+//			------------
+//		    	    . . .
+//	Fct_LS_Word   	------------	Lowest valid word in Fraction Part
+//			------------	Guard word n
+//			------------	Guard word 2
+//			------------	Bottom Word in Fraction part (Static Accuracy)
+//			------------	Allocated, but not used
+//			------------
+//			    . . .
+//			------------
+//		     	------------
+//	Var_LS_Word	=============	Base address of variable (lowest RAM address)
+//
+// ----------------- Memory Map of Typical Variable ------------
+
 // -----------------------------------------------------
 	.data   // Section containing initialized data
 // -----------------------------------------------------
-
-/*  = = = = =   Memory Map of Fixed Point Variable = = = = = =
-
-F_VarMSWOfst Top word of entire variable (equals F_IntMSWOfst)
-F_IntMSWOfst Top word of integer part (equals F_VarMSOfst)
-  (integer data)
-F_IntLSWOfst Bottom word of integer part
-
-F_FctMSWOfst Top word of fraction part
-  (fraction data)
-F_FctLSWOfst Bottom word of fraction part (equals F_VarLSWOfst)
-F_VarLSWOfst Bottom word of entire variable (equals F_FctLSWOfst)
-
- = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = */
-
 
 //
 // Pointers to variables  (word address table)
@@ -159,8 +169,12 @@ RegNameTable:
 IntWSize:	.quad	INT_WSIZE
 FctWsize:	.quad	FCT_WSIZE
 VarWSize:	.quad	VAR_WSIZE
-
 MinimumWord:	.quad	MINIMUM_WORD
+
+IntMSW_WdPtr:	.quad	VAR_WSIZE - 1
+IntLSW_WdPtr:	.quad	VAR_WSIZE - INT_WSIZE
+FctMSW_WdPtr:	.quad	VAR_WSIZE - INT_WSIZE - 1
+VarLSW_WdPtr:	.quad	0
 
 WordFFFF:	.quad	0x0FFFFFFFFFFFFFFFF
 Word8000:	.quad	0x08000000000000000
@@ -200,19 +214,11 @@ FP_Reg7:	.skip	VAR_WSIZE * BYTE_PER_WORD	// If changing, must adjust --> TOPHAND
 NoSigDig:	.skip	BYTE_PER_WORD   // Number of Significant Digits
 NoExtDig:	.skip	BYTE_PER_WORD   // Number of Extended Digits
 
-// F - Fixed precision config variables (does not change to optimize speed)
-F_No_Word:	.skip	BYTE_PER_WORD
-F_VarMSWOfst:	.skip	BYTE_PER_WORD
-F_VarLSWOfst:	.skip	BYTE_PER_WORD
-F_IntMSWOfst:	.skip	BYTE_PER_WORD
-F_IntLSWOfst:	.skip	BYTE_PER_WORD
-F_FctMSWOfst:	.skip	BYTE_PER_WORD
-F_FctLSWOfst:	.skip	BYTE_PER_WORD
+Word_Size_Static:	.skip	BYTE_PER_WORD
+Word_Size_Optimized:	.skip	BYTE_PER_WORD
 
-// V - Variable precision config (can change to increase speed)
-V_No_Word:	.skip	BYTE_PER_WORD
-V_VarLSWOfst:	.skip	BYTE_PER_WORD
-V_FctLSWOfst:	.skip	BYTE_PER_WORD
+FctLSW_WdPtr_Static:	.skip	BYTE_PER_WORD
+FctLSW_WdPtr_Optimized:	.skip	BYTE_PER_WORD
 
 // -----------------------------------------------------
 	.text
@@ -235,48 +241,6 @@ FP_Initialize:
 	str	x1, [sp, #24]
 	str	x2, [sp, #32]
 
-	//
-	// These are constants
-	//
-	// Top of entire variable
-	// Top of Intger part       (same)
-	//
-	// These never change, treat like constant
-	//
-	ldr	x1, =VarWSize
-	ldr	x0, [x1]
-	sub	x0, x0, #1
-	ldr	x2, =F_VarMSWOfst
-	str	x0, [x2]
-	ldr	x2, =F_IntMSWOfst
-	str	x0, [x2]
-	//
-	// Bottom of Integer part
-	//
-	// This never changes, treat like constant
-	//
-	ldr	x1, =VarWSize
-	ldr	x0, [x1]
-	ldr	x2, =IntWSize
-	ldr	x2, [x2]
-	sub	x0, x0, x2
-	ldr	x2, =F_IntLSWOfst
-	str	x0, [x2]
-	//
-	// Top of Fraction Part
-	//
-	// This never changes, treat like constant
-	//
-	ldr	x1, =VarWSize
-	ldr	x0, [x1]
-	sub	x0, x0, #1
-	ldr	x2, =IntWSize
-	ldr	x2, [x2]
-	sub	x0, x0, x2
-	ldr	x2, =F_FctMSWOfst
-	str	x0, [x2]
-	//
-	// Set initial accuracy in digits base 10
 	//
 	ldr	x1, =NoSigDig		// Initial significatn Digits
 	mov	x0, INIT_SIG_DIG
@@ -310,7 +274,7 @@ FP_Initialize:
   Output:  none
 
 --------------------------------------------------------------*/
-Set_No_Word:
+Set_Word_Size:
 	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]
 	str	x29, [sp, #8]
@@ -318,29 +282,23 @@ Set_No_Word:
 	str	x10, [sp, #24]
 	str	x11, [sp, #32]
 	str	x17, [sp, #40]		// VAR_MSW_OFST
-
-	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
 //
-// [F_No_Word] is variable for number 32 bit words in mantissa
+// [Word_Size_Static] is variable for number 32 bit words in mantissa
 //
-	ldr	x11, =F_No_Word		// [F_No_Word] number 64 bit words
+	ldr	x11, =Word_Size_Static		// [Word_Size_Static] number 64 bit words
 	str	x0, [x11]
-	ldr	x11, =V_No_Word	// Default [V_No_Word] value
+	ldr	x11, =Word_Size_Optimized	// Default [Word_Size_Optimized] value
 	str	x0, [x11]
 //
-// [F_VarLSWOfst] is variable to offset to L.S. Word in mantissa
+// [FctLSW_WdPtr_Static] is variable to offset to L.S. Word in mantissa
 //
-	mov	x10, x17		// offset to M.S.Word
+	ldr	x10, =IntMSW_WdPtr	// Offset Top Word in Integer part
+	ldr	x10, [x10]
 	add	x10, x10, BYTE_PER_WORD	// Point 1 past
 	sub	x10, x10, x0, lsl X8SHIFT3BIT // subtrat no words
-	ldr	x11, =F_VarLSWOfst
+	ldr	x11, =FctLSW_WdPtr_Static
 	str	x10, [x11]
-	ldr	x11, =V_VarLSWOfst
-	str	x10, [x11]
-	ldr	x11, =F_FctLSWOfst
-	str	x10, [x11]
-	ldr	x11, =V_FctLSWOfst
+	ldr	x11, =FctLSW_WdPtr_Optimized
 	str	x10, [x11]
 
 	ldr	x30, [sp, #0]		// Restore registers

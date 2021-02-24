@@ -344,7 +344,7 @@ git checkout feff7da331abe0d37f38856384f0539babc8241b
 
 - math-input.s - New file to hold decimal to binary conversion
 - Arranged code, moved MultiplyByTen and DivideByTen to math-subr.s
-- Add debug function D.accv to show accuracy variable current values
+- Add debug function D.vars to show accuracy variable current values
 
 - Added function InputVariable to convert base-10 decimal digits to binary
 
@@ -396,9 +396,18 @@ Fortunately, the selection of new variables will reduce a lot of redundant addre
 calculation, but this will have to be updated by hand. Unfortunately, changing the variable
 names globally broke everything, and it took me the better part of a day to sort it out.
 
-There is still a problem with number input at accuracy over 1000 digits and above, it breaks and 
+There is still a problem with number input at accuracy over 1000 digits and above, it breaks and
 produced gibberish. This will be debugged another time.
 
 ```
 git clone
 ```
+
+### 2021-02-24 - Day 11 (18 days to go until pi day)
+
+- address.s - New file for functions to calculate addresses and offsets for data variables
+
+The goal for today is to re-organize the calculation of addresses and offset pointers.
+After yesterday, I have gained a lot of understanding about ARM64 addressing and
+range limitations of immediate values. My goal today is to consolidate these
+address calculations into functions in address.s.

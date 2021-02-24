@@ -1,5 +1,5 @@
-calc-pi: main.o math.o parser.o iomodule.o help.o util.o practice.o
-	ld -o calc-pi main.o math.o parser.o iomodule.o help.o util.o practice.o -M=calc-pi.map
+calc-pi: main.o math.o parser.o iomodule.o help.o util.o address.o practice.o
+	ld -o calc-pi main.o math.o parser.o iomodule.o help.o util.o address.o practice.o -M=calc-pi.map
 main.o: main.s arch-include.s header-include.s
 	as -g -o main.o main.s -a=main.lst
 math.o: math.s math-subr.s math-output.s math-input.s math-rotate.s math-debug.s arch-include.s header-include.s
@@ -12,6 +12,8 @@ help.o: help.s arch-include.s header-include.s
 	as -g -o help.o help.s -a=help.lst
 util.o: util.s arch-include.s header-include.s
 	as -g -o util.o util.s -a=util.lst
+address.o: address.s arch-include.s header-include.s
+	as -g -o address.o address.s -a=address.lst
 practice.o: practice.s arch-include.s header-include.s
 	as -g -o practice.o practice.s -a=practice.lst
 

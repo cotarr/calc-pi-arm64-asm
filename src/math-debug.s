@@ -79,11 +79,11 @@ PrintVar:
 	mov	x1, x10, lsl X8SHIFT3BIT // 64 bit address size
 	add	x11, x11, x1
 	ldr	x11, [x11]		// x11 point to variable address
-	ldr	x12, =F_VarMSWOfst	// Offset pointer
+	ldr	x12, =IntMSW_WdPtr	// Offset pointer
 	ldr	x12, [x12]
 
 	mov	x14, #0			// line feed counter
-	ldr	x13, =F_No_Word
+	ldr	x13, =Word_Size_Static
 	ldr     x13, [x13]		// x13 mantissa word counter
 10:
 
@@ -169,7 +169,7 @@ PrintHex:
 	mov	x1, x10, lsl #3		// 8 byte / 64 bit address
 	add	x11, x11, x1		// offset from handle
 	ldr	x11, [x11]		// x11 point at variable
-	ldr	x12, =F_VarMSWOfst	// Offset pointer
+	ldr	x12, =IntMSW_WdPtr	// Offset pointer
 	ldr	x12, [x12]
 
 	mov	x13, #4			// count for words to show
@@ -184,7 +184,7 @@ PrintHex:
 //
 //  Print L.S.Word
 //
-	ldr	x0, =F_No_Word
+	ldr	x0, =Word_Size_Static
 	ldr	x0, [x0]
 	sub	x0, x0, GUARDWORDS
 	cmp	x0, #5 // 4 - 1
@@ -197,7 +197,7 @@ PrintHex:
 	mov	x0, #' '
 	bl	CharOut
 
-	ldr	x12, =F_VarLSWOfst
+	ldr	x12, =FctLSW_WdPtr_Static
 	ldr	x12, [x12]
 	add	x12, x12, GUARDBYTES
 
@@ -258,12 +258,12 @@ DebugFillVariable:
 
 	mov	x3, x2			// save for add sign bit option
 
-	ldr	x0, =F_VarMSWOfst
+	ldr	x0, =IntMSW_WdPtr
 	ldr	x0, [x0]
 	add	x0, x0, #7		// shift to type byte
 	add	x2, x2, x0		// x2 point at mantissa M.S.Byte
 	mov	x0, #0x11		// fill value 11,12,13...
-	ldr	x1, =F_No_Word
+	ldr	x1, =Word_Size_Static
 	ldr	x1, [x1]
 	lsl	x1, x1, X8SHIFT3BIT
 
@@ -275,7 +275,7 @@ DebugFillVariable:
 //
 // Option to set sign bit, comment out otherwise
 //
-	ldr	x0, =F_VarMSWOfst
+	ldr	x0, =IntMSW_WdPtr
 	ldr	x0, [x0]
 	add	x0, x0, #7		// shift to type 8 bit byte
 	add	x2, x3, x0		// restore X3 from above

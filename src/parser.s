@@ -80,13 +80,17 @@ Command_Table:
 	.byte	0
 	.quad	Command_cmdlist
 
-	.ascii	"D.accv"
+	.ascii	"D.vars"
 	.byte	0,0
 	.quad	Command_D_accv
 
 	.ascii	"D.fill"
 	.byte	0,0
 	.quad	Command_D_fill
+
+	.ascii	"D.ofst"
+	.byte	0,0
+	.quad	Command_D_ofst
 
 	.ascii	"exit"
 	.byte	0,0,0,0
@@ -155,7 +159,7 @@ OpCodeErrString:	.asciz	"     Input Error: Illegal Op Code.  (Type: cmdlist)\n\n
 // Fatal error messages
 AlignErrorMsg:		.asciz	"Error: Command table not aligned in 128 bit blocks"
 Byte8ErrorMsg:		.asciz	"Error: Command table not zero byte8"
-ACC_Error:		.asciz	"\n     Warning: [F_No_Word] not equal [V_No_Word]\n"
+ACC_Error:		.asciz	"\n     Warning: [Word_Size_Static] not equal [Word_Size_Optimized]\n"
 
 message_input_error:
 			// red text
@@ -258,8 +262,8 @@ ParseCmd:
 	b	FatalError
 30:
 
-	ldr	x0, =F_No_Word
-	ldr	x1, =V_No_Word
+	ldr	x0, =Word_Size_Static
+	ldr	x1, =Word_Size_Optimized
 	ldr	x0, [x0]
 	ldr	x1, [x1]
 	cmp	x0, x1
@@ -496,6 +500,14 @@ Command_D_fill:
 20:
 	.asciz	"D.fill: Error, invalid argument\n\n"
 	.align 4
+
+//
+//
+//
+Command_D_ofst:
+	bl	PrintAddressOffsets
+	b	ParseCmd
+//
 
 //
 //

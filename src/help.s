@@ -72,13 +72,17 @@ Help_Table:
 	.byte	0
 	.quad	Help_cmdlist
 
-	.ascii	"D.accv"
-	.byte	 0, 0
-	.quad	Help_D_accv
-
 	.ascii	"D.fill"
 	.byte	 0, 0
 	.quad	Help_D_fill
+
+	.ascii	"D.ofst"
+	.byte	 0, 0
+	.quad	Help_D_ofst
+
+	.ascii	"D.vars"
+	.byte	 0, 0
+	.quad	Help_D_vars
 
 	.ascii	"exit"
 	.byte	0, 0, 0, 0
@@ -131,10 +135,6 @@ Help_cmdlist:
 	.ascii	"command argument.\n"
 	.byte	0
 
-Help_D_accv:
-	.ascii	"Usage: D.accv\n\n"
-	.ascii	"Description: Show accuracy variables in hex and decimal\n"
-	.byte	0
 
 Help_D_fill:
 	.ascii	"Usage: D.fill <handle>\n\n"
@@ -145,6 +145,16 @@ Help_D_fill:
 	.ascii	"18191A1B1C1D1E1F (next word in mantissa)\n"
 	.ascii	"This is very useful to check low level functions, such as \n"
 	.ascii	"shifting memory left or right 1 bit.\n"
+	.byte	0
+
+Help_D_ofst:
+	.ascii	"Usage: D.ofst\n\n"
+	.ascii	"Description: Show address offsets in hexadecimal\n"
+	.byte	0
+
+Help_D_vars:
+	.ascii	"Usage: D.vars\n\n"
+	.ascii	"Description: Show accuracy variables in hex and decimal\n"
 	.byte	0
 
 Help_exit:

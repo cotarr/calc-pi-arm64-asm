@@ -35,9 +35,9 @@ SOFTWARE.
 	Digits_2_Words
 	PrintByteHex
 	PrintWordHex
+	Print0xWordHex
 	PrintWordB10
 	IntWordInput
-	PrintAccuracyVars
 	PrintFlags
 	ClearRregisters
 	PrintRegisters
@@ -55,9 +55,9 @@ SOFTWARE.
 	.global Digits_2_Words
         .global	PrintByteHex
 	.global	PrintWordHex
+	.global	Print0xWordHex
 	.global PrintWordB10
 	.global	IntWordInput
-	.global PrintAccuracyVars
 	.global PrintFlags
 	.global ClearRegisters
 	.global PrintRegisters
@@ -149,7 +149,7 @@ PrintAccVerbose:
 // Total digits
 	ldr	x0, =sftext4
 	bl	StrOut
-	ldr	x0, =F_No_Word
+	ldr	x0, =Word_Size_Static
 	ldr	x0, [x0]
 	bl	Words_2_Digits
 	bl	PrintWordB10
@@ -175,7 +175,7 @@ PrintAccVerbose:
 // Fraction Part Words
 	ldr	x0, =sftext12
 	bl	StrOut
-	ldr	x0, =F_No_Word
+	ldr	x0, =Word_Size_Static
 	ldr	x0, [x0]
 	sub	x0, x0, GUARDWORDS
 	sub	x0, x0, x1
@@ -190,7 +190,7 @@ PrintAccVerbose:
 // Combined Words
 	ldr	x0, =sftext14
 	bl	StrOut
-	ldr	x0, =[F_No_Word]
+	ldr	x0, =[Word_Size_Static]
 	ldr	x0, [x0]
 	bl	PrintWordB10
 
@@ -302,7 +302,7 @@ SetDigitAccuracy:
 	b.ls	40f
 	mov	x0, FCT_WSIZE
 40:
-	bl	Set_No_Word		// Set all variable word size related vriables
+	bl	Set_Word_Size		// Set all variable word size related vriables
 
 	bl	CROut
 	bl	PrintAccuracy
@@ -499,6 +499,7 @@ PrintByteHex:
 /* **************************************
 
    PrintWordHex
+   Print0xByteHex <-- append "0x" in front of output string
 
    Print 32 bit byte in hexidecimal
 
@@ -507,13 +508,28 @@ PrintByteHex:
    Output: none
 
 ************************************** */
+// entry 1 of 2, stack save must match
+Print0xWordHex:
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+
+	mov	x0, '0'
+	bl	CharOut
+	mov	x0, 'x'
+	bl	CharOut
+	ldr	x0, [sp, #16]		// Restore
+	b.al	10f
+
+// entry 2 of 2, stack save must match
  PrintWordHex:
 	 sub	sp, sp, #32		// Reserve 4 words
 	 str	x30, [sp, #0]
 	 str	x29, [sp, #8]
 	 str	x0,  [sp, #16]
 
-	ldr	x0, [sp, #16]		// Pick 64 bit word from stack
+10:	ldr	x0, [sp, #16]		// Pick 64 bit word from stack
 	lsr	x0, x0, #56		// Shift to align byte
 	and	x0, x0, #0xff		// Mask to 1 byte (8 bit)
 	bl	PrintByteHex		// Print the byte
@@ -687,224 +703,6 @@ Non_numeric_err:
 
 	.align 4
 
-/***************************************
-
-   PrintAccuracyVars
-
-   Input:  none
-
-   Output: none
-
-***************************************/
-PrintAccuracyVars:
-
-	sub	sp, sp, #32		// Reserve 4 words
-	str	x30, [sp, #0]
-	str	x29, [sp, #8]
-	str	x0,  [sp, #16]
-	str	x1,  [sp, #24]
-
-	// Digits
-
-	ldr	x0, =100f
-	bl	StrOut
-	ldr	x1, =NoSigDig
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =101f
-	bl	StrOut
-	ldr	x1, =NoExtDig
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	// Offset pointers
-
-	bl	CROut
-	ldr	x0, =200f
-	bl	StrOut
-	ldr	x1, =F_VarMSWOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =201f
-	bl	StrOut
-	ldr	x1, =F_IntMSWOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =202f
-	bl	StrOut
-	ldr	x1, =F_IntLSWOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =203f
-	bl	StrOut
-	ldr	x1, =F_FctMSWOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =204f
-	bl	StrOut
-	ldr	x1, =F_FctLSWOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =205f
-	bl	StrOut
-	ldr	x1, =V_FctLSWOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =206f
-	bl	StrOut
-	ldr	x1, =F_VarLSWOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =207f
-	bl	StrOut
-	ldr	x1, =V_VarLSWOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	// words
-
-	bl	CROut
-	ldr	x0, =300f
-	bl	StrOut
-	ldr	x1, =F_No_Word
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =301f
-	bl	StrOut
-	ldr	x1, =V_No_Word
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =302f
-	bl	StrOut
-	ldr	x1, =MinimumWord
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	bl	CROut
-	ldr	x0, =303f
-	bl	StrOut
-	ldr	x1, =IntWSize
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =304f
-	bl	StrOut
-	ldr	x1, =FctWsize
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =305f
-	bl	StrOut
-	ldr	x1, =VarWSize
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	bl	CROut
-	bl	CROut
-
-	ldr	x30, [sp, #0]	// Restore registers
-	ldr	x29, [sp, #8]
-	ldr	x0,  [sp, #16]
-	ldr	x1,  [sp, #24]
-	add	sp, sp, #32
-	ret
-
-
-//                 1234567812345678 <-- ruler
-100:	.asciz	"\nNoSigDig       "
-101:	.asciz	"\nNoExtDig       "
-
-200:	.asciz	"\nF_VarMSWOfst   "
-201:	.asciz	"\nF_IntMMWOfst   "
-202:	.asciz	"\nF_IntLMWOfst   "
-203:	.asciz	"\nF_FctMSWOfst   "
-204:	.asciz	"\nF_FctLSWOfst   "
-205:	.asciz	"\nV_FctLSWOfst   "
-206:	.asciz	"\nF_VarLSWOfst   "
-207:	.asciz	"\nV_VarLSWOfst   "
-
-300:	.asciz	"\nF_No_Word      "
-301:	.asciz	"\nV_No_Word      "
-302:	.asciz	"\nMinimumWord    "
-303:	.asciz	"\nIntWsize       "
-304:	.asciz	"\nFctWsize       "
-305:	.asciz	"\nVarWSize       "
-
-	.align 4
 
 /***************************************
 

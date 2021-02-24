@@ -71,7 +71,7 @@ PrintVariable:
 	//
 	// x17 is constant (Offset to M.S. word of variable)
 	//
-	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Treat this as a constant in this function
 	//
 	// x11 is constant (address of ACC M.S. World)
@@ -137,7 +137,7 @@ PrintVariable:
 	bl	ClearVariable
 
 	// Need x9 offset from address of variable L.S.word
-	ldr	x9, =F_No_Word
+	ldr	x9, =Word_Size_Static
 	ldr	x9, [x9]		// x0 is count integer words
 	sub	x9, x9, #1		// subtract 1 now x0 = (words - 1)
 	sub	x9, xzr, x9, lsl X8SHIFT3BIT // (0 - (x9 * 8) = Neg offset to L.S. word
@@ -298,13 +298,13 @@ PrintResult:
 
 	sub	sp, sp, #80
 
-	ldr	x1, =F_No_Word
+	ldr	x1, =Word_Size_Static
 	ldr	x0, [x1]
 	str	x0, [sp, #0]
 	mov	x0, #7
 	str	x0, [x1]
 
-	ldr	x1, =V_No_Word
+	ldr	x1, =Word_Size_Optimized
 	ldr	x0, [x1]
 	str	x0, [sp, #16]
 	mov	x0, #7
@@ -322,13 +322,13 @@ PrintResult:
 	mov	x0, #0
 	str	x0, [x1]
 
-	ldr	x1, =F_VarLSWOfst
+	ldr	x1, =FctLSW_WdPtr_Static
 	ldr	x0, [x1]
 	str	x0, [sp, #48]
 	mov	x0, #464
 	str	x0, [x1]
 
-	ldr	x1, =V_VarLSWOfst
+	ldr	x1, =FctLSW_WdPtr_Optimized
 	ldr	x0, [x1]
 	str	x0, [sp, #56]
 	mov	x0, #464
@@ -345,11 +345,11 @@ PrintResult:
 	//
 	// Restore accuracy varaibles
 	//
-	ldr	x1, =F_No_Word
+	ldr	x1, =Word_Size_Static
 	ldr	x0, [sp, #0]
 	str	x0, [x1]
 
-	ldr	x1, =V_No_Word
+	ldr	x1, =Word_Size_Optimized
 	ldr	x0, [sp, #16]
 	str	x0, [x1]
 
@@ -361,11 +361,11 @@ PrintResult:
 	ldr	x0, [sp, #40]
 	str	x0, [x1]
 
-	ldr	x1, =F_VarLSWOfst
+	ldr	x1, =FctLSW_WdPtr_Static
 	ldr	x0, [sp, #48]
 	str	x0, [x1]
 
-	ldr	x1, =V_VarLSWOfst
+	ldr	x1, =FctLSW_WdPtr_Optimized
 	ldr	x0, [sp, #56]
 	str	x0, [x1]
 

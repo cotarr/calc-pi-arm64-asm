@@ -57,14 +57,14 @@ Right1Bit:
 	str	x12, [sp, #64]		// source 2 address
 	str	x17, [sp, #72]		// VAR_MSW_OFST
 
-	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0
 
 	// set x10 to count of words -1
-	ldr	x10, =F_No_Word		// Pointer to of words in mantissa
+	ldr	x10, =Word_Size_Static		// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in mantissa
 	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
 
@@ -130,14 +130,14 @@ Left1Bit:
 	str	x12, [sp, #64]		// source 2 address
 	str	x17, [sp, #72]		// VAR_MSW_OFST
 
-	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied to address
 
 	// x10 counter to number words
-	ldr	x10, =F_No_Word		// For word counter
+	ldr	x10, =Word_Size_Static		// For word counter
 	ldr	x10, [x10]		// Words in mantissa
 
 	ldr	x11, =RegAddTable	// Pointer to vector table
