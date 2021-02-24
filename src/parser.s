@@ -650,12 +650,16 @@ Command_test:
 //	bl	DivideByTen
 //	bl	DivideByTen
 //	bl	DivideByTen
-//	bl	MultiplyByTen
-//	bl	MultiplyByTen
-//	bl	MultiplyByTen
+//	bl	DivideByTen
+///	bl	DivideByTen
+//	bl	DivideByTen
+
+	bl	MultiplyByTen
+	bl	MultiplyByTen
+	bl	MultiplyByTen
 //	bl	MultiplyByTen
 
-//	b	ParseCmd
+	b	ParseCmd
 
 	// ----------------------
 

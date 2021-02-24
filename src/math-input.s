@@ -76,7 +76,7 @@ InputVariable:
 	str	x2,  [sp, #24]
 	str	x3,  [sp, #32]
 	str	x10, [sp, #40]		// fraction power of 10 counter
-	str	x11, [sp, #48]		// Point ACC M.S. Word
+	str	x11, [sp, #48]		// Point OPR IntMSWord
 	str	x15, [sp, #56]		// Pointer to input string
 	str	x16, [sp, #64]		// Input status flag showing state bits
 	//

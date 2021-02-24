@@ -713,32 +713,16 @@ MultiplyByTen:
 	str	x2,  [sp, #32]
 	str	x3,  [sp, #40]
 	str	x4,  [sp, #48]
-	str	x9,  [sp, #56]
-	str	x10, [sp, #64]
-	str	x11, [sp, #72]
-	str	x12, [sp, #80]
-	str	x17, [sp, #88]		// VAR_MSW_OFST
+	str	x10, [sp, #56]
+	str	x11, [sp, #64]
+	str	x12, [sp, #72]
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
-
-
-	// setup offset index to address within variable
-	mov	x9, #0
+	// Argument x1 contains variable handle number
+	bl	set_x11_to_Fct_LS_Word_Address_Static
 
 	// set x10 to count of words -1
-	ldr	x10, =Word_Size_Static		// Pointer to of words in mantissa
+	ldr	x10, =Word_Size_Static	// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in mantissa
-	sub	x10, x10, #1		// count - 1 ( address calculation nexxt)
-
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // Add (handle * bit size)
-	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, x17		// add VAR_MSW_OFST, point to M.S.Word
-	sub	x11, x11, x10, lsl X8SHIFT3BIT	// X11 Point at L.S. word64
-
-	add	x10, x10, #1		// add back in, x10 = count 64 bit words
 	lsl	x10, x10, #2		// Multiply * 2 to address 32 bit word size
 
 	mov	x12, #10		// constant value, (multiply by 10 from register)
@@ -746,14 +730,13 @@ MultiplyByTen:
 	// Loop back to here
 	//
 10:
-	ldr	w1, [x11, x9]		// Load data32 (upper bit 63-32 are zero by op)
+	ldr	w1, [x11]		// Load data32 (upper bit 63-32 are zero by op)
 	mul	x2, x1, x12		// multiply data32 x 10 = result64
 	lsr	x4, x2, #32		// save remainder shifted to lower half
 	adds	w2, w2, w3		// add previous remainder, carry flag is changed
 	mov	w3, #0			// Need a zero word to add carry flag
 	adc	w3, w4, w3		// Add carry to remainder
-	str	w2, [x11, x9]		// Store 32 bit result
-	add	x9, x9, #4		// decrement index to next 32 bit word
+	str	w2, [x11], #4		// Store 32 bit result, increment half (32 bit) word
 	sub	x10, x10, #1		// decrement counter
 	cbnz	x10, 10b		// loop until all 32 bit word are processed
 	//
@@ -766,15 +749,11 @@ MultiplyByTen:
 	ldr	x2,  [sp, #32]
 	ldr	x3,  [sp, #40]
 	ldr	x4,  [sp, #48]
-	ldr	x9,  [sp, #56]
-	ldr	x10, [sp, #64]
-	ldr	x11, [sp, #72]
-	ldr	x12, [sp, #80]
-	ldr	x17, [sp, #88]
+	ldr	x10, [sp, #56]
+	ldr	x11, [sp, #64]
+	ldr	x12, [sp, #72]
 	add	sp, sp, #96
 	ret
-
-
 
 /* --------------------------------------------------------------
    Divide Variable by 10
@@ -795,36 +774,25 @@ MultiplyByTen:
 
 -------------------------------------------------------------- */
 DivideByTen:
-	sub	sp, sp, #96		// Reserve 12 words
+	sub	sp, sp, #80		// Reserve 10 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]
 	str	x2,  [sp, #32]
 	str	x3,  [sp, #40]
-	str	x9,  [sp, #48]
-	str	x10, [sp, #56]
-	str	x11, [sp, #64]
-	str	x12, [sp, #72]
-	str	x17, [sp, #80]		// VAR_MSW_OFST
+	str	x10, [sp, #48]
+	str	x11, [sp, #56]
+	str	x12, [sp, #64]
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
-
-	// setup offset index to address within variable
-	mov	x9, #0
-
-	// set x10 to count of words -1
-	ldr	x10, =Word_Size_Static		// Pointer to of words in mantissa
+	// set x10 to (count of 32 bit half-words) -1
+	ldr	x10, =Word_Size_Static	// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in mantissa
 	lsl	x10, x10, #2		// Multiply two word32 per word64
 	sub	x10, x10, #1		// Count - 1
 
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // Add (handle * bit size)
-	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, x17		// add VAR_MSW_OFST, point to M.S.Word
+	// Argument x1 is variable handle number
+	bl	set_x11_to_Int_MS_Word_Address
 
 	mov	x12, #10		// constant value, (divide by 10 from register)
 
@@ -839,12 +807,11 @@ DivideByTen:
 	// Loop back to here for each operation
 	//
 10:
-	ldr	w1, [x11, x9]		// Load data32 (upper bit 63-32 are zero by op)
+	ldr	w1, [x11]		// Load data32 (upper bit 63-32 are zero by op)
 	orr	x1, x1, x3, lsl #32	// Combine remainder32:data32 with shifted OR
 	udiv	x2, x1, x12		// x2 quot = (lastrem:data] / 10
 	msub	x3, x2, x12, x1 	// x3 rem  = (lastrem:data) - (quot * 10)
-	str	w2, [x11, x9]		// store 32 bit result
-	sub	x9, x9, #4		// decrement index to next 32 bit word
+	str	w2, [x11], #-4		// store 32 bit result, decrement address by half word (32 bit)
 	sub	x10, x10, #1		// decrement counter
 	cbnz	x10, 10b		// loop until all 32 bit words are processed
 	//
@@ -856,10 +823,8 @@ DivideByTen:
 	ldr	x1,  [sp, #24]
 	ldr	x2,  [sp, #32]
 	ldr	x3,  [sp, #40]
-	ldr	x9,  [sp, #48]
-	ldr	x10, [sp, #56]
-	ldr	x11, [sp, #64]
-	ldr	x12, [sp, #72]
-	ldr	x17, [sp, #80]
-	add	sp, sp, #96
+	ldr	x10, [sp, #48]
+	ldr	x11, [sp, #56]
+	ldr	x12, [sp, #64]
+	add	sp, sp, #80
 	ret
