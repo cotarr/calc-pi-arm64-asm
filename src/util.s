@@ -149,14 +149,14 @@ PrintAccVerbose:
 // Total digits
 	ldr	x0, =sftext4
 	bl	StrOut
-	ldr	x0, =No_Word
+	ldr	x0, =F_No_Word
 	ldr	x0, [x0]
 	bl	Words_2_Digits
 	bl	PrintWordB10
 // Available digits
 	ldr	x0, =sftext5
 	bl	StrOut
-	ldr	x0, =FctWsize
+	ldr	x0, =VarWSize
 	ldr	x0, [x0]
 	sub	x0, x0, GUARDWORDS
 	bl	Words_2_Digits
@@ -175,7 +175,7 @@ PrintAccVerbose:
 // Fraction Part Words
 	ldr	x0, =sftext12
 	bl	StrOut
-	ldr	x0, =No_Word
+	ldr	x0, =F_No_Word
 	ldr	x0, [x0]
 	sub	x0, x0, GUARDWORDS
 	sub	x0, x0, x1
@@ -190,7 +190,7 @@ PrintAccVerbose:
 // Combined Words
 	ldr	x0, =sftext14
 	bl	StrOut
-	ldr	x0, =[No_Word]
+	ldr	x0, =[F_No_Word]
 	ldr	x0, [x0]
 	bl	PrintWordB10
 
@@ -702,49 +702,11 @@ PrintAccuracyVars:
 	str	x30, [sp, #0]
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
-	str	x1,  [sp, #16]
+	str	x1,  [sp, #24]
+
+	// Digits
 
 	ldr	x0, =100f
-	bl	StrOut
-	ldr	x1, =No_Word
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =101f
-	bl	StrOut
-	ldr	x1, =No_Byte
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =102f
-	bl	StrOut
-	ldr	x1, =D_Flt_Word
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =103f
-	bl	StrOut
-	ldr	x1, =D_Flt_Byte
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =104f
 	bl	StrOut
 	ldr	x1, =NoSigDig
 	ldr	x0, [x1]
@@ -754,7 +716,7 @@ PrintAccuracyVars:
 	ldr	x0, [x1]
 	bl	PrintWordB10
 
-	ldr	x0, =105f
+	ldr	x0, =101f
 	bl	StrOut
 	ldr	x1, =NoExtDig
 	ldr	x0, [x1]
@@ -764,7 +726,124 @@ PrintAccuracyVars:
 	ldr	x0, [x1]
 	bl	PrintWordB10
 
-	ldr	x0, =106f
+	// Offset pointers
+
+	bl	CROut
+	ldr	x0, =200f
+	bl	StrOut
+	ldr	x1, =F_VarMSWOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =201f
+	bl	StrOut
+	ldr	x1, =F_IntMSWOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =202f
+	bl	StrOut
+	ldr	x1, =F_IntLSWOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =203f
+	bl	StrOut
+	ldr	x1, =F_FctMSWOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =204f
+	bl	StrOut
+	ldr	x1, =F_FctLSWOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =205f
+	bl	StrOut
+	ldr	x1, =V_FctLSWOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =206f
+	bl	StrOut
+	ldr	x1, =F_VarLSWOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =207f
+	bl	StrOut
+	ldr	x1, =V_VarLSWOfst
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	// words
+
+	bl	CROut
+	ldr	x0, =300f
+	bl	StrOut
+	ldr	x1, =F_No_Word
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =301f
+	bl	StrOut
+	ldr	x1, =V_No_Word
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	ldr	x0, =302f
+	bl	StrOut
+	ldr	x1, =MinimumWord
+	ldr	x0, [x1]
+	bl	PrintWordHex
+	mov	x0, #0x20
+	bl	CharOut
+	ldr	x0, [x1]
+	bl	PrintWordB10
+
+	bl	CROut
+	ldr	x0, =303f
 	bl	StrOut
 	ldr	x1, =IntWSize
 	ldr	x0, [x1]
@@ -774,7 +853,7 @@ PrintAccuracyVars:
 	ldr	x0, [x1]
 	bl	PrintWordB10
 
-	ldr	x0, =107f
+	ldr	x0, =304f
 	bl	StrOut
 	ldr	x1, =FctWsize
 	ldr	x0, [x1]
@@ -784,7 +863,7 @@ PrintAccuracyVars:
 	ldr	x0, [x1]
 	bl	PrintWordB10
 
-	ldr	x0, =108f
+	ldr	x0, =305f
 	bl	StrOut
 	ldr	x1, =VarWSize
 	ldr	x0, [x1]
@@ -794,131 +873,37 @@ PrintAccuracyVars:
 	ldr	x0, [x1]
 	bl	PrintWordB10
 
-	ldr	x0, =109f
-	bl	StrOut
-	ldr	x1, =IntBSize
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =110f
-	bl	StrOut
-	ldr	x1, =FctBsize
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =111f
-	bl	StrOut
-	ldr	x1, =VarBSize
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =112f
-	bl	StrOut
-	ldr	x1, =LSWOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =113f
-	bl	StrOut
-	ldr	x1, =D_Flt_LSWO
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =114f
-	bl	StrOut
-	ldr	x1, =VarMswOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =115f
-	bl	StrOut
-	ldr	x1, =VarMsbOfst
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =116f
-	bl	StrOut
-	ldr	x1, =InitNoWord
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
-
-	ldr	x0, =117f
-	bl	StrOut
-	ldr	x1, =MinimumWord
-	ldr	x0, [x1]
-	bl	PrintWordHex
-	mov	x0, #0x20
-	bl	CharOut
-	ldr	x0, [x1]
-	bl	PrintWordB10
+	bl	CROut
 	bl	CROut
 
-	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x30, [sp, #0]	// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
-	ldr	x1,  [sp, #16]
+	ldr	x1,  [sp, #24]
 	add	sp, sp, #32
 	ret
 
 
 //                 1234567812345678 <-- ruler
-100:	.asciz	"\nNo_Word        "
-101:	.asciz	"\nNo_Byte        "
+100:	.asciz	"\nNoSigDig       "
+101:	.asciz	"\nNoExtDig       "
 
-102:	.asciz	"\nD_Flt_Word     "
-103:	.asciz	"\nD_Flt_Byte     "
+200:	.asciz	"\nF_VarMSWOfst   "
+201:	.asciz	"\nF_IntMMWOfst   "
+202:	.asciz	"\nF_IntLMWOfst   "
+203:	.asciz	"\nF_FctMSWOfst   "
+204:	.asciz	"\nF_FctLSWOfst   "
+205:	.asciz	"\nV_FctLSWOfst   "
+206:	.asciz	"\nF_VarLSWOfst   "
+207:	.asciz	"\nV_VarLSWOfst   "
 
-104:	.asciz	"\nNoSigDig       "
-105:	.asciz	"\nNoExtDig       "
+300:	.asciz	"\nF_No_Word      "
+301:	.asciz	"\nV_No_Word      "
+302:	.asciz	"\nMinimumWord    "
+303:	.asciz	"\nIntWsize       "
+304:	.asciz	"\nFctWsize       "
+305:	.asciz	"\nVarWSize       "
 
-106:	.asciz	"\nIntWsize       "
-107:	.asciz	"\nFctWsize       "
-108:	.asciz	"\nVarWsize       "
-
-109:	.asciz	"\nIntBsize       "
-110:	.asciz	"\nFctBsize       "
-111:	.asciz	"\nVarBsize       "
-
-112:	.asciz	"\nLSWOfst        "
-113:	.asciz	"\nD_FltLSWO      "
-
-114:	.asciz	"\nVarMswOfst     "
-115:	.asciz	"\nVarMsbOfst     "
-
-116:	.asciz	"\nInitNoWord     "
-117:	.asciz	"\nMinimumWord    "
 	.align 4
 
 /***************************************

@@ -30,10 +30,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ----------------------------------------------------------------
+	InitializeIO
 	KeyIn
 	StrOut
 	CharOut
 	CharOutFmt
+	CharOutFmtInit
 	CROut
 	ClrScr
 ------------------------------------------------------------- */
@@ -43,7 +45,16 @@ SOFTWARE.
 
 /* ------------------------------------------------------------ */
 
-	.bss    // Section containing uninitialized data
+	.global InitializeIO
+	.global KeyIn
+	.global	StrOut
+	.global	CharOut
+	.global CharOutFmt
+	.global CharOutFmtInit
+	.global	CROut
+	.global	ClrScr
+
+.bss    // Section containing uninitialized data
 
 OutChar: // Character output buffer (1 64 bit word)
 	.skip	8
@@ -52,17 +63,67 @@ KeyBuf:	// Keyboard Input Buffer
 	.set	KeyBufLen, 0x100
 	.skip	KeyBufLen
 
+PrintVarFormatMode:	.skip	BYTE_PER_WORD
+OutCharacterCounter:	.skip	BYTE_PER_WORD
+OutParagraphCounter:	.skip	BYTE_PER_WORD
+OutLineCounter:		.skip	BYTE_PER_WORD
+OutCharacterLimit:	.skip	BYTE_PER_WORD
+OutParagraphLimit:	.skip	BYTE_PER_WORD
+OutLineLimit:		.skip	BYTE_PER_WORD
 /* ------------------------------------------------------------ */
 
 	.text
 	.align	4
 
-	.global KeyIn
-	.global	StrOut
-	.global	CharOut
-	.global CharOutFmt
-	.global	CROut
-	.global	ClrScr
+
+/******************************************************
+  Initialize I/O
+
+  Input: none
+
+  Output: none
+
+  Called at program start
+
+*******************************************************/
+InitializeIO:
+
+	sub	sp, sp, #48		// Reserve 6 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x1, [sp, #24]
+	str	x2, [sp, #32]
+
+	ldr	x1, =PrintVarFormatMode
+	mov	x0, #0
+	str	x0, [x1]
+
+	ldr	x1, =OutCharacterLimit
+	mov	x0, #10
+	str	x0, [x1]
+
+	ldr	x1, =OutParagraphLimit
+	mov	x0, #10
+	str	x0, [x1]
+
+	ldr	x1, =OutLineLimit
+	mov	x0, #10
+	str	x0, [x1]
+
+	ldr	x0, =10f
+	bl	StrOut
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0, [sp, #16]
+	ldr	x1, [sp, #24]
+	ldr	x2, [sp, #32]
+	add	sp, sp, #48
+	ret
+
+10:	.ascii "I/O Initialized\n\n"
+	.align 4
 
 /******************************************************
   KeyIn - Read text line from console input
@@ -176,7 +237,7 @@ CharOut:
 	ret
 
 /* *****************************************************
-  CharOut - Output character in x0 to stdout
+  CharOutFmt - Output character in x0 to stdout
 
   Input: low byte of x0 contains ASCII character to print
 
@@ -191,8 +252,74 @@ CharOutFmt:
 	str	x1, [sp, #24]
 	str	x2, [sp, #32]
 
-	// temporary output, formatting TBD
+	mov	x2, x0			// save character to print
+
+	ldr	x1, =PrintVarFormatMode
+	ldr	x0, [x1]
+	tst	x0, #1
+	b.ne	10f
+	mov	x0, x2
 	bl	CharOut
+	b.al	99f
+10:
+	ldr	x1, =OutCharacterLimit
+	ldr	x1, [x1]
+	ldr	x0, =OutCharacterCounter
+	ldr	x0, [x0]
+	add	x0, x0, #1
+	cmp	x1, x0
+	b.hi	19f
+	ldr	x1, =OutCharacterCounter
+	mov	x0, #0
+	str	x0, [x1]
+	mov	x0, #' '
+	bl	CharOut
+	b.al	20f
+19:
+	ldr	x1, =OutCharacterCounter
+	str	x0, [x1]
+	b.al	50f
+20:
+	ldr	x1, =OutParagraphLimit
+	ldr	x1, [x1]
+	ldr	x0, =OutParagraphCounter
+	ldr	x0, [x0]
+	add	x0, x0, #1
+	cmp	x1, x0
+	b.hi	29f
+	ldr	x1, =OutParagraphCounter
+	mov	x0, #0
+	str	x0, [x1]
+	mov	x0, #0x0a	// 0x0a = line feed
+	bl	CharOut
+	b.al	30f
+29:
+	ldr	x1, =OutParagraphCounter
+	str	x0, [x1]
+	b.al	50f
+30:
+	ldr	x1, =OutLineLimit
+	ldr	x1, [x1]
+	ldr	x0, =OutLineCounter
+	ldr	x0, [x0]
+	add	x0, x0, #1
+	cmp	x1, x0
+	b.hi	39f
+	ldr	x1, =OutLineCounter
+	mov	x0, #0
+	str	x0, [x1]
+	mov	x0, #0x0a	// 0x0a = line feed
+	bl	CharOut
+	bl	CharOut
+	b.al	50f
+39:
+	ldr	x1, =OutLineCounter
+	str	x0, [x1]
+50:
+	// Output the character
+	mov	x0, x2
+	bl	CharOut
+99:
 
 	ldr	x30, [sp, #0]		// restore registers
 	ldr	x29, [sp, #8]
@@ -201,6 +328,44 @@ CharOutFmt:
 	ldr	x2,  [sp, #32]
 	add	sp, sp, #64
 	ret
+
+/* *****************************************************
+  CharOutFmtInit - Output character in x0 to stdout
+
+  Input: x0 is format mode
+  	bit 0 --> 0=disabled, 1=enabled
+
+  Output: none
+
+****************************************************** */
+CharOutFmtInit:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x1, [sp, #24]
+	str	x2, [sp, #32]
+
+	ldr	x1, =PrintVarFormatMode
+	str	x0, [x1]
+
+	mov	x0, #-1
+	ldr	x1, =OutCharacterCounter
+	str	x0, [x1]
+	mov	x0, #0
+	ldr	x1, =OutParagraphCounter
+	str	x0, [x1]
+	ldr	x1, =OutLineCounter
+	str	x0, [x1]
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	add	sp, sp, #64
+	ret
+
 
 /* *****************************************************
   CROut - Output Return and LineFeed to stdout
@@ -257,7 +422,7 @@ Clear_String:
 	.byte	0			// End of string
 	.align 4
 
-/* ------------------------------------------------------------ */
+// ------------------------------------------------------------
 	.data
 
 	.end

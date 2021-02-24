@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-02-21
+	Last edit: 2021-02-23
 
 	PrintCommandList
 	ParseCmd
@@ -155,7 +155,7 @@ OpCodeErrString:	.asciz	"     Input Error: Illegal Op Code.  (Type: cmdlist)\n\n
 // Fatal error messages
 AlignErrorMsg:		.asciz	"Error: Command table not aligned in 128 bit blocks"
 Byte8ErrorMsg:		.asciz	"Error: Command table not zero byte8"
-ACC_Error:		.asciz	"\n     Warning: [No_Word] not equal [D_Flt_Word]\n"
+ACC_Error:		.asciz	"\n     Warning: [F_No_Word] not equal [V_No_Word]\n"
 
 message_input_error:
 			// red text
@@ -258,8 +258,8 @@ ParseCmd:
 	b	FatalError
 30:
 
-	ldr	x0, =No_Word
-	ldr	x1, =D_Flt_Word
+	ldr	x0, =F_No_Word
+	ldr	x1, =V_No_Word
 	ldr	x0, [x0]
 	ldr	x1, [x1]
 	cmp	x0, x1
@@ -552,7 +552,9 @@ Command_print:
 	bl	CopyVariable
 
 	bl	CROut
-	bl	PrintVariable
+	mov	x0, #1			// enable format print
+	bl	CharOutFmtInit		// Initialize counters for formatting
+	bl	PrintVariable		// print variable
 	b	ParseCmd
 
 Command_sigfigs:
@@ -625,7 +627,13 @@ Command_test:
 
 	mov	x1, HAND_XREG
 	bl	SetToTwo
-//	bl	DivideByTen
+	bl	DivideByTen
+	bl	DivideByTen
+	bl	DivideByTen
+	bl	DivideByTen
+//	bl	MultiplyByTen
+//	bl	MultiplyByTen
+//	bl	MultiplyByTen
 //	bl	MultiplyByTen
 
 	b	ParseCmd

@@ -6,7 +6,7 @@
 	David Bolenbaugh
 
 	Created:   2021-02-14
-	Last Edit: 2021-02-21
+	Last Edit: 2021-02-23
 --------------------------------------------------------------
 MIT License
 
@@ -49,6 +49,8 @@ main:
 //
 	bl	ClrScr			// Terminal setup
 	bl	Help_Welcome
+
+	bl	InitializeIO		// Setup operating system I/O
 
 	bl	FP_Initialize		// Initialize Variab les
 

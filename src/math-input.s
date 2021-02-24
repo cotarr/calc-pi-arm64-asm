@@ -90,7 +90,7 @@ InputVariable:
 	//
 	// x17 is constant (Offset to M.S. word of variable)
 	//
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Treat this as a constant in this function
 	//
 	// x11 is constant (address of ACC M.S. World)

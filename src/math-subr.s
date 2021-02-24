@@ -74,14 +74,14 @@ ClearVariable:
 	str	x11, [sp, #48]		// source 1 address
 	str	x17, [sp, #56]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied address
 
 	// set x10 count number of words
-	ldr	x10, =No_Word		// Word counter
+	ldr	x10, =F_No_Word		// Word counter
 	ldr	x10, [x10]		// Words in mantissa
 
 	// set x11 address of variable m.s. word
@@ -125,7 +125,7 @@ SetToOne:
 	str	x11,  [sp, #32]		// Address Pointer
 	str	x17, [sp, #40]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	bl	ClearVariable		// Handle in x1 preserved
@@ -168,7 +168,7 @@ SetToTwo:
 	str	x11,  [sp, #32]		// Address Pointer
 	str	x17, [sp, #40]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	bl	ClearVariable		// Handle in x1 preserved
@@ -216,14 +216,14 @@ CopyVariable:
 	str	x12, [sp, #64]		// source 2 address
 	str	x17, [sp, #72]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied address
 
 	// x10 count number of words
-	ldr	x10, =No_Word		// For word counter
+	ldr	x10, =F_No_Word		// For word counter
 	ldr	x10, [x10]		// Words in mantissa
 
 	// x11 pointer to variable m.s. word
@@ -280,7 +280,7 @@ ExchangeVariable:
 	str	x12, [sp, #64]		// source 2 address
 	str	x17, [sp, #72]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 
@@ -288,7 +288,7 @@ ExchangeVariable:
 	mov	x9, #0			// offset applied address
 
 	// x10 counter to number words
-	ldr	x10, =No_Word		// For word counter
+	ldr	x10, =F_No_Word		// For word counter
 	ldr	x10, [x10]		// Words in mantissa
 	// x11 pointer to source 1 variable
 	ldr	x11, =RegAddTable	// Pointer to vector table
@@ -340,7 +340,7 @@ TestIfNegative:
 	str	x11, [sp, #24]		// source 1 address
 	str	x17, [sp, #32]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	//
@@ -389,14 +389,14 @@ TestIfZero:
 	str	x11, [sp, #40]		// source 1 address
 	str	x17, [sp, #48]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied to address
 
 	// set x10 count number of words
-	ldr	x10, =No_Word		// Word counter
+	ldr	x10, =F_No_Word		// Word counter
 	ldr	x10, [x10]		// Words in mantissa
 	sub	x10, x10, #1		// Count - 1
 
@@ -429,7 +429,7 @@ TestIfZero:
 	cbnz	x10, 10b		// Done Guard words?
 15:
 	// set x10 count number of other (non-guard) words
-	ldr	x10, =No_Word		// Word counter
+	ldr	x10, =F_No_Word		// Word counter
 	ldr	x10, [x10]		// Words in mantissa
 	sub	x10, x10, GUARDWORDS	// Subtract guard words, already checked
 20:
@@ -488,6 +488,8 @@ TestIfZero:
   -original num.
   ==============
 
+TODO: Make 3 argument, S1 s2 D1
+
 ---------------------------------------------------------------- */
 TwosCompliment:
 	sub	sp, sp, #64		// Reserve 8 words
@@ -500,14 +502,14 @@ TwosCompliment:
 	str	x11, [sp, #48]		// source 1 address
 	str	x17, [sp, #56]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0
 
 	// set x10 to count of words -1
-	ldr	x10, =No_Word		// Pointer to of words in mantissa
+	ldr	x10, =F_No_Word		// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in mantissa
 	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
 
@@ -568,13 +570,13 @@ AddVariable:
 	str	x13, [sp, #80]		// desitination address
 	str	x17, [sp, #88]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied address
 
 	// xet x10 to number of words - 1
-	ldr	x10, =No_Word		// Pointer to of words in mantissa
+	ldr	x10, =F_No_Word		// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in manti
 	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
 
@@ -657,13 +659,13 @@ SubtractVariable:
 	str	x13, [sp, #80]		// desitination address
 	str	x17, [sp, #88]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 	// setup offset index to address within variable
 	mov	x9, #0			// offset applied address
 
 	// xet x10 to number of words - 1
-	ldr	x10, =No_Word		// Pointer to of words in mantissa
+	ldr	x10, =F_No_Word		// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in manti
 	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
 
@@ -749,14 +751,14 @@ MultiplyByTen:
 	str	x12, [sp, #80]
 	str	x17, [sp, #88]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0
 
 	// set x10 to count of words -1
-	ldr	x10, =No_Word		// Pointer to of words in mantissa
+	ldr	x10, =F_No_Word		// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in mantissa
 	sub	x10, x10, #1		// count - 1 ( address calculation nexxt)
 
@@ -836,14 +838,14 @@ DivideByTen:
 	str	x12, [sp, #72]
 	str	x17, [sp, #80]		// VAR_MSW_OFST
 
-	ldr	x17, =VarMswOfst	// VAR_MSW_OFST is to big for immediate value
+	ldr	x17, =F_VarMSWOfst	// VAR_MSW_OFST is to big for immediate value
 	ldr	x17, [x17]		// Store in register as constant value
 
 	// setup offset index to address within variable
 	mov	x9, #0
 
 	// set x10 to count of words -1
-	ldr	x10, =No_Word		// Pointer to of words in mantissa
+	ldr	x10, =F_No_Word		// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in mantissa
 	lsl	x10, x10, #2		// Multiply two word32 per word64
 	sub	x10, x10, #1		// Count - 1

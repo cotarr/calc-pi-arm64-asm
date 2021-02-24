@@ -60,7 +60,7 @@ PrintVar:
 
 	mov	x10, x1			// Save register handle
 	ldr	x0, =RegNameTable	// Point to start of address table
-	mov	x1, x10, LSL #3		// 8 byte per fixed length string
+	mov	x1, x10, LSL X8SHIFT3BIT // 8 byte per fixed length string
 	add	x0, x0, x1
 	bl	StrOut			// Print variable name
 	mov	x0, #' '
@@ -76,15 +76,16 @@ PrintVar:
 	// Print all of mantissa in words
 	//
 	ldr	x11, =RegAddTable	// x11 address vector table
-	mov	x1, x10, lsl #3		// 64 bit address size
+	mov	x1, x10, lsl X8SHIFT3BIT // 64 bit address size
 	add	x11, x11, x1
 	ldr	x11, [x11]		// x11 point to variable address
-	ldr	x12,=VAR_MSW_OFST	// Offset pointer
+	ldr	x12, =F_VarMSWOfst	// Offset pointer
+	ldr	x12, [x12]
 
 	mov	x14, #0			// line feed counter
-	ldr	x13, =No_Word
+	ldr	x13, =F_No_Word
 	ldr     x13, [x13]		// x13 mantissa word counter
-	10:
+10:
 
 	ldr     x0, [x11, x12]		// get word
 	bl	PrintWordHex		// output hex word
@@ -95,7 +96,7 @@ PrintVar:
 	b.le	20f			// need line feed?
 	bl	CROut			// yes, CR LF
 	mov	x14, #0			// reset counter
-	20:
+20:
 	sub	x12, x12, #BYTE_PER_WORD // pointer to next word
 	subs	x13, x13, #1		// decrement word counter
 	b.ne	10b	  		// Done? no... loop
@@ -168,7 +169,8 @@ PrintHex:
 	mov	x1, x10, lsl #3		// 8 byte / 64 bit address
 	add	x11, x11, x1		// offset from handle
 	ldr	x11, [x11]		// x11 point at variable
-	ldr	x12, =VAR_MSW_OFST	// Offset pointer
+	ldr	x12, =F_VarMSWOfst	// Offset pointer
+	ldr	x12, [x12]
 
 	mov	x13, #4			// count for words to show
 30:
@@ -182,6 +184,12 @@ PrintHex:
 //
 //  Print L.S.Word
 //
+	ldr	x0, =F_No_Word
+	ldr	x0, [x0]
+	sub	x0, x0, GUARDWORDS
+	cmp	x0, #5 // 4 - 1
+	b.lo	40f
+
 	mov	x0, #'.'
 	bl	CharOut
 	mov	x0, #'.'
@@ -189,19 +197,18 @@ PrintHex:
 	mov	x0, #' '
 	bl	CharOut
 
-	ldr	x12, =LSWOfst
+	ldr	x12, =F_VarLSWOfst
 	ldr	x12, [x12]
-	add	x12, x12, #GUARDBYTES
+	add	x12, x12, GUARDBYTES
 
 	ldr	x0, [x11, x12]
 	bl	PrintWordHex
-	mov	x0, #' '
-	bl	CharOut
-
+40:
 	bl	CROut
 //
 //  increment counter and  loop back
 //
+
 	add	x10, x10, #1		// Increment handle to next variable
 	cmp	x10, #TOPHAND		// shall we do all?
 	b.le	10b
@@ -245,28 +252,33 @@ DebugFillVariable:
 	str	x3,  [sp, #40]
 
 	ldr	x2, =RegAddTable	// Address of vector table
-	mov	x0, x1, lsl #3		// offset = index * size
+	mov	x0, x1, lsl X8SHIFT3BIT // offset = index * size
 	add	x2, x2, x0
 	ldr	x2, [x2]		// x2 holds variable address
 
 	mov	x3, x2			// save for add sign bit option
 
-	ldr	x0, =VAR_MSB_OFST
+	ldr	x0, =F_VarMSWOfst
+	ldr	x0, [x0]
+	add	x0, x0, #7		// shift to type byte
 	add	x2, x2, x0		// x2 point at mantissa M.S.Byte
 	mov	x0, #0x11		// fill value 11,12,13...
-	ldr	x1, =No_Byte
-	ldr	x1, [x1]		// counter
+	ldr	x1, =F_No_Word
+	ldr	x1, [x1]
+	lsl	x1, x1, X8SHIFT3BIT
 
 10:
-	strb	w0, [x2], #-1		// store ane decrement
+	strb	w0, [x2], #-1		// store and decrement
 	add	x0, x0, #1
 	subs	x1, x1, #1
 	b.ne	10b
 //
 // Option to set sign bit, comment out otherwise
 //
-	ldr	x0, =VAR_MSB_OFST
-	add	x2, x3, x0
+	ldr	x0, =F_VarMSWOfst
+	ldr	x0, [x0]
+	add	x0, x0, #7		// shift to type 8 bit byte
+	add	x2, x3, x0		// restore X3 from above
 	ldrb	w0, [x2]
 	orr	w0, w0, #0x80
 //////////////////// Set Sign Bit //////////////////////////////

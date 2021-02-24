@@ -381,5 +381,24 @@ Op Code: 0.1
 - Input Decimal to binary and Output binary to base-10 decimal are working now.
 
 ```
+git clone 27f3dfa83583c4d55c1a7b44d5785812d7c2a3c2
+```
+- Added function PrintResult to be used with each command entry show intermediate result
+- Added ChartOutFmt to implement formatted output
+
+At this point, I found that my variables used to set accuracy level (number of significant digits)
+were poorly chosen. There are issues with immediate values having range limitation
+on the number of bits. I set out and re-engineered the config variables that
+are defined or declared  as memory variable. This allows full 64 bit number values
+to be pulled from RAM when the immediate range is limited for a function.
+
+Fortunately, the selection of new variables will reduce a lot of redundant address and pointer
+calculation, but this will have to be updated by hand. Unfortunately, changing the variable
+names globally broke everything, and it took me the better part of a day to sort it out.
+
+There is still a problem with number input at accuracy over 1000 digits and above, it breaks and 
+produced gibberish. This will be debugged another time.
+
+```
 git clone
 ```
