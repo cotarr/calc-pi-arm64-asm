@@ -43,6 +43,11 @@ SOFTWARE.
 	.global	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
 	.global set_x9_to_Var_LS_Word_Addr_Offset
 
+	.global set_x10_to_Word_Size_Static
+	.global set_x10_to_Word_Size_Static_Minus_1
+	.global	set_x10_to_Word_Size_Optimized
+	.global set_x10_to_Word_Size_Optimized_Minus_1
+
 	.global	set_x11_to_Int_MS_Word_Address
 	.global	set_x11_to_Int_LS_Word_Address
 	.global	set_x11_to_Fct_MS_Word_Address
@@ -142,6 +147,36 @@ set_x9_to_Fct_LS_Word_Addr_Offset_Optimized:
 set_x9_to_Var_LS_Word_Addr_Offset:
 	mov	x9, #0
 	ret
+
+/* ---------------------------------------
+  Obtain variable size
+
+  Input: none
+
+  Output: x10 holds a count of 64 bit words
+----------------------------------------- */
+
+set_x10_to_Word_Size_Static:
+	ldr	x10, =Word_Size_Static	// Pointer to of words variable3
+	ldr	x10, [x10]		// Number words in manti
+	ret
+
+set_x10_to_Word_Size_Static_Minus_1:
+	ldr	x10, =Word_Size_Static	// Pointer to of words variable
+	ldr	x10, [x10]		// Number words in manti
+	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
+	ret
+set_x10_to_Word_Size_Optimized:
+	ldr	x10, =Word_Size_Optimized // Pointer to of words variable
+	ldr	x10, [x10]		// Number words in manti
+	ret
+
+set_x10_to_Word_Size_Optimized_Minus_1:
+	ldr	x10, =Word_Size_Optimized // Pointer to of words variable
+	ldr	x10, [x10]		// Number words in manti
+	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
+	ret
+
 
 
 /* ---------------------------------------

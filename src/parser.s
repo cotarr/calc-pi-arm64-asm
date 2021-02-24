@@ -644,8 +644,8 @@ Command_test:
 
 
 
-	mov	x1, HAND_XREG
-	bl	SetToTwo
+//	mov	x1, HAND_XREG
+//	bl	SetToTwo
 //	bl	DivideByTen
 //	bl	DivideByTen
 //	bl	DivideByTen
@@ -654,12 +654,12 @@ Command_test:
 ///	bl	DivideByTen
 //	bl	DivideByTen
 
-	bl	MultiplyByTen
-	bl	MultiplyByTen
-	bl	MultiplyByTen
+//	bl	MultiplyByTen
+//	bl	MultiplyByTen
+//	bl	MultiplyByTen
 //	bl	MultiplyByTen
 
-	b	ParseCmd
+//	b	ParseCmd
 
 	// ----------------------
 
@@ -667,12 +667,14 @@ Command_test:
 	mov	x2, #4
 	mov	x3, #5
 
+//	bl	SubtractVariable
+	bl	AddVariable
 //	bl	ClearVariable
 //	bl	SetToOne
 // 	bl	SetToTwo
 //	bl	Right1Bit
 //	bl	Left1Bit
-	bl	CopyVariable
+//	bl	CopyVariable
 //	bl	ExchangeVariable
 //	bl	TwosCompliment
 //	bl	AddVariable

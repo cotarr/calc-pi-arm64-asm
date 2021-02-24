@@ -516,8 +516,6 @@ TwosCompliment:
             x2 = Handle number of source 2 variable
 	    x3 = Handle number of destination variable
   Output:   none
-
-
 ---------------------------------------------------------------- */
 AddVariable:
 	sub	sp, sp, #96		// Reserve 12 words
@@ -532,40 +530,19 @@ AddVariable:
 	str	x11, [sp, #64]		// source 1 address
 	str	x12, [sp, #72]		// source 2 address
 	str	x13, [sp, #80]		// desitination address
-	str	x17, [sp, #88]		// VAR_MSW_OFST
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
+	bl	set_x9_to_Var_LS_Word_Addr_Offset
 
-	// setup offset index to address within variable
-	mov	x9, #0			// offset applied address
+	bl	set_x10_to_Word_Size_Static_Minus_1
 
-	// xet x10 to number of words - 1
-	ldr	x10, =Word_Size_Static		// Pointer to of words in mantissa
-	ldr	x10, [x10]		// Number words in manti
-	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
+	// Argument x1 contains variable handle
+	bl	set_x11_to_Fct_LS_Word_Address_Static
 
-	// set variable pointers x11 souce 1
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// (handle * 8 bit)
-	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, x17	// x11 pointer to m.s. word
-	sub	x11, x11, x10, lsl #3	// X11 Pointer to l.s. word
+	// Argument x2 contains variable handle
+	bl	set_x12_to_Fct_LS_Word_Address_Static
 
-	// set variable pointer x12 source 2
-	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x2, lsl #3	// (handle * 8 bit)
-	ldr	x12, [x12]		// x12 pointer to variable address
-	add	x12, x12, x17	// x12 pointer to m.s. word
-	sub	x12, x12, x10, lsl #3	// x12 Pointer to l.s. word
-
-	// set variable pointer x13 destination
-	ldr	x13, =RegAddTable	// Pointer to vector table
-	add	x13, x13, x3, lsl #3	// (handle * 8 bit)
-	ldr	x13, [x13]		// x13 pointer to variable address
-	add	x13, x13, x17	// x13 pointer to m.s. word
-	sub	x13, x13, x10, lsl #3	// x13 Pointer to l.s. word
+	// Argument x3 contains variable handle
+	bl	set_x13_to_Fct_LS_Word_Address_Static
 
 	// First iteration does not add carry
 	ldr	x1, [x11, x9]		// Source 1 word
@@ -595,7 +572,6 @@ AddVariable:
 	ldr	x11, [sp, #64]
 	ldr	x12, [sp, #72]
 	ldr	x13, [sp, #80]
-	ldr	x17, [sp, #88]
 	add	sp, sp, #96
 	ret
 
@@ -623,40 +599,20 @@ SubtractVariable:
 	str	x11, [sp, #64]		// source 1 address
 	str	x12, [sp, #72]		// source 2 address
 	str	x13, [sp, #80]		// desitination address
-	str	x17, [sp, #88]		// VAR_MSW_OFST
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
+	// This is a zero value
+	bl	set_x9_to_Var_LS_Word_Addr_Offset
 
-	// setup offset index to address within variable
-	mov	x9, #0			// offset applied address
+	bl	set_x10_to_Word_Size_Static_Minus_1
 
-	// xet x10 to number of words - 1
-	ldr	x10, =Word_Size_Static		// Pointer to of words in mantissa
-	ldr	x10, [x10]		// Number words in manti
-	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
+	// Argument x1 contains variable handle
+	bl	set_x11_to_Fct_LS_Word_Address_Static
 
-	// set variable pointers x11 souce 1
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// (handle * 8 bit)
-	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, x17	// x11 pointer to m.s. word
-	sub	x11, x11, x10, lsl #3	// X11 Pointer to l.s. word
+	// Argument x2 contains variable handle
+	bl	set_x12_to_Fct_LS_Word_Address_Static
 
-	// set variable pointer x12 source 2
-	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x2, lsl #3	// (handle * 8 bit)
-	ldr	x12, [x12]		// x12 pointer to variable address
-	add	x12, x12, x17	// x12 pointer to m.s. word
-	sub	x12, x12, x10, lsl #3	// x12 Pointer to l.s. word
-
-	// set variable pointer x13 destination
-	ldr	x13, =RegAddTable	// Pointer to vector table
-	add	x13, x13, x3, lsl #3	// (handle * 8 bit)
-	ldr	x13, [x13]		// x13 pointer to variable address
-	add	x13, x13, x17	// x13 pointer to m.s. word
-	sub	x13, x13, x10, lsl #3	// x13 Pointer to l.s. word
+	// Argument x3 contains variable handle
+	bl	set_x13_to_Fct_LS_Word_Address_Static
 
 	// First iteration does not add carry
 	ldr	x1, [x11, x9]		// Source 1 word
@@ -686,7 +642,6 @@ SubtractVariable:
 	ldr	x11, [sp, #64]
 	ldr	x12, [sp, #72]
 	ldr	x13, [sp, #80]
-	ldr	x17, [sp, #88]
 	add	sp, sp, #96
 	ret
 
