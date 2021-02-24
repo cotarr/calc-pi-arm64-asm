@@ -50,6 +50,21 @@ SOFTWARE.
 	.global	set_x11_to_Fct_LS_Word_Address_Optimized
 	.global	set_x11_to_Var_LS_Word_Address
 
+	.global	set_x12_to_Int_MS_Word_Address
+	.global	set_x12_to_Int_LS_Word_Address
+	.global	set_x12_to_Fct_MS_Word_Address
+	.global	set_x12_to_Fct_LS_Word_Address_Static
+	.global	set_x12_to_Fct_LS_Word_Address_Optimized
+	.global	set_x12_to_Var_LS_Word_Address
+
+	.global	set_x13_to_Int_MS_Word_Address
+	.global	set_x13_to_Int_LS_Word_Address
+	.global	set_x13_to_Fct_MS_Word_Address
+	.global	set_x13_to_Fct_LS_Word_Address_Static
+	.global	set_x13_to_Fct_LS_Word_Address_Optimized
+	.global	set_x13_to_Var_LS_Word_Address
+
+
 	.global	PrintAddressOffsets
 	.global PrintAccuracyVars
 
@@ -138,6 +153,8 @@ set_x9_to_Var_LS_Word_Addr_Offset:
 
 ----------------------------------------- */
 
+// ----------------- x1  returnin x11 ---------------
+
 set_x11_to_Int_MS_Word_Address:
 	stp	x9, x30, [sp, -16]!	// preserve return address
 	ldr	x11, =RegAddTable	// Pointer to vector table
@@ -189,6 +206,116 @@ set_x11_to_Var_LS_Word_Address:
 	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
 	ret
+
+// ----------------- x2  returnin x12 ---------------
+
+set_x12_to_Int_MS_Word_Address:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x12, =RegAddTable	// Pointer to vector table
+	add	x12, x12, x2, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x12, [x12]		// x12 pointer to variable address
+	bl	set_x9_to_Int_MS_Word_Addr_Offset
+	add	x12, x12, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x12_to_Int_LS_Word_Address:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x12, =RegAddTable	// Pointer to vector table
+	add	x12, x12, x2, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x12, [x12]		// x12 pointer to variable address
+	bl	set_x9_to_Int_LS_Word_Addr_Offset
+	add	x12, x12, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x12_to_Fct_MS_Word_Address:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x12, =RegAddTable	// Pointer to vector table
+	add	x12, x12, x2, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x12, [x12]		// x12 pointer to variable address
+	bl	set_x9_to_Fct_MS_Word_Addr_Offset
+	add	x12, x12, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x12_to_Fct_LS_Word_Address_Static:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x12, =RegAddTable	// Pointer to vector table
+	add	x12, x12, x2, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x12, [x12]		// x12 pointer to variable address
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	add	x12, x12, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x12_to_Fct_LS_Word_Address_Optimized:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x12, =RegAddTable	// Pointer to vector table
+	add	x12, x12, x2, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x12, [x12]		// x12 pointer to variable address
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
+	add	x12, x12, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x12_to_Var_LS_Word_Address:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x12, =RegAddTable	// Pointer to vector table
+	add	x12, x12, x2, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x12, [x12]		// x12 pointer to variable address
+	ret
+
+// ----------------- x3  returnin x13 ---------------
+
+set_x13_to_Int_MS_Word_Address:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x13, =RegAddTable	// Pointer to vector table
+	add	x13, x13, x3, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x13, [x13]		// x13 pointer to variable address
+	bl	set_x9_to_Int_MS_Word_Addr_Offset
+	add	x13, x13, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x13_to_Int_LS_Word_Address:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x13, =RegAddTable	// Pointer to vector table
+	add	x13, x13, x3, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x13, [x13]		// x13 pointer to variable address
+	bl	set_x9_to_Int_LS_Word_Addr_Offset
+	add	x13, x13, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x13_to_Fct_MS_Word_Address:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x13, =RegAddTable	// Pointer to vector table
+	add	x13, x13, x3, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x13, [x13]		// x13 pointer to variable address
+	bl	set_x9_to_Fct_MS_Word_Addr_Offset
+	add	x13, x13, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x13_to_Fct_LS_Word_Address_Static:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x13, =RegAddTable	// Pointer to vector table
+	add	x13, x13, x3, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x13, [x13]		// x13 pointer to variable address
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	add	x13, x13, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x13_to_Fct_LS_Word_Address_Optimized:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x13, =RegAddTable	// Pointer to vector table
+	add	x13, x13, x3, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x13, [x13]		// x13 pointer to variable address
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
+	add	x13, x13, x9
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
+set_x13_to_Var_LS_Word_Address:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x13, =RegAddTable	// Pointer to vector table
+	add	x13, x13, x3, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x13, [x13]		// x13 pointer to variable address
+	ret
+
+
 
 /* -------------------------------------
   PrintAddressOffsets
