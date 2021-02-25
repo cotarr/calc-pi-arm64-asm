@@ -685,9 +685,25 @@ Command_sigfigs:
 	.asciz	"\nCommand Parser: sigfigs command invalid argument\n\n"
 	.align 4
 
+Command_version:
+	ldr	x0,=versionString
+	bl	StrOut
+	b	ParseCmd
+
+versionString:
+	.asciz	"\n     Version 1.0 - Debugging in progress\n\n"
+	.align 4
+
+
+// ===============================
 //
+//    T E S T    F U N C T I O N
 //
+// This is the last function to
+// find easily during editing.
 //
+// ===============================
+
 Command_test:
 	stp	x0, x1, [sp, -16]!	// preserve pointer
 	ldr	x0, =TestMessageString
@@ -704,64 +720,28 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
-//	bl	PrintResult
-//	b	ParseCmd
 
-//	sub	x11, x11, BYTE_PER_WORD
-//	sub	x11, x11, BYTE_PER_WORD
+	mov	x1, #5
+	mov	x2, #6
+	mov	x3, #7
 
-//	mov	x1, HAND_XREG
-//	mov	x3, HAND_XREG
-//	bl	SetToTwo
-//	bl	TwosCompliment
 //	bl	TestIfZero
-
-//	bl	DivideByTen
-//	bl	DivideByTen
-//	bl	DivideByTen
-//	bl	DivideByTen
-//	bl	DivideByTen
-///	bl	DivideByTen
-//	bl	DivideByTen
-
-//	bl	MultiplyByTen
-//	bl	MultiplyByTen
-//	bl	MultiplyByTen
-//	bl	MultiplyByTen
-
-//	b	ParseCmd
-
-	// ----------------------
-
-	mov	x1, #3
-	mov	x2, #4
-	mov	x3, #5
-
-//	bl	SubtractVariable
-// 	bl	AddVariable
+//	bl	TestIfNegative
 //	bl	ClearVariable
 //	bl	SetToOne
 // 	bl	SetToTwo
-	bl	CopyVariable
+//	bl	CopyVariable
 //	bl	Right1Bit
 //	bl	Left1Bit
 //	bl	ExchangeVariable
 //	bl	TwosCompliment
-//	bl	AddVariable
+//	bl	SubtractVariable
+// 	bl	AddVariable
+//	bl	DivideByTen
+//	bl	MultiplyByTen
 
+//	bl	PrintResult
 	b	ParseCmd
-
-	// --------------------------
-
-	// Argument string located in x0
-	bl	IntWordInput		// x0=value no error then x1=0
-
-	cmp	x1, #0
-	b.ne	22f			// Error, skip processing
-	bl	PrintWordHex		// This is processing...
-	bl	CROut
-	bl	PrintWordB10
-22:
 
 	// -------- End Test ------------------
 
@@ -773,15 +753,6 @@ TestMessageString:
 	.asciz	"\nTest Command execution:\n\n"
 NoTestString:
 	.asciz	"No test is select in parser.s\n\n"
-	.align 4
-
-Command_version:
-	ldr	x0,=versionString
-	bl	StrOut
-	b	ParseCmd
-
-versionString:
-	.asciz	"\n     Version 1.0 - Debugging in progress\n\n"
 	.align 4
 
 CodeEnd:

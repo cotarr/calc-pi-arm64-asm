@@ -4,7 +4,7 @@
 	Logical shift bit, btyes and words
 
 	Created:   2021-02-10
-	Last edit: 2021-02-19
+	Last edit: 2021-02-25
 
 ----------------------------------------------------------------
 MIT License
@@ -28,9 +28,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-----------------------------------------------------------------
-	Right1Bit
-	Left1Bit
+
 ------------------------------------------------------------- */
 
 	.global	Right1Bit
@@ -54,48 +52,29 @@ Right1Bit:
 	str	x9,  [sp, #40]		// word index
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
-	str	x12, [sp, #64]		// source 2 address
-	str	x17, [sp, #72]		// VAR_MSW_OFST
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
+	bl	set_x10_to_Word_Size_Static_Minus_1
 
-	// setup offset index to address within variable
-	mov	x9, #0
-
-	// set x10 to count of words -1
-	ldr	x10, =Word_Size_Static		// Pointer to of words in mantissa
-	ldr	x10, [x10]		// Number words in mantissa
-	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
-
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // Add (handle * bit size)
-	ldr	x11, [x11]		// X11 pointer to variable address
-		// get VAR_MSW_OFST (too big for immediate value)
-	add	x11, x11, x17		// add VAR_MSW_OFST, point to M.S.Word
-	sub	x11, x11, x10, lsl X8SHIFT3BIT // X11 Pointer to l.s. word
-
-
-	// Setup x12 to point 1 word higher than x11
-	add	x12, x11, BYTE_PER_WORD // x12 pointer l.s. word + 1 word
+	// Argument x1 contains variable handle number
+	bl	set_x11_to_Fct_LS_Word_Address_Static
 
 	// fetch word to setup loop entry
-	ldr	x1, [x11, x9]		// x1 is first word to shift right
+	ldr	x1, [x11]		// x1 is first word to shift right
 10:
-	ldr	x2, [x12, x9]		// x2 is next (adjacent) word to shift
+	ldr	x2, [x11, BYTE_PER_WORD] // x2 is next (adjacent left) word to shift
 	lsr	x1, x1, #1		// Shift right 1 bit (0 into m.s. bit)
 	add	x1, x1, x2, lsl #63	// Add l.s. bit next word as m.s. bit
-	str	x1, [x11, x9]		// Store shifted word
+	str	x1, [x11], BYTE_PER_WORD // Store shifted word
 	// increment and loop
 	mov	x1, x2			// No need fetch from memory again
-	add	x9, x9, #8		// increment word pointer
 	sub	x10, x10, #1		// decrement word counter
 	cbnz	x10, 10b		// non-zero, loop back
-
+	//
+	// last word is special case of end word
+	//
 	// most significant word, sign bit copies into next bit when rotating right
 	asr	x1, x1, #1		// Shift right 1 bit (sign bit into m.s. bit)
-	str	x1, [x11, x9]		// and store most significant word
+	str	x1, [x11]		// and store most significant word
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
@@ -105,8 +84,6 @@ Right1Bit:
 	ldr	x9,  [sp, #40]
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
-	ldr	x12, [sp, #64]
-	ldr	x17, [sp, #72]
 	add	sp, sp, #80
 	ret
 
@@ -128,39 +105,27 @@ Left1Bit:
 	str	x9,  [sp, #40]		// word index
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
-	str	x12, [sp, #64]		// source 2 address
-	str	x17, [sp, #72]		// VAR_MSW_OFST
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
+	bl	set_x10_to_Word_Size_Static_Minus_1
 
-	// setup offset index to address within variable
-	mov	x9, #0			// offset applied to address
+	// Argument x1 is variable handle number
+	bl	set_x11_to_Int_MS_Word_Address
 
-	// x10 counter to number words
-	ldr	x10, =Word_Size_Static		// For word counter
-	ldr	x10, [x10]		// Words in mantissa
-
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl #3	// (handle * 8 bit)
-	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, x17		// add VAR_MSW_OFST, point to M.S. Word
-
-	// Setup x12 to point 1 word lower than x11
-	sub	x12, x11, BYTE_PER_WORD // x12 pointer l.s. word - 1 word
-
-	ldr	x1, [x11, x9]		// x0 is first word to shift left
+	ldr	x1, [x11]
 10:
-	ldr	x2, [x12, x9]		// x1 is next (adjacent) word to shift
-	lsl	x1, x1, #1		// Shift right 1 bit (0 into m.s. bit)
+	ldr	x2, [x11, -BYTE_PER_WORD] // x1 is next (adjacent right) word to shift
+	lsl	x1, x1, #1		// Shift left 1 bit (0 into m.s. bit)
 	add	x1, x1, x2, lsr #63	// Add l.s. bit next word as m.s. bit
-	str	x1, [x11, x9]
+	str	x1, [x11], -BYTE_PER_WORD
 	// increment and loop
 	mov	x1, x2			// No need fetch from memory again
-	sub	x9, x9, BYTE_PER_WORD	// increment word pointer
 	sub	x10, x10, #1		// decrement word counter
 	cbnz	x10, 10b		// non-zero, loop back
+	//
+	// Last word is special case, no adjacent word on right
+	//
+	lsl	x1, x1, #1
+	str	x1, [x11]
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
@@ -170,7 +135,5 @@ Left1Bit:
 	ldr	x9,  [sp, #40]
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
-	ldr	x12, [sp, #64]
-	ldr	x17, [sp, #72]
 	add	sp, sp, #80
 	ret

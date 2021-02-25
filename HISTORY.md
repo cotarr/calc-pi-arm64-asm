@@ -427,3 +427,4 @@ git cone 88c904e9643fea472503de0aef034be49a59b5ea
 
 - Finished code clean up in file math-subr.s
 - Added commands "+", "-", and "chs" to help test program with RPN calculation.
+- Code clean up address pointers in rotate.s
