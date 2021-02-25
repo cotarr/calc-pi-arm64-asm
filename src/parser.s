@@ -161,10 +161,6 @@ Command_TableEnd:
 
 	.align 4
 
-StackPtrSnapshot:
-// TODO what size?
-	.quad	0
-
 StackPtrErrorMsg:	.asciz	"\nWarning: Stack pointer moving.\n"
 PromptString:		.asciz	"Op Code: "
 OpCodeErrString:	.asciz	"     Input Error: Illegal Op Code.  (Type: cmdlist)\n\n"
@@ -183,6 +179,19 @@ message_input_error:
 			.byte 0
 
 			.align 4
+
+StackPtrSnapshot:
+	.quad	0
+	.quad	0
+	.quad	0
+	.quad	0
+
+	.align 4
+// ---------------------------------------
+// unitialized allocatred memory
+//	.bss
+
+
 //----------------------------------------
 	.text
 	.align 4
@@ -247,21 +256,65 @@ PrintCommandList:
 
 *********************************************/
 ParseCmd:
-//
-// Check stack pointer for unexpected change
-//
+// -------------------------------------
+// This function is an infinite loop
+// All execution of command will jump
+// back to here
+//--------------------------------------
+	// Check stack pointer for unexpected change
+	//    1) Compare SP value
+	//    2) Compare first word [sp]
+	//    2) Compare second word [sp,+8]
+	// If error pring message
 	ldr	x9, =StackPtrSnapshot	// x9 pointer
-	ldr	x10, [x9]		// last stack pointer address
-	tst	x10, x10		// Initialized? (zero?)
-	b.ne	10f			// next, skip init
-	mov	x10, sp
-	str	x10, [x9]		// Initialize stack pointer snapshot
+	ldr	x0, [x9, #16]		// last stack pointer address
+	cbnz	x0, 10f			// Initialized? (zero?)
+
+	// Value at program start are saved here
+	mov	x0, sp
+	str	x0, [x9, #0]		// Stack pointer value
+	ldr	x0, [sp, #0]
+	str	x0, [x9, #8]		// Stack contents word 0
+	ldr	x0, [sp, #8]
+	str	x0, [x9, #16]		// stack contents word 1
+	b.al	20f
+
 10:
-	mov	x9, sp			// current
-	cmp	x10, x9			// changed from last?
-	b.eq	20f			// no, expected result
-	ldr	x10, =StackPtrErrorMsg	// Error, stack is growing
+	mov	x1, #1			// code
+	mov	x2, sp			// Code 1 Stack pointe value
+	ldr	x3, [x9, #0]
+	cmp	x2, x3
+	b.ne	19f
+	mov	x1, #2			// code
+	ldr	x2, [sp, #0]		// Code 1 Stack word 0
+	ldr	x3, [x9, #8]
+	cmp	x2, x3
+	b.ne	19f
+	mov	x1, #3			// code
+	ldr	x2, [sp, #8]		// Code 3 Stack word 1 (address)
+	ldr	x3, [x9, #16]
+	cmp	x2, x3
+	b.ne	19f
+	b.al	20f
+
+19:	// Error, stack pointer or contents are changing
+	ldr	x0, =StackPtrErrorMsg	// Error, stack is growing
 	bl	StrOut
+	mov	x0, #'('
+	bl	CharOut
+	mov	x0, x1			// error code
+	bl	PrintWordB10
+	mov	x0, #')'
+	bl	CharOut
+	mov	x0, #' '
+	bl	CharOut
+	mov	x0, x2
+	bl	Print0xWordHex
+	mov	x0, #' '
+	bl	CharOut
+	mov	x0, x3
+	bl	Print0xWordHex
+	bl	CROut
 20:
 //
 // Check command table alignment
@@ -720,6 +773,13 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
+	add	sp, sp, #16
+
+;;	mov	x0, sp
+;;	bl	Print0xWordHex
+;;	bl	CROut
+
+	b	ParseCmd
 
 	mov	x1, #5
 	mov	x2, #6

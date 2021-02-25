@@ -428,3 +428,9 @@ git cone 88c904e9643fea472503de0aef034be49a59b5ea
 - Finished code clean up in file math-subr.s
 - Added commands "+", "-", and "chs" to help test program with RPN calculation.
 - Code clean up address pointers in rotate.s
+- Command parser monitoring of stack pointer to detect program code errors
+
+After spending so much time yesterday due to a mis-matched stack
+manipulation, the command parser now check SP value and the
+first two word value on the stack to see if they change. If change
+is detected, an error is printed.
