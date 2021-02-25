@@ -72,6 +72,10 @@ Command_Table:
 	.byte	0,0,0,0,0,0,0
 	.quad	Command_minus_symbol
 
+	.ascii	"/"
+	.byte	0,0,0,0,0,0,0
+	.quad	Command_slash_symbol
+
 	.ascii	"."
 	.byte	0,0,0,0,0,0,0
 	.quad	Command_print
@@ -546,6 +550,38 @@ Command_plus_symbol:
 //
 //
 //
+Command_slash_symbol:
+	mov	x1, HAND_YREG
+	mov	x2, HAND_OPR
+	bl	CopyVariable
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+
+	bl	DivideVariable
+
+	mov	x1, HAND_ACC
+	mov	x2, HAND_XREG
+	bl	CopyVariable
+
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	mov	x1, HAND_TREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_TREG
+	bl	ClearVariable
+
+	bl	PrintResult
+	b	ParseCmd
+
+//
+//
+//
 Command_chs:
 	mov	x1, HAND_XREG
 	mov	x3, HAND_XREG
@@ -687,6 +723,7 @@ Command_print:
 	mov	x0, #1			// enable format print
 	bl	CharOutFmtInit		// Initialize counters for formatting
 	bl	PrintVariable		// print variable
+	bl	CROut
 	b	ParseCmd
 
 Command_sigfigs:

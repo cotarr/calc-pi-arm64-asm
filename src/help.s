@@ -68,6 +68,10 @@ Help_Table:
 	.byte	0,0,0,0,0,0,0
 	.quad	Help_minus_symbol
 
+	.ascii	"/"
+	.byte	0,0,0,0,0,0,0
+	.quad	Help_slash_symbol
+
 	.ascii	"clrstk"
 	.byte	0,0
 	.quad	Help_clrstk
@@ -132,22 +136,29 @@ Help_Table_End:
 Help_plus_symbol:
 	.ascii	"Usage: +\n\n"
 	.ascii	"Description: Floating Point Addition\n"
-	.ascii	"Additon: XReg = Yreg + Xreg\n"
+	.ascii	"Parser:: XReg = YReg + XReg\n"
 	.ascii	"Stack: YReg --> XReg, then roll stack down.\n"
 	.byte	0
 
 Help_minus_symbol:
 	.ascii	"Usage: -\n\n"
 	.ascii	"Description: Floating Point Subtraction\n"
-	.ascii	"Additon: XReg = Yreg - Xreg\n"
+	.ascii	"Parser: XReg = YReg - XReg\n"
+	.ascii	"Stack: YReg --> XReg, then roll stack down.\n"
+	.byte	0
+
+Help_slash_symbol:
+	.ascii	"Usage: /\n\n"
+	.ascii	"Description: Floating Point Division\n"
+	.ascii	"Parser: XReg = YReg - XReg\n"
 	.ascii	"Stack: YReg --> XReg, then roll stack down.\n"
 	.byte	0
 
 Help_chs:
 	.ascii	"Usage: chs\n\n"
 	.ascii	"Description: Change Sign of XReg\n"
-	.ascii	"Performs Two's Compliment on Xreg\n"
-	.ascii	"Stack: No rotation\n"
+	.ascii	"Parser: xReg = Yreg / Xreg\n"
+	.ascii	"Stack: YReg --> XReg, then roll stack down\n"
 	.byte	0
 
 Help_clrstk:

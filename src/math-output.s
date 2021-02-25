@@ -262,7 +262,6 @@ PrintVariable:
 
 done_print:
 	bl	CROut
-	bl	CROut
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
@@ -357,7 +356,7 @@ PrintResult:
 	//
 	// Print result at reduced accuracy
 	//
-
+/*
 	mov	x1, HAND_XREG
 	mov	x2, HAND_ACC
 	bl	CopyVariable
@@ -366,6 +365,10 @@ PrintResult:
 	mov	x0, #0			// formatting disabled
 	bl	CharOutFmtInit		// initialize format output
 	bl	PrintVariable		// print variable unformatted
+*/
+	bl	CROut
+	bl	PrintStack
+	bl	CROut
 
 	//
 	// Restore accuracy varaibles
@@ -398,6 +401,65 @@ PrintResult:
 	str	x0, [x1]
 
 	add	sp, sp, #80
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x3,  [sp, #40]
+	add	sp, sp, #64
+	ret
+
+
+PrintStack:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]
+	str	x2,  [sp, #32]
+	str	x3,  [sp, #40]
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+	ldr	x0, =RegNameTable
+	add	x0, x0, #40		// handle 5 * 8 bit
+	bl	StrOut
+	mov	x0, #0			// formatting disabled
+	bl	CharOutFmtInit		// initialize format output
+	bl	PrintVariable		// print variable unformatted
+
+	mov	x1, HAND_YREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+	ldr	x0, =RegNameTable
+	add	x0, x0, #48		// handle 6 * 8 bit
+	bl	StrOut
+	mov	x0, #0			// formatting disabled
+	bl	CharOutFmtInit		// initialize format output
+	bl	PrintVariable		// print variable unformatted
+
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+	ldr	x0, =RegNameTable
+	add	x0, x0, #56		// handle 7 * 8 bit
+	bl	StrOut
+	mov	x0, #0			// formatting disabled
+	bl	CharOutFmtInit		// initialize format output
+	bl	PrintVariable		// print variable unformatted
+
+	mov	x1, HAND_TREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+	ldr	x0, =RegNameTable
+	add	x0, x0, #64		// handle 8 * 8 bit
+	bl	StrOut
+	mov	x0, #0			// formatting disabled
+	bl	CharOutFmtInit		// initialize format output
+	bl	PrintVariable		// print variable unformatted
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
