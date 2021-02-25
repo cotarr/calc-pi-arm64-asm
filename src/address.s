@@ -240,6 +240,7 @@ set_x11_to_Var_LS_Word_Address:
 	ldr	x11, =RegAddTable	// Pointer to vector table
 	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x11, [x11]		// x11 pointer to variable address
+	ldp	x9, x30, [sp], 16	// restore return address
 	ret
 
 // ----------------- x2  returnin x12 ---------------
@@ -294,6 +295,7 @@ set_x12_to_Var_LS_Word_Address:
 	ldr	x12, =RegAddTable	// Pointer to vector table
 	add	x12, x12, x2, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x12, [x12]		// x12 pointer to variable address
+	ldp	x9, x30, [sp], 16	// restore return address
 	ret
 
 // ----------------- x3  returnin x13 ---------------
@@ -348,6 +350,7 @@ set_x13_to_Var_LS_Word_Address:
 	ldr	x13, =RegAddTable	// Pointer to vector table
 	add	x13, x13, x3, lsl X8SHIFT3BIT // handle --> index into table
 	ldr	x13, [x13]		// x13 pointer to variable address
+	ldp	x9, x30, [sp], 16	// restore return address
 	ret
 
 

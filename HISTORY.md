@@ -421,5 +421,9 @@ defects that were difficult to debug. Further testing is needed
 tomorrow to make sure there are no other issues.
 
 ```
-git cone (tbd)
+git cone 88c904e9643fea472503de0aef034be49a59b5ea
 ```
+### 2021-02-25 - Day 11 (18 days to go until pi day)
+
+- Finished code clean up in file math-subr.s
+- Added commands "+", "-", and "chs" to help test program with RPN calculation.

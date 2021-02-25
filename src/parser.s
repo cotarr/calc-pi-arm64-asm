@@ -64,9 +64,21 @@ PrintCommandList
 //
 //------------------------
 Command_Table:
+	.ascii	"+"
+	.byte	0,0,0,0,0,0,0
+	.quad	Command_plus_symbol
+
+	.ascii	"-"
+	.byte	0,0,0,0,0,0,0
+	.quad	Command_minus_symbol
+
 	.ascii	"."
 	.byte	0,0,0,0,0,0,0
 	.quad	Command_print
+
+	.ascii	"chs"
+	.byte	0,0,0,0,0
+	.quad	Command_chs
 
 	.ascii	"clrstk"
 	.byte	0,0
@@ -431,7 +443,63 @@ ParseCmdEnd:
     Command Handlers
 -------------------------------------------------------------*/
 	.align 4
+//
+//
+//
 
+Command_minus_symbol:
+	mov	x1, HAND_YREG
+	mov	x2, HAND_XREG
+	mov	x3, HAND_XREG
+
+	bl	SubtractVariable
+
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	mov	x1, HAND_TREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_TREG
+	bl	ClearVariable
+
+	bl	PrintResult
+	b	ParseCmd
+//`
+//
+//
+Command_plus_symbol:
+	mov	x1, HAND_YREG
+	mov	x2, HAND_XREG
+	mov	x3, HAND_XREG
+
+	bl	AddVariable
+
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	mov	x1, HAND_TREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_TREG
+	bl	ClearVariable
+
+	bl	PrintResult
+	b	ParseCmd
+//
+//
+//
+Command_chs:
+	mov	x1, HAND_XREG
+	mov	x3, HAND_XREG
+	bl	TwosCompliment
+
+	bl	PrintResult
+	b	ParseCmd
 //
 //
 //
@@ -549,7 +617,6 @@ Command_hex:
 30:
 	.asciz	"Hex: Error, invalid argument\n\n"
 	.align 4
-
 //
 //
 //
@@ -637,15 +704,15 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
-	bl	PrintResult
-	b	ParseCmd
+//	bl	PrintResult
+//	b	ParseCmd
 
 //	sub	x11, x11, BYTE_PER_WORD
 //	sub	x11, x11, BYTE_PER_WORD
 
-	mov	x1, HAND_XREG
+//	mov	x1, HAND_XREG
 //	mov	x3, HAND_XREG
-	bl	SetToTwo
+//	bl	SetToTwo
 //	bl	TwosCompliment
 //	bl	TestIfZero
 
@@ -657,12 +724,12 @@ Command_test:
 ///	bl	DivideByTen
 //	bl	DivideByTen
 
-	bl	MultiplyByTen
-	bl	MultiplyByTen
+//	bl	MultiplyByTen
+//	bl	MultiplyByTen
 //	bl	MultiplyByTen
 //	bl	MultiplyByTen
 
-	b	ParseCmd
+//	b	ParseCmd
 
 	// ----------------------
 
@@ -675,9 +742,9 @@ Command_test:
 //	bl	ClearVariable
 //	bl	SetToOne
 // 	bl	SetToTwo
+	bl	CopyVariable
 //	bl	Right1Bit
 //	bl	Left1Bit
-//	bl	CopyVariable
 //	bl	ExchangeVariable
 //	bl	TwosCompliment
 //	bl	AddVariable

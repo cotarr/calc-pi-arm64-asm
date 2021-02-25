@@ -27,19 +27,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-----------------------------------------------------------------
-	ClearVariable
-	SetToOne
-	SetToTwo
-	CopyVariable
-	ExchangeVariable
-	TwosCompliment
-	TestIfNegative
-	TestIfZero
-	AddVariable
-	SubtractVariable
-	MultiplyByTen
-	DivideByTen
+
 ------------------------------------------------------------- */
 
 	.global	ClearVariable
@@ -72,9 +60,7 @@ ClearVariable:
 	str	x10, [sp, #32]		// word counter
 	str	x11, [sp, #40]		// source 1 address
 
-	// set x10 count number of words
-	ldr	x10, =Word_Size_Static		// Word counter
-	ldr	x10, [x10]		// Words in mantissa
+	bl	set_x10_to_Word_Size_Static
 
 	// Argument in x1 is variable handle (preserved)
 	bl	set_x11_to_Fct_LS_Word_Address_Static
@@ -175,30 +161,17 @@ CopyVariable:
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
 	str	x12, [sp, #64]		// source 2 address
-	str	x17, [sp, #72]		// VAR_MSW_OFST
-
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
 
 	// setup offset index to address within variable
-	mov	x9, #0			// offset applied address
+	bl	set_x9_to_Int_MS_Word_Addr_Offset
 
-	// x10 count number of words
-	ldr	x10, =Word_Size_Static		// For word counter
-	ldr	x10, [x10]		// Words in mantissa
+	bl	set_x10_to_Word_Size_Static
 
-	// x11 pointer to variable m.s. word
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // Handle --> index into table
-	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, x17	// x11 pointer at m.s. word (exponent)
+	// Argument x1 contains variable handle number
+	bl	set_x11_to_Var_LS_Word_Address
 
-	// x12 pointer to variable m.s. word
-	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x2, lsl X8SHIFT3BIT // Index into table
-	ldr	x12, [x12]		// x12 pointer to variable address
-	add	x12, x12, x17	// x12 pointer at m.s, word (exponent)
+	// Argument x2 contains variable handle number
+	bl	set_x12_to_Var_LS_Word_Address
 10:
 	// Perform the copy using 64 bit words
 	ldr	x1, [x11, x9]
@@ -216,7 +189,6 @@ CopyVariable:
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
 	ldr	x12, [sp, #64]
-	ldr	x17, [sp, #72]
 	add	sp, sp, #80
 	ret
 
@@ -240,28 +212,18 @@ ExchangeVariable:
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
 	str	x12, [sp, #64]		// source 2 address
-	str	x17, [sp, #72]		// VAR_MSW_OFST
-
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
 
 	// setup offset index to address within variable
-	mov	x9, #0			// offset applied address
+	bl	set_x9_to_Int_MS_Word_Addr_Offset
 
-	// x10 counter to number words
-	ldr	x10, =Word_Size_Static		// For word counter
-	ldr	x10, [x10]		// Words in mantissa
-	// x11 pointer to source 1 variable
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // Handle --> index into table
-	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, x17	// x11 pointer at m.s. word (exponent)
-	// x12 pointer to source 2 variable
-	ldr	x12, =RegAddTable	// Pointer to vector table
-	add	x12, x12, x2, lsl X8SHIFT3BIT // Index into table
-	ldr	x12, [x12]		// x12 pointer to variable address
-	add	x12, x12, x17	// x12 pointer at m.s, word (exponent)
+	bl	set_x10_to_Word_Size_Static
+
+	// Argument x1 contains variable handle number
+	bl	set_x11_to_Var_LS_Word_Address
+
+	// Argument x2 contains variable handle number
+	bl	set_x12_to_Var_LS_Word_Address
+
 10:
 	// Perform the word exchange using 64 bit words
 	ldr	x1, [x11, x9]

@@ -60,9 +60,21 @@ Help_Table:
 	.byte	0,0,0,0,0,0,0
 	.quad	Help_print
 
+	.ascii	"+"
+	.byte	0,0,0,0,0,0,0
+	.quad	Help_plus_symbol
+
+	.ascii	"-"
+	.byte	0,0,0,0,0,0,0
+	.quad	Help_minus_symbol
+
 	.ascii	"clrstk"
 	.byte	0,0
 	.quad	Help_clrstk
+
+	.ascii	"chs"
+	.byte	0,0,0,0,0
+	.quad	Help_chs
 
 	.ascii	"clrx"
 	.byte	0,0,0,0
@@ -116,6 +128,27 @@ Help_Table_End:
 	.byte	0, 0, 0, 0, 0, 0, 0, 0
 	.quad	0			// End of list
 
+
+Help_plus_symbol:
+	.ascii	"Usage: +\n\n"
+	.ascii	"Description: Floating Point Addition\n"
+	.ascii	"Additon: XReg = Yreg + Xreg\n"
+	.ascii	"Stack: YReg --> XReg, then roll stack down.\n"
+	.byte	0
+
+Help_minus_symbol:
+	.ascii	"Usage: -\n\n"
+	.ascii	"Description: Floating Point Subtraction\n"
+	.ascii	"Additon: XReg = Yreg - Xreg\n"
+	.ascii	"Stack: YReg --> XReg, then roll stack down.\n"
+	.byte	0
+
+Help_chs:
+	.ascii	"Usage: chs\n\n"
+	.ascii	"Description: Change Sign of XReg\n"
+	.ascii	"Performs Two's Compliment on Xreg\n"
+	.ascii	"Stack: No rotation\n"
+	.byte	0
 
 Help_clrstk:
 	.ascii	"Usage: clrstk\n\n"
