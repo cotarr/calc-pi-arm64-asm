@@ -122,7 +122,8 @@ InitializeIO:
 	add	sp, sp, #48
 	ret
 
-10:	.ascii "I/O Initialized\n\n"
+10:	.ascii	"I/O Initialized\n"
+	.byte	0 
 	.align 4
 
 /******************************************************

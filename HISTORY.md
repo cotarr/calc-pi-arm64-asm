@@ -399,10 +399,6 @@ names globally broke everything, and it took me the better part of a day to sort
 There is still a problem with number input at accuracy over 1000 digits and above, it breaks and
 produced gibberish. This will be debugged another time.
 
-```
-git clone
-```
-
 ### 2021-02-24 - Day 11 (18 days to go until pi day)
 
 - address.s - New file for functions to calculate addresses and offsets for data variables
@@ -412,4 +408,18 @@ After yesterday, I have gained a lot of understanding about ARM64 addressing and
 range limitations of immediate values. My goal today is to consolidate these
 address calculations into functions in address.s.
 
-- Preliminary address calculation working in address.s (debugging in progress)
+- Preliminary address calculation working in address.s
+- Functions to return both offsets and addresses of different parts of variables
+- Optimized addresses in math-input.s math-output.s and part of math-subr.s
+- Fixed input error in input decimal to binary (was mis-matched stack push/pop)
+- Numerous bug fixes and code clean up.
+- Debug function D.ofst and D.vars to show offset and addresses.
+- Both input and output base 10 conversion seem to be working now
+
+Looking back, today was too many changes at one time causing simultaneous
+defects that were difficult to debug. Further testing is needed
+tomorrow to make sure there are no other issues.
+
+```
+git cone (tbd)
+```

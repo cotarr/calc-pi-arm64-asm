@@ -122,6 +122,7 @@ PrintVariable:
 	bl	CharOutFmt
 
 	mov	x1, HAND_ACC		// Variable handle number
+	mov	x3, HAND_ACC
 	bl	TwosCompliment		// perform 2's compiment before print
 	b.al	21f
 20:
@@ -288,62 +289,79 @@ done_print:
 
 -------------------------------------------------------------- */
 PrintResult:
-	sub	sp, sp, #48		// Reserve 6 words
+	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]
 	str	x2,  [sp, #32]
+	str	x3,  [sp, #40]
 
-	mov	x0, PREVIEW_DIG		// Printing word size
-	bl	Digits_2_Words		// Convert base 10 digit to 64 bit words
-	ldr	x2, =IntMSW_WdPtr	// Top word offset
-	ldr	x2, [x2]
-	add	x2, x2, #1		// point 1 past, then subtract word-size
-	sub	x2, x2, x0		// point at LS word for reduced digits
+
+// %%%%%%%%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%%%%%%
+// This must match SetDigitAccuracy in util.s
+
+	ldr	x2, =IntWSize		// words in integer part
+	ldr	x2, [x2]		// number of Int part words
+	add	x2, x2, GUARDWORDS
+	mov	x0, PREVIEW_DIG
+	bl	Digits_2_Words
+	add	x2, x2, x0		// total words
+
+	ldr	x3, =IntMSW_WdPtr	// Top word offset
+	ldr	x3, [x3]
+	add	x3, x3, #1
+	sub	x3, x3, x2
+// %%%%%%%%%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%%%%%%%%
+
 
 	// Temporarily save existing variables on the stack
 	// Assign an new value to each one
 
-	sub	sp, sp, #64		// Room for 8 more words
+	sub	sp, sp, #80		// Room for 10 more words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
 
 	ldr	x1, =NoSigDig
 	ldr	x0, [x1]
-	str	x0, [sp, #0]
-	mov	x0, #50
+	str	x0, [sp, #16]
+	mov	x0, PREVIEW_DIG
 	str	x0, [x1]
 
 	ldr	x1, =NoExtDig
 	ldr	x0, [x1]
-	str	x0, [sp, #8]
+	str	x0, [sp, #24]
 	mov	x0, #0
 	str	x0, [x1]
 
 	ldr	x1, =Word_Size_Static
 	ldr	x0, [x1]
-	str	x0, [sp, #16]
-	mov	x0, #7
-	str	x0, [x1]
+	str	x0, [sp, #32]
+	str	x2, [x1]
 
 	ldr	x1, =Word_Size_Optimized
 	ldr	x0, [x1]
-	str	x0, [sp, #24]
-	mov	x0, #7
-	str	x0, [x1]
+	str	x0, [sp, #40]
+	str	x2, [x1]
 
 	ldr	x1, =FctLSW_WdPtr_Static
 	ldr	x0, [x1]
-	str	x0, [sp, #32]
-	str	x2, [x1]		// store FCTLSW from x2 from above
+	str	x0, [sp, #48]
+	str	x3, [x1]		// x3 from above
 
 	ldr	x1, =FctLSW_WdPtr_Optimized
 	ldr	x0, [x1]
-	str	x0, [sp, #40]
-	str	x2, [x1]		// // store FCTLSW from x2 from above
+	str	x0, [sp, #56]
+	str	x3, [x1]		// x3 from above
 
 	//
 	// Print result at reduced accuracy
 	//
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+
 	bl	CROut
 	mov	x0, #0			// formatting disabled
 	bl	CharOutFmtInit		// initialize format output
@@ -352,36 +370,40 @@ PrintResult:
 	//
 	// Restore accuracy varaibles
 	//
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+
 	ldr	x1, =NoSigDig
-	ldr	x0, [sp, #0]
-	str	x0, [x1]
-
-	ldr	x1, =NoExtDig
-	ldr	x0, [sp, #8]
-	str	x0, [x1]
-
-	ldr	x1, =Word_Size_Static
 	ldr	x0, [sp, #16]
 	str	x0, [x1]
 
-	ldr	x1, =Word_Size_Optimized
+	ldr	x1, =NoExtDig
 	ldr	x0, [sp, #24]
 	str	x0, [x1]
 
-	ldr	x1, =FctLSW_WdPtr_Static
+	ldr	x1, =Word_Size_Static
 	ldr	x0, [sp, #32]
 	str	x0, [x1]
 
-	ldr	x1, =FctLSW_WdPtr_Optimized
+	ldr	x1, =Word_Size_Optimized
 	ldr	x0, [sp, #40]
 	str	x0, [x1]
 
-	add	sp, sp, #64
+	ldr	x1, =FctLSW_WdPtr_Static
+	ldr	x0, [sp, #48]
+	str	x0, [x1]
+
+	ldr	x1, =FctLSW_WdPtr_Optimized
+	ldr	x0, [sp, #56]
+	str	x0, [x1]
+
+	add	sp, sp, #80
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
 	ldr	x2,  [sp, #32]
-	add	sp, sp, #48
+	ldr	x3,  [sp, #40]
+	add	sp, sp, #64
 	ret

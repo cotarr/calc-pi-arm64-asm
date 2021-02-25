@@ -637,15 +637,18 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
-
+	bl	PrintResult
+	b	ParseCmd
 
 //	sub	x11, x11, BYTE_PER_WORD
 //	sub	x11, x11, BYTE_PER_WORD
 
+	mov	x1, HAND_XREG
+//	mov	x3, HAND_XREG
+	bl	SetToTwo
+//	bl	TwosCompliment
+//	bl	TestIfZero
 
-
-//	mov	x1, HAND_XREG
-//	bl	SetToTwo
 //	bl	DivideByTen
 //	bl	DivideByTen
 //	bl	DivideByTen
@@ -654,12 +657,12 @@ Command_test:
 ///	bl	DivideByTen
 //	bl	DivideByTen
 
-//	bl	MultiplyByTen
-//	bl	MultiplyByTen
+	bl	MultiplyByTen
+	bl	MultiplyByTen
 //	bl	MultiplyByTen
 //	bl	MultiplyByTen
 
-//	b	ParseCmd
+	b	ParseCmd
 
 	// ----------------------
 
@@ -668,7 +671,7 @@ Command_test:
 	mov	x3, #5
 
 //	bl	SubtractVariable
-	bl	AddVariable
+// 	bl	AddVariable
 //	bl	ClearVariable
 //	bl	SetToOne
 // 	bl	SetToTwo

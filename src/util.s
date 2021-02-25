@@ -286,10 +286,19 @@ SetDigitAccuracy:
 	ldr	x0, =NoSigDig		// pointer
 	str	x9, [x0]		// Save requested digits
 
+// %%%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%%%%
+//
+//   This must match PrintResult in util.s
+//
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 	// compute word size
-	mov	x0, x9
+	mov	x0, x9			// digits
+	ldr	x9, =IntWSize
+	ldr	x9, [x9]		// number of Int part words
+	add	x9, x9, GUARDWORDS
 	bl	Digits_2_Words		// Convert base 10 digit to 64 bit words
-	add	x0, x0, GUARDWORDS
+	add	x0, x0, x9		// add total wordsl
 
 	// check minimum word size
 	cmp	x0, MINIMUM_WORD
@@ -499,7 +508,7 @@ PrintByteHex:
 /* **************************************
 
    PrintWordHex
-   Print0xByteHex <-- append "0x" in front of output string
+   Print0xWordHex <-- append "0x" in front of output string
 
    Print 32 bit byte in hexidecimal
 

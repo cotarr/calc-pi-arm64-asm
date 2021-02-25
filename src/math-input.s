@@ -64,12 +64,14 @@ SOFTWARE.
   0x0002 0 = positive, 1 = negative  need 2's compliment
   0x0004 0 = Accepting integer part before decimal point, 1=done
 
+  TODO Add overflow and underflow check for too many digits
+
  ------------------------------------------------------- */
 
 	.align 4
 
 InputVariable:
-	sub	sp, sp, #128		// Reserve 16 words
+	sub	sp, sp, #80		// Reserve 16 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
@@ -222,6 +224,7 @@ end_of_string:
 	tst	x16, 0x02		// Check if 2's compliment needed for negate?
 	b.eq	900f
 	mov	x1, HAND_ACC		// Variable handle number
+	mov	x3, HAND_ACC
 	bl	TwosCompliment
 900:
 	mov	x1, #0			// no error

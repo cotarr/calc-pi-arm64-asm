@@ -300,19 +300,9 @@ TestIfNegative:
 	str	x29, [sp, #8]
 	str	x1,  [sp, #16]		// input argument / scratch
 	str	x11, [sp, #24]		// source 1 address
-	str	x17, [sp, #32]		// VAR_MSW_OFST
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
-	//
-	// First check if negative, if so perform 2's compliment
-	//
-	// set x11 address of variable m.s. word
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
-	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, x17		// x11 pointer at m.s. word
+	// Argument x1 variable handle number
+	bl	set_x11_to_Int_MS_Word_Address
 
 	ldr	x1, =Word8000
 	ldr	x1, [x1]
@@ -324,12 +314,10 @@ TestIfNegative:
 	b.eq	10f			// is it positive, skip?
 	mov	x0, #1			// No, set 1 for negative
 10:
-
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x1,  [sp, #16]
 	ldr	x11, [sp, #24]
-	ldr	x17, [sp, #32]
 	add	sp, sp, #48
 	ret
 
@@ -346,79 +334,62 @@ TestIfZero:
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
 	str	x1,  [sp, #16]		// input argument / scratch
-	str	x9,  [sp, #24]		// word index
-	str	x10, [sp, #32]		// word counter
-	str	x11, [sp, #40]		// source 1 address
-	str	x17, [sp, #48]		// VAR_MSW_OFST
+	str	x10, [sp, #24]		// word counter
+	str	x11, [sp, #32]		// source 1 address
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
-
-	// setup offset index to address within variable
-	mov	x9, #0			// offset applied to address
-
-	// set x10 count number of words
-	ldr	x10, =Word_Size_Static		// Word counter
-	ldr	x10, [x10]		// Words in mantissa
-	sub	x10, x10, #1		// Count - 1
-
-	// set x11 address of variable m.s. word
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // handle --> index into table
-	ldr	x11, [x11]		// x11 pointer to variable address
-	add	x11, x11, x17	// x11 pointer at m.s. word
-
+	// Argument x1 Variable handle number
 	bl	TestIfNegative		// test if negative using handle in x1
 	cbz	x0, 50f			// Positive number from previous test
 // ------------------
 // Case of negative
 // ------------------
-	sub	x11, x11, x10, lsl X8SHIFT3BIT // X11 Pointer to l.s. word
+	// Argument x1 contains variable handle
+	bl	set_x11_to_Fct_LS_Word_Address_Static
+
+	bl	set_x10_to_Word_Size_Static
+	sub	x10, x10, GUARDWORDS	// Subtract guard words, already checked
 
 	mov	x1, #1			// sign flag, default 1 for zero
 
 	mov	x0, #0
 	subs	x0, x0, x0		// set carry C=1  (NOT carry)
 
-	mov	x10, GUARDWORDS		// first loop guard words
-	cbz	x10, 15f		// skip if no guardwords
+	mov	x1, GUARDWORDS		// first loop guard words
+	cbz	x1, 20f		// skip if no guardwords
 10:
 	// loop ignoring guard words
-	ldr	x0, [x11, x9]		// x0 is first word
+	ldr	x0, [x11], BYTE_PER_WORD // x0 is first word
 	sbcs	x0, xzr, x0		// subtract register and NOT carry from zero (flags set)
-	add	x9, x9, BYTE_PER_WORD	// increment word pointer
-	sub	x10, x10, #1		// decrement word counter
-	cbnz	x10, 10b		// Done Guard words?
-15:
-	// set x10 count number of other (non-guard) words
-	ldr	x10, =Word_Size_Static		// Word counter
-	ldr	x10, [x10]		// Words in mantissa
-	sub	x10, x10, GUARDWORDS	// Subtract guard words, already checked
+	sub	x1, x1, #1		// decrement word counter
+	cbnz	x1, 10b			// Done Guard words?
 20:
-	ldr	x0, [x11, x9]		// x0 is first word
+	ldr	x0, [x11], BYTE_PER_WORD // x0 is first word
 	sbcs	x0, xzr, x0		// subtract register and NOT carry from zero (flags set)
-	cbz	x0, 15f			// test if word is zero
+	cbz	x0, 25f			// test if word is zero
 	mov	x1, #0			// clear zero flag if non zero
-15:
-	add	x9, x9, BYTE_PER_WORD	// increment word pointer
+25:
 	sub	x10, x10, #1		// decrement word counter
 	cbnz	x10, 20b		// Done?
 	b.al	100f			// yes done exit
-//
+// --------------------
 // Case of Positive
-//
+// --------------------
 50:
-	add	x10, x10, #1		// x10 word count  ( (count-1) + 1)
+	bl	set_x10_to_Word_Size_Static
 	sub	x10, x10, GUARDWORDS	// less guard words
+
+	// Argument x1 variable handl enumber
+	bl	set_x11_to_Fct_LS_Word_Address_Static
+	mov	x0, GUARDWORDS
+	lsl	x0, x0, X8SHIFT3BIT	// convert words to bytes
+	add	x11, x11, x0
 
 	mov	x1, #1			// default flag 1 = zero
 60:
-	ldr	x0, [x11, x9]		// get word
+	ldr	x0, [x11], BYTE_PER_WORD // get word
 	cbz	x0, 70f
 	mov	x1, #0			// set flag for non-zero found
 70:
-	sub	x9, x9, BYTE_PER_WORD
 	sub	x10, x10, #1		// Decrement counter
 	cbnz	x10, 60b		// Done?
 //
@@ -430,17 +401,16 @@ TestIfZero:
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x1,  [sp, #16]
-	ldr	x9,  [sp, #24]
-	ldr	x10, [sp, #32]
-	ldr	x11, [sp, #40]
-	ldr	x17, [sp, #48]
+	ldr	x10, [sp, #24]
+	ldr	x11, [sp, #32]
 	add	sp, sp, #64
 	ret
 
 /* --------------------------------------------------------------
   Perform Floating Point 2's Compliment on Variable
 
-  Input:    RSI = Handle Number of Variable
+  Input:    x1 = Source Handle Number of Variable
+            x3 = Destination Handle Number ff Varaible
 
   Output:   none
 
@@ -455,45 +425,36 @@ TODO: Make 3 argument, S1 s2 D1
 
 ---------------------------------------------------------------- */
 TwosCompliment:
-	sub	sp, sp, #64		// Reserve 8 words
+	sub	sp, sp, #80		// Reserve 10 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]		// input argument / scratch
-	str	x9,  [sp, #32]		// word index
-	str	x10, [sp, #40]		// word counter
-	str	x11, [sp, #48]		// source 1 address
-	str	x17, [sp, #56]		// VAR_MSW_OFST
+	str	x3,  [sp, #32]		// input argument / scratch
+	str	x9,  [sp, #40]		// word index
+	str	x10, [sp, #49]		// word counter
+	str	x11, [sp, #56]		// source 1 address
 
-	ldr	x17, =IntMSW_WdPtr	// VAR_MSW_OFST is to big for immediate value
-	ldr	x17, [x17]		// Store in register as constant value
-	lsl	x17, x17, X8SHIFT3BIT
+	bl	set_x9_to_Var_LS_Word_Addr_Offset
 
-	// setup offset index to address within variable
-	mov	x9, #0
+	bl	set_x10_to_Word_Size_Static_Minus_1
 
-	// set x10 to count of words -1
-	ldr	x10, =Word_Size_Static		// Pointer to of words in mantissa
-	ldr	x10, [x10]		// Number words in mantissa
-	sub	x10, x10, #1		// Count - 1 (Note minimum count is 2)
+	// Argument x1 contains variable handle
+	bl	set_x11_to_Fct_LS_Word_Address_Static
 
-	// x11 pointer to variable
-	ldr	x11, =RegAddTable	// Pointer to vector table
-	add	x11, x11, x1, lsl X8SHIFT3BIT // (handle * 8 bit)
-	ldr	x11, [x11]		// X11 pointer to variable address
-	add	x11, x11, x17	// x11 pointer to m.s. word
-	sub	x11, x11, x10, lsl X8SHIFT3BIT // X11 Pointer to l.s. word
+	// Argument x3 contains variable handle
+	bl	set_x13_to_Fct_LS_Word_Address_Static
 
 	// First iteration does not subtract carry
 	ldr	x0, [x11, x9]		// x0 is first word
 	subs	x0, xzr, x0		// subtract register from zero (flags set)
-	str	x0, [x11, x9]		// Store shifted word
+	str	x0, [x13, x9]		// Store shifted word
 	add	x9, x9, BYTE_PER_WORD	// increment word pointer (no change in flags)
 	// decrement counter not needed because already count-1 for pointer arithmetic
 10:
 	ldr	x0, [x11, x9]		// x0 is first word
 	sbcs	x0, xzr, x0		// subtract register and NOT carry from zero (flags set)
-	str	x0, [x11, x9]		// Store shifted word
+	str	x0, [x13, x9]		// Store shifted word
 	// increment and loop
 	add	x9, x9, BYTE_PER_WORD	// increment word pointer
 	sub	x10, x10, #1		// decrement word counter
@@ -503,11 +464,11 @@ TwosCompliment:
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
-	ldr	x9,  [sp, #32]
-	ldr	x10, [sp, #40]
-	ldr	x11, [sp, #48]
-	ldr	x17, [sp, #56]
-	add	sp, sp, #64
+	ldr	x3,  [sp, #32]
+	ldr	x9,  [sp, #40]
+	ldr	x10, [sp, #48]
+	ldr	x11, [sp, #56]
+	add	sp, sp, #80
 	ret
 /* --------------------------------------------------------------
   Perform Floating Point addition of 3 variables
@@ -713,7 +674,7 @@ MultiplyByTen:
 /* --------------------------------------------------------------
    Divide Variable by 10
 
-   Input:   x1 = Variablel Handle
+   Input:   x1 = Variable Handle
 
    Output:  none
 

@@ -54,9 +54,6 @@ main:
 
 	bl	FP_Initialize		// Initialize Variab les
 
-	bl	PrintAccuracy		// Show default significatn digits
-	bl	CROut
-
 	bl	ParseCmd		// Infinite loop... user input
 
 
