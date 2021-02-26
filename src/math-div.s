@@ -143,24 +143,30 @@ LongDivision:
 	lsl	x16, x10, X8SHIFT3BIT	// 8 bytes per word
 	lsl	x16, x16, X8SHIFT3BIT	// 8 bits per byte
 	sub	x16, x16, #1		// Don't use sign bit for data
-	//
-	// Additional shift for decimal point alignment
-//	mov	x1, HAND_ACC
-//	bl	Right1Bit
-//	bl	Right1Bit
-//--------------------------------------------------------------------
-// At this point, the number must be adjusted for the number of
-// integer words to the left of the decimal point.
-// For 2 words of 64 bit, an adjustment of 128 bits is needed
-// This can bee OPR to Right, or ACC to Left
-//
-// TODO: this need to be optimized.
-// Temporary, just shift OPR left 128 bits, overflowing into guard words.
-// It will be fixed later.
-//--------------------------------------------------------------------
 
+//--------------------------------------------------------------------
+// At this point, the number must be shifted to accommodate the
+// position of the decimal point. For example:
+// for 2 words of 64 bit, an adjustment of 128 bits is needed
+// This can be a combination of OPR to Right, or ACC to Left
+// with the sum of OPR right and ACC left equals required bits.
+//
+// Shifting OPR to the right has risk of pushing significant
+// digits out the least significant end of the variable.
+// Therefore, it is preferred to shift ACC to the left.
+// However, excess shifting left of ACC can also overflow
+// bit on the most significant end.
+//
+// The following section does 3 things:
+//   1) Check available results to see if quotient will exceed
+//      the size of the variable, generating error if needed.
+//   2) Calculate largest possible shift to left of ACC, then shift.
+//   3) Shift remaining bits by moving OPR to the right.
+//--------------------------------------------------------------------
+	//   Gather Data
+	// -------------------
 	//
-	// x4 is bit shift needed for decimal point alignment
+	// x4 contains bit shift needed for decimal point alignment
 	//
 	ldr	x4, =IntWSize
 	ldr	x4, [x4]
@@ -178,13 +184,6 @@ LongDivision:
 	mov	x1, HAND_OPR
 	bl	CountLeftZerobits
 	mov	x2, x0
-
-//	mov	x0, #'r'	// "Required"
-//	bl	CharOut
-//	bl	CROut
-//	mov	x0, x4
-//	bl	PrintWordB10
-//	bl	CROut
 	//
 	// Check for long division overflow (number too big)
 	//
@@ -198,60 +197,32 @@ LongDivision:
 	mov	x1, #1222		// 12 bit error code
 	b	FatalError
 10:
-/*
 	//
 	// count of available bit to shift in ACC
 	//
 	subs	x3, x3, #2		// safety bits on high end
-	b.eq	10f
-	b.mi	10f
+	b.eq	10f			// If zero skip to ship OPR
+	b.mi	10f			// If negative skip to OPR
 
-	cmp	x4, x3
-	b.cc	5f
-	b.eq	5f
-	mov	x3, x4
+	cmp	x4, x3			// Area available bit more than needed?
+	b.cs	5f			// Too big, use required number instead
+	b.eq	5f			// equal, use it
+	mov	x3, x4			// Replace available shift with required shift
 5:
-	mov	x0, #'a'
-	bl	CharOut			// A = ACC for debug
-	bl	CROut
-
-	mov	x0, x3
-	bl	PrintWordB10
-	bl	CROut
-
-	mov	x0, x3
-	mov	x1, HAND_ACC
-	bl	LeftNBits
+	mov	x0, x3			// Argument bits to shift
+	mov	x1, HAND_ACC		// Variable handle number
+	bl	LeftNBits		// Shift variable bits
 10:
-	subs	x2, x4, x3		// remaining bits to shift
-//	b.mi	20f
-//	b.eq	20f
-
-	mov	x0, #'o'
-	bl	CharOut			// A = ACC for debug
-	bl	CROut
-
-	mov	x0, x2
-	bl	PrintWordB10
-	bl	CROut
+	subs	x2, x4, x3		// Subtract ot get remaining bits to shift
+	b.mi	20f			// negative, not needed skip
+	b.eq	20f			// zero, not needed, skip
 
 	mov	x0, x2
 	mov	x1, HAND_OPR
 	bl	RightNBits
-*/
-	// temporary alignment, (TODO use auto calculation)
 20:
-	mov	x0, #126
-	mov	x1, HAND_OPR
-	bl	RightNBits
-
-//	mov	x0, #64
-///	mov	x1, HAND_ACC
-//	bl	LeftNBits
-
 
 //--------------------------------------------------------------------
-
 	//
 	// Setup address pointers x11,x12,x13,x14(these will not change)
 	//
