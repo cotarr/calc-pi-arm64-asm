@@ -816,9 +816,12 @@ Command_test:
 //	mov	x3, #7
 
 	mov	x1, #5
-	bl	CountLeftZerobits
-	bl	PrintWordB10
-	bl	CROut
+	bl	Right64Bit
+//	bl	Left64Bit
+
+//	bl	CountLeftZerobits
+//	bl	PrintWordB10
+//	bl	CROut
 
 //	bl	TestIfZero
 //	bl	TestIfNegative

@@ -1,7 +1,7 @@
 /* ----------------------------------------------------------------
 	math-rotate.s
 
-	Logical shift bit, btyes and words
+	Logical shift bit, bytes and words
 
 	Created:   2021-02-10
 	Last edit: 2021-02-25
@@ -34,6 +34,8 @@ SOFTWARE.
 	.global CountLeftZerobits
 	.global	Right1Bit
 	.global	Left1Bit
+	.global	Right64Bit
+	.global	Left64Bit
 
 /* --------------------------------------------------------------
   Count number of zero bits to the left of the first non-zero bit
@@ -96,7 +98,7 @@ CountLeftZerobits:
 	ret
 
 /* --------------------------------------------------------------
-  Rotate Mantissa Right 1 bit (copy sign bit)
+  Rotate Right 1 bit (copy sign bit)
 
   Input:   x1 = Handle Number of Variable
 
@@ -149,7 +151,7 @@ Right1Bit:
 	ret
 
 /* --------------------------------------------------------------
-  Rotate Mantissa Left 1 bit (zero fill l.s. bit)
+  Rotate Left 1 bit (zero fill l.s. bit)
 
   Input:   x1 = Handle Number of Variable
 
@@ -197,4 +199,83 @@ Left1Bit:
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
 	add	sp, sp, #80
+	ret
+
+
+/* --------------------------------------------------------------
+  Rotate Right 1 word (64 bits) (zero fill l.s. word)
+
+  Input:   x1 = Handle Number of Variable
+
+  Output:  none
+
+;--------------------------------------------------------------*/
+Right64Bit:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]		// input argument / scratch
+	str	x10, [sp, #32]		// word counter
+	str	x11, [sp, #40]		// pointer address
+
+	bl	set_x10_to_Word_Size_Static_Minus_1
+
+	// Argument x1 is variable handle number
+	bl	set_x11_to_Fct_LS_Word_Address_Static
+10:
+	ldr	x0, [x11, BYTE_PER_WORD] // Load adjacent word on left
+	str	x0, [x11], BYTE_PER_WORD // Save at pointer location, then inc pointer
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 10b		// non-zero, loop back
+
+	mov	x0, #0			// lowest word is zero fill
+	str	x0, [x11]
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x10, [sp, #32]
+	ldr	x11, [sp, #40]
+	add	sp, sp, #64
+	ret
+
+/* --------------------------------------------------------------
+  Rotate Left 1 word (64 bits) (zero fill l.s. word)
+
+  Input:   x1 = Handle Number of Variable
+
+  Output:  none
+
+;--------------------------------------------------------------*/
+Left64Bit:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]		// input argument / scratch
+	str	x10, [sp, #32]		// word counter
+	str	x11, [sp, #40]		// pointer address
+
+	bl	set_x10_to_Word_Size_Static_Minus_1
+
+	// Argument x1 is variable handle number
+	bl	set_x11_to_Int_MS_Word_Address
+10:
+	ldr	x0, [x11, -BYTE_PER_WORD] // Load adjacent word on right
+	str	x0, [x11], -BYTE_PER_WORD // Save at pointer location, then decrement pointer
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 10b		// non-zero, loop back
+
+	mov	x0, #0			// lowest word is zero fill
+	str	x0, [x11]
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x10, [sp, #32]
+	ldr	x11, [sp, #40]
+	add	sp, sp, #64
 	ret
