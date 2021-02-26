@@ -31,8 +31,69 @@ SOFTWARE.
 
 ------------------------------------------------------------- */
 
+	.global CountLeftZerobits
 	.global	Right1Bit
-	.global	Left1Bi
+	.global	Left1Bit
+
+/* --------------------------------------------------------------
+  Count number of zero bits to the left of the first non-zero bit
+  in the specified variable. If the variable is zero, it will
+  return number of bits in variable (world_size * 64).
+  If the top bit is non-zero, it will return zero
+
+  Input:   x1 = Handle Number of Variable
+
+  Output:  x0 = Number of zero bits
+
+;--------------------------------------------------------------*/
+CountLeftZerobits:
+	sub	sp, sp, #64		// Preserve words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x1,  [sp, #16]		// Input argument
+	str	x10, [sp, #24]		// Counter
+	str	x11, [sp, #32]		// Address pointer
+	str	x16, [sp, #40]		// Constant 0x8000000000000000
+	str	x17, [sp, #48]		// Bit counter
+
+	ldr	x16, =Word8000		// use as constant
+	ldr	x16, [x16]		// 0x8000000000000000
+	mov	x17, #0			// bit counter
+
+	bl	set_x10_to_Word_Size_Static	// Word counter
+
+	// Argument in x1 variable handle number
+	bl	set_x11_to_Int_MS_Word_Address	// Top word address
+
+10:
+	ldr	x0, [x11], -BYTE_PER_WORD // get word, then decrement address
+	cbnz	x0, 20f			// non-zero? yes branch
+	add	x17, x17, #64		// add 64 bits (1 word)
+	sub	x10, x10, #1		// last word?
+	cbnz	x10, 10b		// no loop again
+	b.al	99f			// no words were found, it equal zero
+20:
+	mov	x10, #64
+30:
+	tst	x0, x16			// AND 0x8000000000000000
+	b.ne	99f
+	lsl	x0, x0, #1		// shift next bit left to test
+	add	x17, x17, #1		// add 1 bit
+	sub	x10, x10, #1		// loop counter
+	cbnz	x10, 30b		// again?
+	b.al	99f			// done
+99:
+	mov	x0, x17			// return value x0 is number zero bits
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x1,  [sp, #16]
+	ldr	x10, [sp, #24]
+	ldr	x11,  [sp, #32]
+	ldr	x16,  [sp, #40]
+	ldr	x17,  [sp, #48]
+	add	sp, sp, #64
+	ret
 
 /* --------------------------------------------------------------
   Rotate Mantissa Right 1 bit (copy sign bit)

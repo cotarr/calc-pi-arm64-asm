@@ -810,18 +810,15 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
-	add	sp, sp, #16
 
-//	mov	x0, sp
-//	bl	Print0xWordHex
-//	bl	CROut
 
-//	bl	DivideVariable
-	b	ParseCmd
+//	mov	x2, #6
+//	mov	x3, #7
 
 	mov	x1, #5
-	mov	x2, #6
-	mov	x3, #7
+	bl	CountLeftZerobits
+	bl	PrintWordB10
+	bl	CROut
 
 //	bl	TestIfZero
 //	bl	TestIfNegative
