@@ -30,7 +30,8 @@ make
 ## Commands available:
 
 ```
-. + - / clrstk chs clrx cmdlist D.fill
-D.ofst D.vars exit hex print q quit
-sf sigfigs
++ - / . chs clrstk clrx cmdlist
+D.vars D.fill D.ofst exit help
+hex prac print q quit rdown rup
+sigfigs test version xy
 ```

@@ -481,3 +481,4 @@ git clone 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
 - Add function RightNBits, LeftNBits logical shift on full variable size.
 - Add overflow error detection to long division
 - Optimized of bit alignment in ACC and OPP during long division.
+- Added commands xy, rup, rdown

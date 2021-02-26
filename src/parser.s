@@ -136,9 +136,14 @@ Command_Table:
 	.byte	0,0,0,0
 	.quad	Command_exit
 
-	.ascii	"sf"
-	.byte	0,0,0,0,0,0
-	.quad	Command_sigfigs
+	.ascii	"rdown"
+	.byte	0,0,0
+	.quad	Command_rdown
+
+
+	.ascii	"rup"
+	.byte	0,0,0,0,0
+	.quad	Command_rup
 
 	.ascii	"sigfigs"
 	.byte	0
@@ -151,6 +156,10 @@ Command_Table:
 	.ascii	"version"
 	.byte	0
 	.quad	Command_version
+
+	.ascii	"xy"
+	.byte	0,0,0,0,0,0
+	.quad	Command_xy
 
 // End table marker
 	.byte	0,0,0,0,0,0,0,0
@@ -726,6 +735,54 @@ Command_print:
 	bl	CROut
 	b	ParseCmd
 
+Command_rdown:
+	mov	x1, HAND_XREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+
+	mov	x1, HAND_YREG
+	mov	x2, HAND_XREG
+	bl	CopyVariable
+
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	mov	x1, HAND_TREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_ACC
+	mov	x2, HAND_TREG
+	bl	CopyVariable
+
+	bl	PrintResult
+	b	ParseCmd
+
+Command_rup:
+	mov	x1, HAND_TREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_TREG
+	bl	CopyVariable
+
+	mov	x1, HAND_YREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	mov	x1, HAND_ACC
+	mov	x2, HAND_XREG
+	bl	CopyVariable
+
+	bl	PrintResult
+	b	ParseCmd
+
 Command_sigfigs:
 	cmp	x0, #0			// Check for argument
 	b.ne	10f
@@ -783,6 +840,15 @@ Command_version:
 versionString:
 	.asciz	"\n     Version 1.0 - Debugging in progress\n\n"
 	.align 4
+
+Command_xy:
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_YREG
+	bl	ExchangeVariable
+
+	bl	PrintResult
+	b	ParseCmd
 
 
 // ===============================

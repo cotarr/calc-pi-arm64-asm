@@ -120,6 +120,14 @@ Help_Table:
 	.byte	0, 0, 0, 0
 	.quad	Help_q
 
+	.ascii	"rdown"
+	.byte	0,0,0
+	.quad	Help_rdown
+
+	.ascii	"rup"
+	.byte	0,0,0,0,0
+	.quad	Help_rdown
+
 	.ascii	"sf"
 	.byte	0,0,0,0,0,0
 	.quad	Help_sigfigs
@@ -127,6 +135,10 @@ Help_Table:
 	.ascii	"sigfigs"
 	.byte	0
 	.quad	Help_sigfigs
+
+	.ascii	"xy"
+	.byte	0,0,0,0,0,0
+	.quad	Help_xy
 
 Help_Table_End:
 	.byte	0, 0, 0, 0, 0, 0, 0, 0
@@ -230,6 +242,23 @@ Help_q:
 	.ascii	"Usage: quit\n\n"
 	.ascii	"Description: Quit the program.\n"
 	.byte	0
+
+Help_rdown:
+	.ascii	"Usage: rdown\n\n"
+	.ascii	"Stack Roll DOWN: T-->Z, Z-->Y, Y-->X, X-->T\n"
+	.byte	0
+
+Help_rup:
+	.ascii	"Usage: rup\n\n"
+	.ascii	"Stack Roll up: X-->Y, Y-->Z, Z-->T, T-->X\n"
+	.byte	0
+
+
+Help_xy:
+	.ascii	"Usage: xy\n\n"
+	.ascii	"Description: Exchange XReg <> YReg.\n"
+	.byte	0
+
 
 Help_sigfigs:
 	.ascii	"Usage: sf             (prints current accuracy)\n\n"
