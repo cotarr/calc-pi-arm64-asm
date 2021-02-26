@@ -479,3 +479,4 @@ git clone 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
 - Add function Right64bit, Left64Bit to logical shift even words
 - First benchmark test bit-wise long division time 100000 digits 11 seconds on Pi 4
 - Add function RightNBits, LeftNBits logical shift on full variable size.
+- Add overlow error detection to long division

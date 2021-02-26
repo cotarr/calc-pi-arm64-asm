@@ -813,16 +813,16 @@ Command_test:
 //	mov	x2, #6
 //	mov	x3, #7
 
-	mov	x2, #64*2 + 15
+	mov	x2, #64*2 + 0
 	mov	x0, x2
 	mov	x1, #5
-	bl	RightNBits
-//	bl	LeftNBits
+//	bl	RightNBits
+	bl	LeftNBits
 
 	mov	x1, #3
 10:
-	bl	Right1Bit
-//	bl	Left1Bit
+//	bl	Right1Bit
+	bl	Left1Bit
 	sub	x2, x2, #1
 	cbnz	x2, 10b
 

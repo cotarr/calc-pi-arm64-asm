@@ -123,7 +123,7 @@ InitializeIO:
 	ret
 
 10:	.ascii	"I/O Initialized\n"
-	.byte	0 
+	.byte	0
 	.align 4
 
 /******************************************************
@@ -263,6 +263,45 @@ CharOutFmt:
 	bl	CharOut
 	b.al	99f
 10:
+	cmp	x2, #'.'
+	b.ne	15f
+	mov	x0,#'.'
+	bl	CharOut
+	mov	x0, #0x0a		// line feed
+	bl	CharOut
+	ldr	x1, =OutCharacterCounter
+	mov	x0, #-1
+	str	x0, [x1]
+	ldr	x1, =OutParagraphCounter
+	mov	x0, #0
+	str	x0, [x1]
+	ldr	x1, =OutLineCounter
+	mov	x0, #0
+	str	x0, [x1]
+	b.al	99f
+15:
+	cmp	x2, #'('
+	b.ne	16f
+	mov	x0, #0x0a		// line feed
+	bl	CharOut
+	mov	x0, #'('
+	bl	CharOut
+	ldr	x1, =OutCharacterCounter
+	mov	x0, #0
+	str	x0, [x1]
+	ldr	x1, =OutParagraphCounter
+	mov	x0, #0
+	str	x0, [x1]
+	ldr	x1, =OutLineCounter
+	mov	x0, #0
+	str	x0, [x1]
+	b.al	99f
+16:
+
+
+
+
+
 	ldr	x1, =OutCharacterLimit
 	ldr	x1, [x1]
 	ldr	x0, =OutCharacterCounter

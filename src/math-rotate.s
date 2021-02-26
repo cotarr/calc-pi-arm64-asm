@@ -34,8 +34,8 @@ SOFTWARE.
 	.global CountLeftZerobits
 	.global	Right1Bit
 	.global	Left1Bit
-	.global	Right64Bit
-	.global	Left64Bit
+	.global	Right64Bits
+	.global	Left64Bits
 	.global	RightNBits
 	.global	LeftNBits
 
@@ -212,7 +212,7 @@ Left1Bit:
   Output:  none
 
 ;--------------------------------------------------------------*/
-Right64Bit:
+Right64Bits:
 	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
@@ -251,7 +251,7 @@ Right64Bit:
   Output:  none
 
 ;--------------------------------------------------------------*/
-Left64Bit:
+Left64Bits:
 	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
@@ -320,6 +320,31 @@ RightNBits:
 	// Argument x1 contains variable handle number
 	bl	set_x11_to_Fct_LS_Word_Address_Static
 
+	//-------------------------------------------------
+	// TODO:  Special case when all filled with zero
+	//        except some bits of last word
+	//        This crashes, because can not combine 2
+	//        words of different shift when only world 1 left
+	//
+	//        Would be similar to even word case
+	//        except zero fill last words
+	//
+	//        Error range check --> fatal error
+        // -------------------------------------------------
+
+	//
+	// check in range
+	//
+	mov	x0, x10
+	lsl	x0, x0, X8SHIFT3BIT
+	lsl	x0, x0, X8SHIFT3BIT
+	sub	x0, x0, #64
+	cmp	x0, x15
+	b.hs	10f
+	ldr	x0, =RotateNRangeMsgRight // Error message pointer
+	mov	x1, #372		// 12 bit error code
+	b	FatalError
+10:
 	//
 	// Divide to get words and bits
 	//
@@ -328,6 +353,28 @@ RightNBits:
 	msub	x17, x16, x0, x15	// x17 bits within word to shift
 	sub	x18, x0, x17		// x18 fill in bits in adjacent word (64 - N)
 
+	// ---------------------------
+	// Special case of even word
+	// ---------------------------
+	cbnz	x17, 40f
+	add	x12, x11, x16, lsl X8SHIFT3BIT
+	mov	x8, x10			// temp save
+	sub	x10, x10, x16		// counter
+	sub	x8, x8, x10		// zero words needed
+20:	ldr	x0, [x12], BYTE_PER_WORD // Load adjacent word on left
+	str	x0, [x11], BYTE_PER_WORD // Save at pointer location, then inc pointer
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 20b		// non-zero, loop back
+	// fill remaining words with zero
+30:	mov	x0, #0			// fill value
+	str	x0, [x11], BYTE_PER_WORD // store zero word
+	sub	x8, x8, #1		// counter
+	cbnz	x8, 30b
+	b.al	99f			// no more, return
+	// -------------------------------
+	// End special case of even word
+	// -------------------------------
+40:
 	// At zero word shift, offset is 1 word (like shift 1 bit above)
 	// Number of words shift is added to offset of 1
 	add	x12, x11, x16, lsl X8SHIFT3BIT // low source word address
@@ -337,20 +384,12 @@ RightNBits:
 	mov	x8, x10			// copy (temp)
 	sub	x10, x10, x16		// counter adjusted word shift
 	sub	x8, x8, x10		// fill words after shifted words
-	//
-	// check in range
-	//
-	cmp	x10, x16
-	b.hs	10f
-	ldr	x0, =RotateNRangeMsgRight // Error message pointer
-	mov	x1, #372		// 12 bit error code
-	b	FatalError
-10:
+
 	mov	x9, #0			// offset pointer
 
 	// fetch word to setup loop entry
 	ldr	x1, [x12, x9]		// x1 contains Low source word
-20:
+50:
 	ldr	x2, [x13, X9]		// x2 contains High source word
 	lsr	x1, x1, x17		// Shift right [x17] bits, zero fill
 	lsl	x0, x2, x18		// temp shifted value to x0
@@ -361,7 +400,7 @@ RightNBits:
 	add	x9, x9, BYTE_PER_WORD
 	mov	x1, x2			// High word --> Low word
 	sub	x10, x10, #1		// decrement word counter
-	cbnz	x10, 20b		// non-zero, loop back
+	cbnz	x10, 50b		// non-zero, loop back
 	//
 	// last word is special case of end word
 	//
@@ -374,11 +413,11 @@ RightNBits:
 	cbz	x8, 99f
 	mov	x0, #0			// fill value
 	add	x9, x9, BYTE_PER_WORD	// for alignment of words
-30:
+60:
 	str	x0, [x11, x9]
 	add	x9, x9, BYTE_PER_WORD
 	sub	x8, x8, #1
-	cbnz	x8, 30b
+	cbnz	x8, 60b
 99:
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
@@ -436,6 +475,31 @@ LeftNBits:
 	// Argument x1 contains variable handle number
 	bl	set_x11_to_Int_MS_Word_Address
 
+	//-------------------------------------------------
+	// TODO:  Special case when all filled with zero
+	//        except some bits of last word
+	//        This crashes, because can not combine 2
+	//        words of different shift when only world 1 left
+	//
+	//        Would be similar to even word case
+	//        except zero fill last words
+	//
+	//        Error range check --> fatal error
+        // -------------------------------------------------
+
+	//
+	// check in range
+	//
+	mov	x0, x10
+	lsl	x0, x0, X8SHIFT3BIT
+	lsl	x0, x0, X8SHIFT3BIT
+	sub	x0, x0, #64
+	cmp	x0, x15
+	b.hs	10f
+	ldr	x0, =RotateNRangeMsgLeft // Error message pointer
+	mov	x1, #374		// 12 bit error code
+	b	FatalError
+10:
 	//
 	// Divide to get words and bits
 	//
@@ -444,6 +508,28 @@ LeftNBits:
 	msub	x17, x16, x0, x15	// x17 bits within word to shift
 	sub	x18, x0, x17		// x18 fill in bits in adjacent word (64 - N)
 
+	// ---------------------------
+	// Special case of even word
+	// ---------------------------
+	cbnz	x17, 40f
+	sub	x12, x11, x16, lsl X8SHIFT3BIT
+	mov	x8, x10			// temp save
+	sub	x10, x10, x16		// counter
+	sub	x8, x8, x10		// zero words needed
+20:	ldr	x0, [x12], -BYTE_PER_WORD // Load adjacent word on left
+	str	x0, [x11], -BYTE_PER_WORD // Save at pointer location, then inc pointer
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 20b		// non-zero, loop back
+	// fill remaining words with zero
+30:	mov	x0, #0			// fill value
+	str	x0, [x11], -BYTE_PER_WORD // store zero word
+	sub	x8, x8, #1		// counter
+	cbnz	x8, 30b
+	b.al	99f			// no more, return
+	// -------------------------------
+	// End special case of even word
+	// -------------------------------
+40:
 	// At zero word shift, offset is 1 word (like shift 1 bit above)
 	// Number of words shift is added to offset of 1
 	sub	x12, x11, x16, lsl X8SHIFT3BIT // high source word address
@@ -453,20 +539,12 @@ LeftNBits:
 	mov	x8, x10			// copy (temp)
 	sub	x10, x10, x16		// counter adjusted word shift
 	sub	x8, x8, x10		// fill words after shifted words
-	//
-	// check in range
-	//
-	cmp	x10, x16
-	b.hs	10f
-	ldr	x0, =RotateNRangeMsgLeft // Error message pointer
-	mov	x1, #373		// 12 bit error code
-	b	FatalError
-10:
+
 	mov	x9, #0			// offset pointer
 
 	// fetch word to setup loop entry
 	ldr	x1, [x12, x9]		// x1 contains high source word
-20:
+50:
 	ldr	x2, [x13, X9]		// x2 contains Low source word
 	lsl	x1, x1, x17		// Shift right [x17] bits, zero fill
 	lsr	x0, x2, x18		// temp shifted value to x0
@@ -477,7 +555,7 @@ LeftNBits:
 	sub	x9, x9, BYTE_PER_WORD
 	mov	x1, x2			// Low word --> High word
 	sub	x10, x10, #1		// decrement word counter
-	cbnz	x10, 20b		// non-zero, loop back
+	cbnz	x10, 50b		// non-zero, loop back
 	//
 	// last word is special case of end word
 	//
@@ -490,11 +568,11 @@ LeftNBits:
 	cbz	x8, 99f
 	mov	x0, #0			// fill value
 	sub	x9, x9, BYTE_PER_WORD	// for alignment of words
-30:
+60:
 	str	x0, [x11, x9]
 	sub	x9, x9, BYTE_PER_WORD
 	sub	x8, x8, #1
-	cbnz	x8, 30b
+	cbnz	x8, 60b
 99:
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]

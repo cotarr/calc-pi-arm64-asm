@@ -47,6 +47,7 @@ SOFTWARE.
 .set	X4SHIFT2BIT,	0x02	// how many bit to shift for multiply by 8 (word size)
 .set	X8SHIFT3BIT,	0x03	// how many bit to shift for multiply by 8 (word size)
 .set	X16SHIFT4BIT,	0x04	// how many bit to shift for multiply by 8 (word size)
+.set	X64SHIFT4BIT,	0x06	// how many bit to shift for multiply by 8 (word size)
 
 // -------------------------------------------------------------------
 // Variable (integer part) and (fraction part)

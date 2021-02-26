@@ -145,9 +145,9 @@ LongDivision:
 	sub	x16, x16, #1		// Don't use sign bit for data
 	//
 	// Additional shift for decimal point alignment
-	mov	x1, HAND_ACC
-	bl	Right1Bit
-	bl	Right1Bit
+//	mov	x1, HAND_ACC
+//	bl	Right1Bit
+//	bl	Right1Bit
 //--------------------------------------------------------------------
 // At this point, the number must be adjusted for the number of
 // integer words to the left of the decimal point.
@@ -158,23 +158,98 @@ LongDivision:
 // Temporary, just shift OPR left 128 bits, overflowing into guard words.
 // It will be fixed later.
 //--------------------------------------------------------------------
-//	mov	x2, #128	// full inetger part word shift
-//	mov	x1, HAND_OPR
-//50:
-//	bl	Right1Bit
-//	sub	x2, x2,#1
-//	cbnz	x2, 50b
 
+	//
+	// x4 is bit shift needed for decimal point alignment
+	//
+	ldr	x4, =IntWSize
+	ldr	x4, [x4]
+	lsl	x4, x4, X64SHIFT4BIT
+	sub	x4, x4, #2 		// for alignment
+	//
+	// X3 is space to shift ACC left (preferred ACC)
+	//
+	mov	x1, HAND_ACC
+	bl	CountLeftZerobits
+	mov	x3, x0
+	//
+	// X2 is space to shift OPR right (remaining bits)
+	//
 	mov	x1, HAND_OPR
-	bl	Right64Bit
-	bl	Right64Bit
-//--------------------------------------------------------------------
-//	mov	x2, #0
-//	mov	x1, HAND_ACC
-// 51:
-//	bl	Left1Bit
-//	sub	x2, x2,#1
-//	cbnz	x2, 51b
+	bl	CountLeftZerobits
+	mov	x2, x0
+
+//	mov	x0, #'r'	// "Required"
+//	bl	CharOut
+//	bl	CROut
+//	mov	x0, x4
+//	bl	PrintWordB10
+//	bl	CROut
+	//
+	// Check for long division overflow (number too big)
+	//
+	mov	x0, x4			// Available bits
+	add	x0, x0, x2		// OPR alignment
+	sub	x0, x0, #3		// safety bits
+	subs	x0, x0, x3		// ACC alignment
+	b.pl	10f			// If negative, overlow error
+	// Fatal error
+	ldr	x0, =MsgDivOverflow	// Error message pointer
+	mov	x1, #1222		// 12 bit error code
+	b	FatalError
+10:
+/*
+	//
+	// count of available bit to shift in ACC
+	//
+	subs	x3, x3, #2		// safety bits on high end
+	b.eq	10f
+	b.mi	10f
+
+	cmp	x4, x3
+	b.cc	5f
+	b.eq	5f
+	mov	x3, x4
+5:
+	mov	x0, #'a'
+	bl	CharOut			// A = ACC for debug
+	bl	CROut
+
+	mov	x0, x3
+	bl	PrintWordB10
+	bl	CROut
+
+	mov	x0, x3
+	mov	x1, HAND_ACC
+	bl	LeftNBits
+10:
+	subs	x2, x4, x3		// remaining bits to shift
+//	b.mi	20f
+//	b.eq	20f
+
+	mov	x0, #'o'
+	bl	CharOut			// A = ACC for debug
+	bl	CROut
+
+	mov	x0, x2
+	bl	PrintWordB10
+	bl	CROut
+
+	mov	x0, x2
+	mov	x1, HAND_OPR
+	bl	RightNBits
+*/
+	// temporary alignment, (TODO use auto calculation)
+20:
+	mov	x0, #126
+	mov	x1, HAND_OPR
+	bl	RightNBits
+
+//	mov	x0, #64
+///	mov	x1, HAND_ACC
+//	bl	LeftNBits
+
+
 //--------------------------------------------------------------------
 
 	//
@@ -299,6 +374,6 @@ LongDivisionExit:
 	add	sp, sp, #128
 	ret
 
-MsgDivZero:
-	.asciz	"FP_Long_Divison: Error: Division by Zero"
+MsgDivZero:	.asciz	"FP_Long_Divison: Error: Division by Zero"
+MsgDivOverflow:	.asciz	"FP_Long_Divison: Error: Overlow (number too big)"
 	.align 4
