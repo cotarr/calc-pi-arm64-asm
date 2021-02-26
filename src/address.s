@@ -69,6 +69,7 @@ SOFTWARE.
 	.global	set_x13_to_Fct_LS_Word_Address_Optimized
 	.global	set_x13_to_Var_LS_Word_Address
 
+	.global set_x14_to_Var_LS_Word_Address
 
 	.global	PrintAddressOffsets
 	.global PrintAccuracyVars
@@ -353,6 +354,16 @@ set_x13_to_Var_LS_Word_Address:
 	ldp	x9, x30, [sp], 16	// restore return address
 	ret
 
+//------------------------------------
+// Create additional as needed here
+//------------------------------------
+set_x14_to_Var_LS_Word_Address:
+	stp	x9, x30, [sp, -16]!	// preserve return address
+	ldr	x14, =RegAddTable	// Pointer to vector table
+	add	x14, x14, x4, lsl X8SHIFT3BIT // handle --> index into table
+	ldr	x14, [x14]		// x12 pointer to variable address
+	ldp	x9, x30, [sp], 16	// restore return address
+	ret
 
 
 /* -------------------------------------

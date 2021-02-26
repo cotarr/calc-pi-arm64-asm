@@ -122,7 +122,7 @@ PrintVariable:
 	bl	CharOutFmt
 
 	mov	x1, HAND_ACC		// Variable handle number
-	mov	x3, HAND_ACC
+	mov	x2, HAND_ACC
 	bl	TwosCompliment		// perform 2's compiment before print
 	b.al	21f
 20:
@@ -145,7 +145,7 @@ PrintVariable:
 	sub	x9, xzr, x9, lsl X8SHIFT3BIT // (0 - (x9 * 8) = Neg offset to L.S. word
 
 	// ----- select this to round off -------------
-	movz	x0, #0x1000, lsl #16	// 0x0000000010000000
+	movz	x0, #0x1000, lsl #32	// 0x0000000010000000
 	str	x0, [x12, x9]		// x12 address x9 offset
 	// --------------------------------------------
 

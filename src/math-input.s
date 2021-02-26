@@ -224,7 +224,7 @@ end_of_string:
 	tst	x16, 0x02		// Check if 2's compliment needed for negate?
 	b.eq	900f
 	mov	x1, HAND_ACC		// Variable handle number
-	mov	x3, HAND_ACC
+	mov	x2, HAND_ACC
 	bl	TwosCompliment
 900:
 	mov	x1, #0			// no error

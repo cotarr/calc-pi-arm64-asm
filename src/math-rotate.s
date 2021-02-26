@@ -32,7 +32,7 @@ SOFTWARE.
 ------------------------------------------------------------- */
 
 	.global	Right1Bit
-	.global	Left1Bit
+	.global	Left1Bi
 
 /* --------------------------------------------------------------
   Rotate Mantissa Right 1 bit (copy sign bit)

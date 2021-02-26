@@ -584,7 +584,7 @@ Command_slash_symbol:
 //
 Command_chs:
 	mov	x1, HAND_XREG
-	mov	x3, HAND_XREG
+	mov	x2, HAND_XREG
 	bl	TwosCompliment
 
 	bl	PrintResult
@@ -812,10 +812,11 @@ Command_test:
 
 	add	sp, sp, #16
 
-;;	mov	x0, sp
-;;	bl	Print0xWordHex
-;;	bl	CROut
+//	mov	x0, sp
+//	bl	Print0xWordHex
+//	bl	CROut
 
+//	bl	DivideVariable
 	b	ParseCmd
 
 	mov	x1, #5

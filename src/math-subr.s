@@ -372,7 +372,7 @@ TestIfZero:
   Perform Floating Point 2's Compliment on Variable
 
   Input:    x1 = Source Handle Number of Variable
-            x3 = Destination Handle Number ff Varaible
+            x2 = Destination Handle Number ff Varaible
 
   Output:   none
 
@@ -392,10 +392,11 @@ TwosCompliment:
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x1,  [sp, #24]		// input argument / scratch
-	str	x3,  [sp, #32]		// input argument / scratch
+	str	x2,  [sp, #32]		// input argument / scratch
 	str	x9,  [sp, #40]		// word index
 	str	x10, [sp, #49]		// word counter
 	str	x11, [sp, #56]		// source 1 address
+	str	x12, [sp, #64]		// source 1 address
 
 	bl	set_x9_to_Var_LS_Word_Addr_Offset
 
@@ -404,19 +405,19 @@ TwosCompliment:
 	// Argument x1 contains variable handle
 	bl	set_x11_to_Fct_LS_Word_Address_Static
 
-	// Argument x3 contains variable handle
-	bl	set_x13_to_Fct_LS_Word_Address_Static
+	// Argument x2 contains variable handle
+	bl	set_x12_to_Fct_LS_Word_Address_Static
 
 	// First iteration does not subtract carry
 	ldr	x0, [x11, x9]		// x0 is first word
 	subs	x0, xzr, x0		// subtract register from zero (flags set)
-	str	x0, [x13, x9]		// Store shifted word
+	str	x0, [x12, x9]		// Store shifted word
 	add	x9, x9, BYTE_PER_WORD	// increment word pointer (no change in flags)
 	// decrement counter not needed because already count-1 for pointer arithmetic
 10:
 	ldr	x0, [x11, x9]		// x0 is first word
 	sbcs	x0, xzr, x0		// subtract register and NOT carry from zero (flags set)
-	str	x0, [x13, x9]		// Store shifted word
+	str	x0, [x12, x9]		// Store shifted word
 	// increment and loop
 	add	x9, x9, BYTE_PER_WORD	// increment word pointer
 	sub	x10, x10, #1		// decrement word counter
@@ -426,10 +427,11 @@ TwosCompliment:
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
 	ldr	x1,  [sp, #24]
-	ldr	x3,  [sp, #32]
+	ldr	x2,  [sp, #32]
 	ldr	x9,  [sp, #40]
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
+	ldr	x12, [sp, #64]
 	add	sp, sp, #80
 	ret
 /* --------------------------------------------------------------

@@ -197,7 +197,7 @@ git checkout 019035bfb629efc95ab513a0a3e9ab3990725183
 
 - Added function Left1Bit to perform shift right 1 bit, zero fill l.s. bit
 
-This is a good place to discuss number format. I am assuminig a fixed point binary number.
+This is a good place to discuss number format. I am assuming a fixed point binary number.
 On the most significant end, there will be 1 64 bit word for the integer part.
 Using the top bit as a sign bit, this is 63 bits for integer number values.
 All remaining words will be fraction part.
@@ -215,7 +215,7 @@ I ran into a confusing situation with ARM64 flags. I want to write a Two's Compl
 This is a fancy way of saying, subtract the number from zero.
 For multi-precision calculations, each 64 bit subtraction will borrow the carry flag
 if needed. The next subtraction will subtract both the 64 bit value and the (NOT) carry flag.
-However, a loop also needs a counter. Decrementing the counter needs a test.
+However, a loop also needs a counter. Decrement the counter needs a test.
 Other processors you can "push" or preserve the flag register. I could not find a
 way to do this in ARM64. I tried complicated ways to save carry in a register, but
 it was too complicated and costly in instructions.
@@ -229,11 +229,11 @@ The two's compliment loop appears successful with SBCS (use carry flag) and CBNS
 Note about entry with variable equal to zero.
 In scientific notation variables, i usually test the top word
 of a normalized mantissa for zero, then skip the 2's compliment if
-the variable is zero when 2's complment is called.
+the variable is zero when 2's complement is called.
 Since this is fixed point format, there is no normalized word to check.
-ALso, I have not provided a zero flag for the variable.
+Also, I have not provided a zero flag for the variable.
 Executing this function with a zero value returns all words zero.
-I have left it at this point, but may revist a zero check in the future (TODO)
+I have left it at this point, but may revisit a zero check in the future (TODO)
 
 - Added function AddMantissa
 - Standardized register use, the clean up all register use for today's work.
@@ -294,10 +294,10 @@ Binary Accuracy:
 
 Ran into problem. I was using the offset of the most significant word
 as an immediate value VAR_MSW_OFST. However, the assembler only
-allows 12 bits for this immedidate value. I moved several
+allows 12 bits for this immediate value. I moved several
 of the declared constants to be stored in memory. Then a variable
 is defined by INT_WSISE and FCT_WSIZE in 64 bit words for
-the integer part and fractino part.
+the integer part and fraction part.
 
 - Cleaned up previous function for VAR_MSW_OFFSET --> [VarMsbOfst]
 
@@ -434,3 +434,38 @@ After spending so much time yesterday due to a mis-matched stack
 manipulation, the command parser now check SP value and the
 first two word value on the stack to see if they change. If change
 is detected, an error is printed.
+
+- Modified PrintResult to show stack X,Y,Z,T with each operation
+- math-div.s - New file for long division routines
+- Function LongDivision is now working for debug
+- Added command "/" to call divide in RPN calculator
+-
+This is a bit-wise long division. It is a VERY slow method to divide
+two numbers, and thus not very useful to calculate pi. I have included
+it to show how the division works.
+
+Since this is a fixed point number, currently 2 integer part 64 bit words,
+and variable fraction part words, there are some outstanding issues trying
+to align the decimal separator to avoid overflow on the left (most significant
+end), or loss of accuracy, pushing numbers out the right less significant end.
+Currently, I am shifting the Dividend right 128 bits before divide
+but I would like to optimize this and check for overflow. The rough
+steps to divide are as follows, (code commented in more detail.)
+
+```
+1  Subtract WorkA[i] = OPR[i] - ACC[i]
+2  If result negative (highest bit 1) then copy OPR = WorkA
+3  Rotate OPR and WorkB left 1 bit at a time
+4  For each cycle, if M.S.Bit of WorkA = 1 then Rotate 1 into L.S. Bit WorkB
+5  When done all bits, result mantissa is in WorkB
+```
+```
+Calculate 1/7 to 200 digits as example:
+
+Op Code: 1
+Op Code: 7
+Op Code: /
+Op Code: .
++0.1428571 4285714285 7142857142 8571428571 4285714285 7142857142 8571428571 4285714285 7142857142 8571428571
+4285714285 7142857142 8571428571 4285714285 7142857142 8571428571 4285714285 7142857142 8571428571 4285714285
+```
