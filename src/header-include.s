@@ -57,7 +57,7 @@ SOFTWARE.
 
 .set	FCT_WSIZE, 	0x40
 // .set	FCT_WSIZE, 	0x80
-// .set	FCT_WSIZE, 	0x40000
+//.set	FCT_WSIZE, 	0x40000
 
 .set	VAR_WSIZE,	(INT_WSIZE + FCT_WSIZE)
 //--------------------------------------------------------------------

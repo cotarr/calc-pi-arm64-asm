@@ -36,6 +36,8 @@ SOFTWARE.
 	.global	Left1Bit
 	.global	Right64Bit
 	.global	Left64Bit
+	.global	RightNBits
+	.global	LeftNBits
 
 /* --------------------------------------------------------------
   Count number of zero bits to the left of the first non-zero bit
@@ -126,7 +128,7 @@ Right1Bit:
 10:
 	ldr	x2, [x11, BYTE_PER_WORD] // x2 is next (adjacent left) word to shift
 	lsr	x1, x1, #1		// Shift right 1 bit (0 into m.s. bit)
-	add	x1, x1, x2, lsl #63	// Add l.s. bit next word as m.s. bit
+	orr	x1, x1, x2, lsl #63	// Add l.s. bit next word as m.s. bit
 	str	x1, [x11], BYTE_PER_WORD // Store shifted word
 	// increment and loop
 	mov	x1, x2			// No need fetch from memory again
@@ -136,7 +138,7 @@ Right1Bit:
 	// last word is special case of end word
 	//
 	// most significant word, sign bit copies into next bit when rotating right
-	asr	x1, x1, #1		// Shift right 1 bit (sign bit into m.s. bit)
+	lsr	x1, x1, #1		// Shift right 1 bit (zero fill)
 	str	x1, [x11]		// and store most significant word
 
 	ldr	x30, [sp, #0]		// Restore registers
@@ -178,7 +180,7 @@ Left1Bit:
 10:
 	ldr	x2, [x11, -BYTE_PER_WORD] // x1 is next (adjacent right) word to shift
 	lsl	x1, x1, #1		// Shift left 1 bit (0 into m.s. bit)
-	add	x1, x1, x2, lsr #63	// Add l.s. bit next word as m.s. bit
+	orr	x1, x1, x2, lsr #63	// Add l.s. bit next word as m.s. bit
 	str	x1, [x11], -BYTE_PER_WORD
 	// increment and loop
 	mov	x1, x2			// No need fetch from memory again
@@ -187,7 +189,7 @@ Left1Bit:
 	//
 	// Last word is special case, no adjacent word on right
 	//
-	lsl	x1, x1, #1
+	lsl	x1, x1, #1		// zero fill
 	str	x1, [x11]
 
 	ldr	x30, [sp, #0]		// Restore registers
@@ -279,3 +281,242 @@ Left64Bit:
 	ldr	x11, [sp, #40]
 	add	sp, sp, #64
 	ret
+
+/* --------------------------------------------------------------
+  Rotate Right (n) bits with zero fill
+
+  Input:  x0 = Number of bits to rotate
+          x1 = Handle Number of Variable
+
+  Output:  none
+
+;--------------------------------------------------------------*/
+RightNBits:
+	sub	sp, sp, #128		// Reserve 16 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]		// input argument (bits to shift)
+	str	x1,  [sp, #24]		// input argument (variable handle)
+	str	x2,  [sp, #32]		// input argument (variable handle)
+
+	str	x8,  [sp, #40]		// Counter zero fill words
+	str	x9,  [sp, #48]		// Address offset
+	str	x10, [sp, #56]		// Counter shifting words
+
+	str	x11, [sp, #64]		// Destinatin base address
+	str	x12, [sp, #72]		// Source low word address
+	str	x13, [sp, #80]		// source high word address
+
+	str	x15, [sp, #88]		// Input argument x0: total bits to rotate
+	str	x16, [sp, #96]		// count of words to rotate
+	str	x17, [sp, #104]		// count of bits from high word
+	str	x18, [sp, #112]		// count of bits from low word
+
+	mov	x15, x0			// save N bits to shift in X15
+	cbz	x0, 99f			// if zero skip
+
+	bl	set_x10_to_Word_Size_Static
+
+	// Argument x1 contains variable handle number
+	bl	set_x11_to_Fct_LS_Word_Address_Static
+
+	//
+	// Divide to get words and bits
+	//
+	mov	x0, #64			// Use as temporary constant value
+	udiv	x16, x15, x0		// x16 words to shift
+	msub	x17, x16, x0, x15	// x17 bits within word to shift
+	sub	x18, x0, x17		// x18 fill in bits in adjacent word (64 - N)
+
+	// At zero word shift, offset is 1 word (like shift 1 bit above)
+	// Number of words shift is added to offset of 1
+	add	x12, x11, x16, lsl X8SHIFT3BIT // low source word address
+	add	x13, x12, BYTE_PER_WORD // high source word address
+
+	sub	x10, x10, #1		// Adjust one time case outside loop
+	mov	x8, x10			// copy (temp)
+	sub	x10, x10, x16		// counter adjusted word shift
+	sub	x8, x8, x10		// fill words after shifted words
+	//
+	// check in range
+	//
+	cmp	x10, x16
+	b.hs	10f
+	ldr	x0, =RotateNRangeMsgRight // Error message pointer
+	mov	x1, #372		// 12 bit error code
+	b	FatalError
+10:
+	mov	x9, #0			// offset pointer
+
+	// fetch word to setup loop entry
+	ldr	x1, [x12, x9]		// x1 contains Low source word
+20:
+	ldr	x2, [x13, X9]		// x2 contains High source word
+	lsr	x1, x1, x17		// Shift right [x17] bits, zero fill
+	lsl	x0, x2, x18		// temp shifted value to x0
+	orr	x1, x1, x0		// OR shifted bits
+	// Store shifted word
+	str	x1, [x11, x9]		// save in destination word
+	// increment and loop
+	add	x9, x9, BYTE_PER_WORD
+	mov	x1, x2			// High word --> Low word
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 20b		// non-zero, loop back
+	//
+	// last word is special case of end word
+	//
+	// most significant word
+	lsr	x1, x1, x17		// Shift right 1 bit (zero fill)
+	str	x1, [x11, x9]		// and store most significant word
+	//
+	// Fill shifted words
+	//
+	cbz	x8, 99f
+	mov	x0, #0			// fill value
+	add	x9, x9, BYTE_PER_WORD	// for alignment of words
+30:
+	str	x0, [x11, x9]
+	add	x9, x9, BYTE_PER_WORD
+	sub	x8, x8, #1
+	cbnz	x8, 30b
+99:
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x8,  [sp, #40]
+	ldr	x9,  [sp, #48]
+	ldr	x10, [sp, #56]
+	ldr	x11, [sp, #64]
+	ldr	x12, [sp, #72]
+	ldr	x13, [sp, #80]
+	ldr	x15, [sp, #88]
+	ldr	x16, [sp, #96]
+	ldr	x17, [sp, #104]
+	ldr	x18, [sp, #116]
+	add	sp, sp, #128
+	ret
+
+/* --------------------------------------------------------------
+  Rotate left (n) bits with zero fill
+
+  Input:  x0 = Number of bits to rotate
+          x1 = Handle Number of Variable
+
+  Output:  none
+
+;--------------------------------------------------------------*/
+LeftNBits:
+	sub	sp, sp, #128		// Reserve 16 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]		// input argument (bits to shift)
+	str	x1,  [sp, #24]		// input argument (variable handle)
+	str	x2,  [sp, #32]		// input argument (variable handle)
+
+	str	x8,  [sp, #40]		// Counter zero fill words
+	str	x9,  [sp, #48]		// Address offset
+	str	x10, [sp, #56]		// Counter shifting words
+
+	str	x11, [sp, #64]		// Destinatin base address
+	str	x12, [sp, #72]		// Source high word address
+	str	x13, [sp, #80]		// source low word address
+
+	str	x15, [sp, #88]		// Input argument x0: total bits to rotate
+	str	x16, [sp, #96]		// count of words to rotate
+	str	x17, [sp, #104]		// count of bits from low word
+	str	x18, [sp, #112]		// count of bits from high word
+
+	mov	x15, x0			// save N bits to shift in X15
+	cbz	x0, 99f			// if zero skip
+
+	bl	set_x10_to_Word_Size_Static
+
+	// Argument x1 contains variable handle number
+	bl	set_x11_to_Int_MS_Word_Address
+
+	//
+	// Divide to get words and bits
+	//
+	mov	x0, #64			// Use as temporary constant value
+	udiv	x16, x15, x0		// x16 words to shift
+	msub	x17, x16, x0, x15	// x17 bits within word to shift
+	sub	x18, x0, x17		// x18 fill in bits in adjacent word (64 - N)
+
+	// At zero word shift, offset is 1 word (like shift 1 bit above)
+	// Number of words shift is added to offset of 1
+	sub	x12, x11, x16, lsl X8SHIFT3BIT // high source word address
+	sub	x13, x12, BYTE_PER_WORD // low source word address
+
+	sub	x10, x10, #1		// Adjust one time case outside loop
+	mov	x8, x10			// copy (temp)
+	sub	x10, x10, x16		// counter adjusted word shift
+	sub	x8, x8, x10		// fill words after shifted words
+	//
+	// check in range
+	//
+	cmp	x10, x16
+	b.hs	10f
+	ldr	x0, =RotateNRangeMsgLeft // Error message pointer
+	mov	x1, #373		// 12 bit error code
+	b	FatalError
+10:
+	mov	x9, #0			// offset pointer
+
+	// fetch word to setup loop entry
+	ldr	x1, [x12, x9]		// x1 contains high source word
+20:
+	ldr	x2, [x13, X9]		// x2 contains Low source word
+	lsl	x1, x1, x17		// Shift right [x17] bits, zero fill
+	lsr	x0, x2, x18		// temp shifted value to x0
+	orr	x1, x1, x0		// OR shifted bits
+	// Store shifted word
+	str	x1, [x11, x9]
+	// increment and loop
+	sub	x9, x9, BYTE_PER_WORD
+	mov	x1, x2			// Low word --> High word
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 20b		// non-zero, loop back
+	//
+	// last word is special case of end word
+	//
+	// least significant word
+	lsl	x1, x1, x17		// Shift right 1 bit (zero fill)
+	str	x1, [x11, x9]		// and store most significant word
+	//
+	// Fill shifted words
+	//
+	cbz	x8, 99f
+	mov	x0, #0			// fill value
+	sub	x9, x9, BYTE_PER_WORD	// for alignment of words
+30:
+	str	x0, [x11, x9]
+	sub	x9, x9, BYTE_PER_WORD
+	sub	x8, x8, #1
+	cbnz	x8, 30b
+99:
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x8,  [sp, #40]
+	ldr	x9,  [sp, #48]
+	ldr	x10, [sp, #56]
+	ldr	x11, [sp, #64]
+	ldr	x12, [sp, #72]
+	ldr	x13, [sp, #80]
+	ldr	x15, [sp, #88]
+	ldr	x16, [sp, #96]
+	ldr	x17, [sp, #104]
+	ldr	x18, [sp, #116]
+	add	sp, sp, #128
+	ret
+
+
+RotateNRangeMsgRight:
+	.asciz	"RightNBits argument too large"
+RotateNRangeMsgLeft:
+	.asciz	"LeftNBits argument too large"
+	.align 4

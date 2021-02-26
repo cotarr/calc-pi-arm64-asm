@@ -158,12 +158,16 @@ LongDivision:
 // Temporary, just shift OPR left 128 bits, overflowing into guard words.
 // It will be fixed later.
 //--------------------------------------------------------------------
-	mov	x2, #128	// full inetger part word shift
+//	mov	x2, #128	// full inetger part word shift
+//	mov	x1, HAND_OPR
+//50:
+//	bl	Right1Bit
+//	sub	x2, x2,#1
+//	cbnz	x2, 50b
+
 	mov	x1, HAND_OPR
-50:
-	bl	Right1Bit
-	sub	x2, x2,#1
-	cbnz	x2, 50b
+	bl	Right64Bit
+	bl	Right64Bit
 //--------------------------------------------------------------------
 //	mov	x2, #0
 //	mov	x1, HAND_ACC
