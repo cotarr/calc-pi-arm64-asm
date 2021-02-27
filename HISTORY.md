@@ -423,7 +423,7 @@ tomorrow to make sure there are no other issues.
 ```
 git cone 88c904e9643fea472503de0aef034be49a59b5ea
 ```
-### 2021-02-25 - Day 11 (18 days to go until pi day)
+### 2021-02-25 - Day 11 (17 days to go until pi day)
 
 - Finished code clean up in file math-subr.s
 - Added commands "+", "-", and "chs" to help test program with RPN calculation.
@@ -474,7 +474,7 @@ Op Code: .
 git clone 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
 ```
 
-### 2021-02-26 - Day 12 (17 days to go until pi day)
+### 2021-02-26 - Day 12 (16 days to go until pi day)
 
 - Add function Right64bit, Left64Bit to logical shift even words
 - First benchmark test bit-wise long division time 100000 digits 11 seconds on Pi 4
@@ -482,3 +482,8 @@ git clone 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
 - Add overflow error detection to long division
 - Optimized of bit alignment in ACC and OPP during long division.
 - Added commands xy, rup, rdown
+
+```
+git clone 191ee7b1f0919b68e7c724ad209033c94228514b
+```
+### 2021-02-26 - Day 12 (15 days to go until pi day)

@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-02-23
+	Last edit: 2021-02-27
 
 	PrintCommandList
 	ParseCmd
@@ -876,23 +876,15 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
-//	mov	x2, #6
-//	mov	x3, #7
+	// ------- start RightNBits LeftNBits ----------
+//	cbz	x0, 10f			// if arg missing skip test
+//	bl	IntWordInput		// ascii --> 64 bit binary
+//	mov	x9, x0
+//	bl	DEBUG_test_N_shift
+//10:	b	ParseCmd
+	// ------- end RightNBits LeftNBits ----------
 
-	mov	x2, #64*2 + 0
-	mov	x0, x2
-	mov	x1, #5
-//	bl	RightNBits
-	bl	LeftNBits
-
-	mov	x1, #3
-10:
-//	bl	Right1Bit
-	bl	Left1Bit
-	sub	x2, x2, #1
-	cbnz	x2, 10b
-
-//	bl	Left64Bit
+//	mov	x1, 5
 
 //	bl	CountLeftZerobits
 //	bl	PrintWordB10

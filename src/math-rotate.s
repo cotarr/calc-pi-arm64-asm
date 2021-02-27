@@ -4,7 +4,7 @@
 	Logical shift bit, bytes and words
 
 	Created:   2021-02-10
-	Last edit: 2021-02-25
+	Last edit: 2021-02-27
 
 ----------------------------------------------------------------
 MIT License
@@ -312,69 +312,112 @@ RightNBits:
 	str	x17, [sp, #104]		// count of bits from high word
 	str	x18, [sp, #112]		// count of bits from low word
 
+	// -------------------------------------------------------
+	// Save input argument
+	// -------------------------------------------------------
 	mov	x15, x0			// save N bits to shift in X15
-	cbz	x0, 99f			// if zero skip
 
+	// -------------------------------------------------------
+	// Setup word size counter and varaible address pointer
+	// -------------------------------------------------------
 	bl	set_x10_to_Word_Size_Static
 
 	// Argument x1 contains variable handle number
 	bl	set_x11_to_Fct_LS_Word_Address_Static
 
-	//-------------------------------------------------
-	// TODO:  Special case when all filled with zero
-	//        except some bits of last word
-	//        This crashes, because can not combine 2
-	//        words of different shift when only world 1 left
-	//
-	//        Would be similar to even word case
-	//        except zero fill last words
-	//
-	//        Error range check --> fatal error
-        // -------------------------------------------------
+	// -------------------------------------------------
+	// Case #1 - Zero bit shift requested (x15 = 0)
+	// In this care return the original result unchanged.
+	// -------------------------------------------------
+	cbz	x15, 999f			// if zero skip
 
-	//
-	// check in range
-	//
+	// -------------------------------------------------
+	// check shift size range, else fatal error
+	// -------------------------------------------------
 	mov	x0, x10
-	lsl	x0, x0, X8SHIFT3BIT
-	lsl	x0, x0, X8SHIFT3BIT
-	sub	x0, x0, #64
+	lsl	x0, x0, X64SHIFT4BIT	// mult * 8 for 64 bits
 	cmp	x0, x15
-	b.hs	10f
+	b.gt	10f
 	ldr	x0, =RotateNRangeMsgRight // Error message pointer
 	mov	x1, #372		// 12 bit error code
 	b	FatalError
 10:
-	//
+	// ------------------------------------------------
 	// Divide to get words and bits
-	//
+	// x15 = Iriginal word size
+	// x16 = Number of 64 bit words to shift
+	// x17 = Number of bits to shift
+	// x18 = Number of bits to fill after shift (64 - x17)
+	// ------------------------------------------------
 	mov	x0, #64			// Use as temporary constant value
 	udiv	x16, x15, x0		// x16 words to shift
 	msub	x17, x16, x0, x15	// x17 bits within word to shift
 	sub	x18, x0, x17		// x18 fill in bits in adjacent word (64 - N)
 
-	// ---------------------------
-	// Special case of even word
-	// ---------------------------
-	cbnz	x17, 40f
+	// -------------------------------------------------
+	// Case #2 request shift of even word (x16 != 0, x17 == 0)
+	// -------------------------------------------------
+	cbnz	x17, 140f
+	// setup x12 to point to destination word address
 	add	x12, x11, x16, lsl X8SHIFT3BIT
 	mov	x8, x10			// temp save
-	sub	x10, x10, x16		// counter
+	sub	x10, x10, x16		// counter words to shift
 	sub	x8, x8, x10		// zero words needed
-20:	ldr	x0, [x12], BYTE_PER_WORD // Load adjacent word on left
+120:	ldr	x0, [x12], BYTE_PER_WORD // Load adjacent word on left
 	str	x0, [x11], BYTE_PER_WORD // Save at pointer location, then inc pointer
 	sub	x10, x10, #1		// decrement word counter
-	cbnz	x10, 20b		// non-zero, loop back
+	cbnz	x10, 120b		// non-zero, loop back
 	// fill remaining words with zero
-30:	mov	x0, #0			// fill value
+130:	mov	x0, #0			// fill value
 	str	x0, [x11], BYTE_PER_WORD // store zero word
 	sub	x8, x8, #1		// counter
-	cbnz	x8, 30b
-	b.al	99f			// no more, return
-	// -------------------------------
-	// End special case of even word
-	// -------------------------------
-40:
+	cbnz	x8, 130b
+	b.al	999f			// no more, return
+140:
+	// -------------------------------------------------
+	// Case #3 Shift End to End
+	//
+	// Some bits from first words are shifted to the
+	// last word. In this case bits from two different
+	// words are not combined.
+	// -------------------------------------------------
+	// Note, register x17 (bit count) has already been checked for zero
+	mov	x0, x10			// count of number of words
+	sub	x0, x0, 1		// Count -1
+	cmp	x16, x0
+	b.ne	240f
+
+	// setup x12 to point to destination word address
+	add	x12, x11, x16, lsl X8SHIFT3BIT
+	// Single word move with shift of bits
+	sub	x8, x10, #1		// zero words needed
+	ldr	x0, [x12]		// Word from one end of variable
+	lsr	x0, x0, x17		// shift bits by requested bit count
+	str	x0, [x11], BYTE_PER_WORD // Save at pointer location, then inc pointer
+
+	// fill remaining words with zero
+230:	mov	x0, #0			// fill value
+	str	x0, [x11], BYTE_PER_WORD // store zero word
+	sub	x8, x8, #1		// counter
+	cbnz	x8, 230b
+
+	b.al	999f			// no more, return
+240:
+	// ---------------------------------------------------------------
+	//      M A I N   S H I F T   C O D E
+	//
+	// All special cases are complete.
+	//
+	// This is the main bit shift function
+	// This is the main bit shift function
+	//    Load 2 adjacent words
+	//    Shift bits in one word
+	//    Shift bits in other word opposite direction
+	//    Combine two words with bitwise OR
+	//    Store single word (combined from two words)
+	//    Loop until done
+	// ---------------------------------------------------------------
+
 	// At zero word shift, offset is 1 word (like shift 1 bit above)
 	// Number of words shift is added to offset of 1
 	add	x12, x11, x16, lsl X8SHIFT3BIT // low source word address
@@ -389,7 +432,7 @@ RightNBits:
 
 	// fetch word to setup loop entry
 	ldr	x1, [x12, x9]		// x1 contains Low source word
-50:
+350:
 	ldr	x2, [x13, X9]		// x2 contains High source word
 	lsr	x1, x1, x17		// Shift right [x17] bits, zero fill
 	lsl	x0, x2, x18		// temp shifted value to x0
@@ -400,7 +443,7 @@ RightNBits:
 	add	x9, x9, BYTE_PER_WORD
 	mov	x1, x2			// High word --> Low word
 	sub	x10, x10, #1		// decrement word counter
-	cbnz	x10, 50b		// non-zero, loop back
+	cbnz	x10, 350b		// non-zero, loop back
 	//
 	// last word is special case of end word
 	//
@@ -410,15 +453,15 @@ RightNBits:
 	//
 	// Fill shifted words
 	//
-	cbz	x8, 99f
+	cbz	x8, 999f
 	mov	x0, #0			// fill value
 	add	x9, x9, BYTE_PER_WORD	// for alignment of words
-60:
+360:
 	str	x0, [x11, x9]
 	add	x9, x9, BYTE_PER_WORD
 	sub	x8, x8, #1
-	cbnz	x8, 60b
-99:
+	cbnz	x8, 360b
+999:
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
@@ -467,69 +510,111 @@ LeftNBits:
 	str	x17, [sp, #104]		// count of bits from low word
 	str	x18, [sp, #112]		// count of bits from high word
 
+	// -------------------------------------------------------
+	// Save input argument
+	// -------------------------------------------------------
 	mov	x15, x0			// save N bits to shift in X15
-	cbz	x0, 99f			// if zero skip
 
+	// -------------------------------------------------------
+	// Setup word size counter and varaible address pointer
+	// -------------------------------------------------------
 	bl	set_x10_to_Word_Size_Static
 
 	// Argument x1 contains variable handle number
 	bl	set_x11_to_Int_MS_Word_Address
 
-	//-------------------------------------------------
-	// TODO:  Special case when all filled with zero
-	//        except some bits of last word
-	//        This crashes, because can not combine 2
-	//        words of different shift when only world 1 left
-	//
-	//        Would be similar to even word case
-	//        except zero fill last words
-	//
-	//        Error range check --> fatal error
-        // -------------------------------------------------
+	// -------------------------------------------------
+	// Case #1 - Zero bit shift requested (x15 = 0)
+	// In this care return the original result unchanged.
+	// -------------------------------------------------
+	cbz	x15, 999f		// if zero skip
 
-	//
-	// check in range
-	//
+	// -------------------------------------------------
+	// check shift size range, else fatal error
+	// -------------------------------------------------
 	mov	x0, x10
-	lsl	x0, x0, X8SHIFT3BIT
-	lsl	x0, x0, X8SHIFT3BIT
-	sub	x0, x0, #64
+	lsl	x0, x0, X64SHIFT4BIT	// mult * 8 for 64 bits
 	cmp	x0, x15
-	b.hs	10f
+	b.gt	10f
 	ldr	x0, =RotateNRangeMsgLeft // Error message pointer
 	mov	x1, #374		// 12 bit error code
 	b	FatalError
 10:
-	//
+	// ------------------------------------------------
 	// Divide to get words and bits
-	//
+	// x15 = Iriginal word size
+	// x16 = Number of 64 bit words to shift
+	// x17 = Number of bits to shift
+	// x18 = Number of bits to fill after shift (64 - x17)
+	// ------------------------------------------------
 	mov	x0, #64			// Use as temporary constant value
 	udiv	x16, x15, x0		// x16 words to shift
 	msub	x17, x16, x0, x15	// x17 bits within word to shift
 	sub	x18, x0, x17		// x18 fill in bits in adjacent word (64 - N)
 
-	// ---------------------------
-	// Special case of even word
-	// ---------------------------
-	cbnz	x17, 40f
+	// -------------------------------------------------
+	// Case #2 request shift of even word (x16 != 0, x17 == 0)
+	// -------------------------------------------------
+	cbnz	x17, 140f
+	// setup x12 to point to destination word address
 	sub	x12, x11, x16, lsl X8SHIFT3BIT
 	mov	x8, x10			// temp save
-	sub	x10, x10, x16		// counter
+	sub	x10, x10, x16		// counter words to shift
 	sub	x8, x8, x10		// zero words needed
-20:	ldr	x0, [x12], -BYTE_PER_WORD // Load adjacent word on left
+120:	ldr	x0, [x12], -BYTE_PER_WORD // Load adjacent word on left
 	str	x0, [x11], -BYTE_PER_WORD // Save at pointer location, then inc pointer
 	sub	x10, x10, #1		// decrement word counter
-	cbnz	x10, 20b		// non-zero, loop back
+	cbnz	x10, 120b		// non-zero, loop back
 	// fill remaining words with zero
-30:	mov	x0, #0			// fill value
+130:	mov	x0, #0			// fill value
 	str	x0, [x11], -BYTE_PER_WORD // store zero word
 	sub	x8, x8, #1		// counter
-	cbnz	x8, 30b
-	b.al	99f			// no more, return
-	// -------------------------------
-	// End special case of even word
-	// -------------------------------
-40:
+	cbnz	x8, 130b
+	b.al	999f			// no more, return
+140:
+	// -------------------------------------------------
+	// Case #3 Shift End to End
+	//
+	// Some bits from first words are shifted to the
+	// last word. In this case bits from two different
+	// words are not combined.
+	// -------------------------------------------------
+	// Note, register x17 (bit count) has already been checked for zero
+	mov	x0, x10			// count of number of words
+	sub	x0, x0, 1		// Count -1
+	cmp	x16, x0
+	b.ne	240f
+
+	// setup x12 to point to destination word address
+	sub	x12, x11, x16, lsl X8SHIFT3BIT
+	// Single word move with shift of bits
+	sub	x8, x10, #1		// zero words needed
+	ldr	x0, [x12]		// Word from one end of variable
+	lsl	x0, x0, x17		// shift bits by requested bit count
+	str	x0, [x11], -BYTE_PER_WORD // Save at pointer location, then inc pointer
+
+	// fill remaining words with zero
+230:	mov	x0, #0			// fill value
+	str	x0, [x11], -BYTE_PER_WORD // store zero word
+	sub	x8, x8, #1		// counter
+	cbnz	x8, 230b
+
+	b.al	999f			// no more, return
+240:
+	// ---------------------------------------------------------------
+	//      M A I N   S H I F T   C O D E
+	//
+	// All special cases are complete.
+	//
+	// This is the main bit shift function
+	//    Load 2 adjacent words
+	//    Shift bits in one word
+	//    Shift bits in other word opposite direction
+	//    Combine two words with bitwise OR
+	//    Store single word (combined from two words)
+	//    Loop until done
+	// ---------------------------------------------------------------
+
 	// At zero word shift, offset is 1 word (like shift 1 bit above)
 	// Number of words shift is added to offset of 1
 	sub	x12, x11, x16, lsl X8SHIFT3BIT // high source word address
@@ -544,7 +629,7 @@ LeftNBits:
 
 	// fetch word to setup loop entry
 	ldr	x1, [x12, x9]		// x1 contains high source word
-50:
+350:
 	ldr	x2, [x13, X9]		// x2 contains Low source word
 	lsl	x1, x1, x17		// Shift right [x17] bits, zero fill
 	lsr	x0, x2, x18		// temp shifted value to x0
@@ -555,7 +640,7 @@ LeftNBits:
 	sub	x9, x9, BYTE_PER_WORD
 	mov	x1, x2			// Low word --> High word
 	sub	x10, x10, #1		// decrement word counter
-	cbnz	x10, 50b		// non-zero, loop back
+	cbnz	x10, 350b		// non-zero, loop back
 	//
 	// last word is special case of end word
 	//
@@ -565,15 +650,15 @@ LeftNBits:
 	//
 	// Fill shifted words
 	//
-	cbz	x8, 99f
+	cbz	x8, 999f
 	mov	x0, #0			// fill value
 	sub	x9, x9, BYTE_PER_WORD	// for alignment of words
-60:
+360:
 	str	x0, [x11, x9]
 	sub	x9, x9, BYTE_PER_WORD
 	sub	x8, x8, #1
-	cbnz	x8, 60b
-99:
+	cbnz	x8, 360b
+999:
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
@@ -592,9 +677,85 @@ LeftNBits:
 	add	sp, sp, #128
 	ret
 
-
 RotateNRangeMsgRight:
 	.asciz	"RightNBits argument too large"
 RotateNRangeMsgLeft:
 	.asciz	"LeftNBits argument too large"
 	.align 4
+/*
+// -------  Begin test code -----------
+//
+// RightNBits and LeftNBits are critical
+// functions that must work correctly.
+// This is some temporary debug code to test.
+//
+// Insert furnction "DEBUG_test_N_shift" into
+// command parser "test" Function as follows:
+//
+///		cbz	x0, 10f
+//		bl	IntWordInput
+//		mov	x9, x0
+//		bl	DEBUG_test_N_shift
+//	10:	b	ParseCmd
+//
+// Comment lines for left or right (two places)
+//
+// Command:  test <bits to shift>
+// ---------------------------------------
+	.align 4
+	.global	DEBUG_test_N_shift
+//
+// Bits to shift argument in x9
+//
+DEBUG_test_N_shift:
+	stp	x29, x30, [sp, -16]!	// preserve return address
+
+	mov	x0, x9
+	bl	Print0xWordHex
+	mov	x0, #' '
+	bl	CharOut
+	mov	x0, x9
+	bl	PrintWordB10
+	bl	CROut
+
+	// 1) fill test data
+
+	mov	x1, 3
+	bl DebugFillVariable
+	mov	x1, 5
+	bl DebugFillVariable
+	mov	x1, 7
+	bl DebugFillVariable
+
+	// 2) Shift specified number of bits in single function test
+
+	mov	x0, x9
+	mov	x1, #5
+//	bl	RightNBits
+	bl	LeftNBits
+
+	// 3) Shift bits manually bit by bit
+
+	mov	x2, x9
+	cbz	x2, 20f		// skip if zero
+
+	mov	x1, #3
+10:
+//	bl	Right1Bit
+	bl	Left1Bit
+	sub	x2, x2, #1
+	cbnz	x2, 10b
+20:
+	// 4) Print resutls to compare
+
+	mov	x1, #3
+	bl	PrintVar
+	mov	x1, #5
+	bl	PrintVar
+	mov	x1, #7
+	bl	PrintVar
+99:
+	ldp	x29, x30, [sp], 16	// restore return address
+	ret
+// -------------- end test code --------------
+*/
