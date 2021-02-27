@@ -35,6 +35,7 @@ SOFTWARE.
    	.include "header-include.s"
 	.include "math-subr.s"
 	.include "math-rotate.s"
+	.include "math-mult.s"
 	.include "math-div.s"
 	.include "math-input.s"
 	.include "math-output.s"

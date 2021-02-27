@@ -72,6 +72,10 @@ Help_Table:
 	.byte	0,0,0,0,0,0,0
 	.quad	Help_slash_symbol
 
+	.ascii	"*"
+	.byte	0,0,0,0,0,0,0
+	.quad	Help_star_symbol
+
 	.ascii	"clrstk"
 	.byte	0,0
 	.quad	Help_clrstk
@@ -162,7 +166,14 @@ Help_minus_symbol:
 Help_slash_symbol:
 	.ascii	"Usage: /\n\n"
 	.ascii	"Description: Floating Point Division\n"
-	.ascii	"Parser: XReg = YReg - XReg\n"
+	.ascii	"Parser: XReg = YReg / XReg\n"
+	.ascii	"Stack: YReg --> XReg, then roll stack down.\n"
+	.byte	0
+
+Help_star_symbol:
+	.ascii	"Usage: *\n\n"
+	.ascii	"Description: Floating Point Multiplication\n"
+	.ascii	"Parser: XReg = YReg * XReg\n"
 	.ascii	"Stack: YReg --> XReg, then roll stack down.\n"
 	.byte	0
 

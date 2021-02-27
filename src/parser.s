@@ -72,6 +72,10 @@ Command_Table:
 	.byte	0,0,0,0,0,0,0
 	.quad	Command_minus_symbol
 
+	.ascii	"*"
+	.byte	0,0,0,0,0,0,0
+	.quad	Command_star_symbol
+
 	.ascii	"/"
 	.byte	0,0,0,0,0,0,0
 	.quad	Command_slash_symbol
@@ -569,6 +573,38 @@ Command_slash_symbol:
 	bl	CopyVariable
 
 	bl	DivideVariable
+
+	mov	x1, HAND_ACC
+	mov	x2, HAND_XREG
+	bl	CopyVariable
+
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	mov	x1, HAND_TREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_TREG
+	bl	ClearVariable
+
+	bl	PrintResult
+	b	ParseCmd
+
+//
+//
+//
+Command_star_symbol:
+	mov	x1, HAND_YREG
+	mov	x2, HAND_OPR
+	bl	CopyVariable
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+
+	bl	MultiplyVariable
 
 	mov	x1, HAND_ACC
 	mov	x2, HAND_XREG
