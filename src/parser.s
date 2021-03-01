@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-02-28
+	Last edit: 2021-03-01
 
 	PrintCommandList
 	ParseCmd
@@ -921,12 +921,15 @@ Command_test:
 
 	mov	x1, HAND_ACC
 	bl	SetToOne
+	bl	MultiplyByTen
+	bl	MultiplyByTen
+	bl	MultiplyByTen
 
-	mov	X1, HAND_OPR
-	bl	SetToOne
-	bl	MultiplyVariable
-	mov	x1, HAND_OPR
-	bl	PrintVar
+	mov	X0, 10
+	mov	x1, HAND_ACC
+	mov	x2, HAND_ACC
+	bl	Reg32BitDivision
+
 	mov	x1, HAND_ACC
 	bl	PrintVar
 

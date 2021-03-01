@@ -4,7 +4,7 @@
 	Floating point multiplicatoin routines
 
 	Created:   2021-02-27
-	Last edit: 2021-02-28
+	Last edit: 2021-03-01
 
 ----------------------------------------------------------------
 MIT License

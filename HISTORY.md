@@ -510,3 +510,5 @@ to improve loss of significant bits on the least significant end.
 
 - Fixed and tested bit alignment for word multiplication
 - Fixed error in sign flag on multiplication
+- Added function Reg32BitDivision to divide full variable with 32 bit integer
+- Added division selector to choose long division or faster 32 bit division

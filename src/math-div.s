@@ -4,7 +4,7 @@
 	Floating point division routines
 
 	Created:   2021-02-15
-	Last edit: 2021-02-28
+	Last edit: 2021-03-01
 
 ----------------------------------------------------------------
 MIT License
@@ -32,10 +32,241 @@ SOFTWARE.
 ------------------------------------------------------------- */
 
 	.global DivideVariable
+	.global Reg32BitDivision
 	.global LongDivision
 
+// ----------------------------------------
+// Divide variable
+//
+// THis is a selector function to
+// call proper division child function.
+//
+// Input:  OPR register is the Dividend
+//         ACC register is the Divisor
+//
+// Output  ACC register contains the Quotient
+//
+//-----------------------------------------
+
+
 DivideVariable:
-//	b	LongDivision
+	sub	sp, sp, #80		// Reserve 10 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]
+	str	x2,  [sp, #32]
+	str	x8,  [sp, #40]
+	str	x9,  [sp, #48]
+	str	x10, [sp, #56]
+	str	x11, [sp, #64]
+
+	bl	set_x9_to_Int_LS_Word_Addr_Offset
+	mov	x8, x9
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	bl	set_x10_to_Word_Size_Static
+
+	mov	x1, HAND_ACC
+	bl	set_x11_to_Var_LS_Word_Address
+
+10:	cmp	x9, x8			// check if not Integer part MS word
+	b.eq	20f			// this is int L.S word, special case
+	ldr	x0, [x11, x9]
+	cbnz	x0, 100f		// non-zero can't use 32 bit, do full
+20:
+	add	x9, x9, BYTE_PER_WORD
+	sub	x10, x10, #1
+	cbnz	x10, 10b
+	//
+	// Check Integer part L.S. word for 32 bit
+	ldr	x1, [x11, x8]		// L.S word integer part
+	ldr	x0, =31f
+	ldr	x0, [x0]
+	tst	x0, x1			// is it 32 bits
+	b.ne	100f			// No go do long division
+	//
+	// Case of faster 32 bit division
+	//
+	// -------------------------
+	ldr	x0, [x11, x8]		// L.S word integer part			// Divisor from word
+	mov	x1, HAND_OPR		// Use main variable
+	mov	x2, HAND_ACC		// Use main variable
+	bl	Reg32BitDivision
+	// -------------------------
+	b.al	999f
+//       Ruler -->1234567812345678
+31:	.quad	0xffffffff00000000
+	.align 4
+
+100:
+	//
+	// Default, do full precision long division
+	//
+	// -------------------------
+	bl	LongDivision
+	// -------------------------
+
+999:
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x8,  [sp, #40]
+	ldr	x9,  [sp, #48]
+	ldr	x10, [sp, #56]
+	ldr	x11, [sp, #64]
+	add	sp, sp, #80
+	ret
+
+/* --------------------------------------------------------------
+   Divide Variable by 10
+
+   Input: x0 = 64 bit word with 32 bit divisor, positive only
+          x1 = Source Dividend Variable Handle (may be negtive)
+	  x2 = Destination Quotient variable Handle
+
+   Output:  none
+
+    This will utilize 64 bit dividend by 32 bit divisor
+   to get 32 bit quotient and 32 bit remiander
+
+   The each loop 32 bit remainder and 32 bit data
+   is used to form the 64 bit divisor.
+
+   Memory is loaded and stored in 32 bit word size in a loop.
+
+-------------------------------------------------------------- */
+Reg32BitDivision:
+	sub	sp, sp, #96		// Reserve 12 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]	// <-- do not renumber (Dividend)
+	str	x2,  [sp, #32]  // <-- do not renumber (Quatient)
+	str	x3,  [sp, #40]
+	str	x10, [sp, #48]
+	str	x11, [sp, #56]
+	str	x12, [sp, #64]
+	str	x17, [sp, #72]
+	str	x18, [sp, #80]
+
+	mov	x18, x0			// save x0 32 bi divisor divisor
+
+	cmp	x18, #0
+	b.ne	10f
+	// Fatal error
+	ldr	x0, =MsgRegDivByZero	// Error message pointer
+	mov	x1, #1230		// 12 bit error code
+	b	FatalError
+10:
+	//
+	// Check for valid input, only bit 0-31 allowed
+	//
+	ldr	x0, =20f
+	ldr	x0, [x0]
+	tst	x0, x18
+	// Fatal error
+	b.eq	30f
+	ldr	x0, =MsgRegDivInvalid	// Error message pointer
+	mov	x1, #1233		// 12 bit error code
+	b	FatalError
+//       Ruler -->1234567812345678
+20:	.quad	0xffffffff00000000
+	.align 4
+30:
+
+//
+// Check Dividend for zero, if so, return 0
+//
+	ldr	x1,  [sp, #24]		// Dividend (Source) register handle
+	bl	TestIfZero
+	cbz	x0, 40f
+	// is zero, return zero value
+	ldr	x1,  [sp, #32]		// Quotient (Destination) register handle
+	bl	ClearVariable
+	b.al	999f
+40:
+	// Check Dividend for negative sign
+	mov	x17, #0			// default sign flag
+	ldr	x1, [sp, #24]		// Dividned (Source) register handle
+	bl	TestIfNegative
+	cbz	x0, 50f
+
+	mov	x17, #1			// result sign flag
+
+	ldr	x1, [sp, #24]
+	ldr	x2, [sp, #24]
+	bl	TwosCompliment
+50:
+	//
+	// set x10 to (count of 32 bit half-words) -1
+	//
+	bl	set_x10_to_Word_Size_Static
+	lsl	x10, x10, #1		// Multiply two word32 per word64
+	sub	x10, x10, #1		// Count - 1
+
+	// Argument x1 is variable handle number
+	ldr	x1, [sp, #24]		// Dividend (source) handle
+	bl	set_x11_to_Int_MS_Word_Address
+	ldr	x2, [sp, #32]		// Quotient (destination) handle
+	bl	set_x12_to_Int_MS_Word_Address
+
+	//
+	// Clear variables
+	//
+	mov	x0, #0
+	mov	x1, x0
+	mov	x2, x0
+	mov	x3, x0
+	//
+	// first division is special case, no previous remainder
+	//
+	ldr	w1, [x11, #4]		// Special case, get top 32 bit word into 64 bit reg
+	udiv	x2, x1, x18		// x2 quot = (zero32:data32) / 10
+	msub	x3, x2, x18, x1		// x3 rem  = (zero32:data32) - (quot64 * 10)
+	str	w2, [x12, #4]		// save lower 32 bit of top word
+	//
+	// Loop back to here for each operation
+	//
+100:
+	ldr	w1, [x11], #-4		// Load data32 (upper bit 63-32 are zero by op)
+	orr	x1, x1, x3, lsl #32	// Combine remainder32:data32 with shifted OR
+	udiv	x2, x1, x18		// x2 quot = (lastrem:data] / 10
+	msub	x3, x2, x18, x1 	// x3 rem  = (lastrem:data) - (quot * 10)
+	str	w2, [x12], #-4		// store 32 bit result, decrement address by half word (32 bit)
+	sub	x10, x10, #1		// decrement counter
+	cbnz	x10, 100b		// loop until all 32 bit words are processed
+	//
+	// Done
+	//
+	// Check for two's compliment
+	//
+	tst	x17, #1			// check sign bit
+	beq	999f
+	ldr	x1, [sp, #32]		// destination register
+	bl	TwosCompliment
+
+999:
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x3,  [sp, #40]
+	ldr	x10, [sp, #48]
+	ldr	x11, [sp, #56]
+	ldr	x12, [sp, #64]
+	ldr	x17, [sp, #72]
+	ldr	x18, [sp, #80]
+	add	sp, sp, #96
+	ret
+
+MsgRegDivInvalid:	.asciz	"Reg32BitDivision: Error: Invalid input (Out of range)"
+MsgRegDivByZero:	.asciz	"Reg32BitDivision: Error: Division by zero"
+	.align 4
+
 
 /*-----------------------------------------
 
