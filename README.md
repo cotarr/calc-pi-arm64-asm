@@ -1,13 +1,16 @@
-# WORK IN PROGRESS
+# 13 Days to go ...
 
-View progress to date: [HISTORY.md](../master/HISTORY.md)
+Read file [HISTORY.md](../master/HISTORY.md) to see progress to date.
 
-## No Pi calculation available at this time
+## No Pi calculation yet, few more days please...
 
-Today is Feb 14, 2021. The goal is to write ARM64 program
-to calculate pi, on a Raspberry Pi, by "Pi Day" March 14.
-Since Raspberry Pi OS is only released as 32 bit stable release ARMHF,
-I will try this project with the new beta version ARM64 of Raspberry OS
+The start date was Feb 14, 2021. Time needed is 1 month.
+The goal is to write ARM64 program to calculate pi, on a Raspberry Pi, by "Pi Day" March 14.
+
+In order use a Raspberry Pi in 64-Bit mode, the new beta
+version Raspberry OS 64 bit is required.
+
+This is what I am using:
 
 - Raspberry Pi 4 Model B Rev 1.2
 - ARM64 (Beta) Debian GNU/Linux 10 (buster)
@@ -26,6 +29,24 @@ make
 ./calc-pi
 
 ```
+
+Update 2021-03-01 (See [HISTORY.md](../master/HISTORY.md)).
+
+The core arithmetic functions are now working. This includes
+addition, subtraction, multiplication, long division (bit-wise)
+There may be some edge case errors, but the best way to find
+these is to move forward with the rest of the program.
+
+In this state, the program basically works like an RPN calculator.
+Numbers may be input followed by the [enter] key. The
+"*", "/", "+", and "-" operators will invoke the arithmetic
+functions. Pressing a period will print the X-Register.
+
+In the next few days I plan to work with some code to
+perform series summations and I build out other tools.
+I still have Pi-day 2021 as a goal:
+
+Calculate pi, on a pi, by pi-day.
 
 ## Commands available:
 

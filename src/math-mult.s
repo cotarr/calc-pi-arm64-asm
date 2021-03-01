@@ -30,12 +30,236 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ------------------------------------------------------------- */
-
 	.global MultiplyVariable
 	.global WordMultiplication
+	.global Reg64BitMultiplication
+
+// ----------------------------------------
+// Multiply variable
+//
+// THis is a selector function to
+// call proper multiplication child function.
+//
+// Input:  OPR register is the factor
+//         ACC register is the factor
+//
+// Output  ACC register contains the Product
+//
+//-----------------------------------------
+
 
 MultiplyVariable:
-	b	WordMultiplication
+	sub	sp, sp, #96		// Reserve 12 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]
+	str	x2,  [sp, #32]
+	str	x8,  [sp, #40]
+	str	x9,  [sp, #48]
+	str	x10, [sp, #56]
+	str	x11, [sp, #64]
+
+	bl	set_x9_to_Int_LS_Word_Addr_Offset
+	mov	x8, x9
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	bl	set_x10_to_Word_Size_Static
+
+	mov	x1, HAND_ACC
+	bl	set_x11_to_Var_LS_Word_Address
+
+10:	cmp	x9, x8			// check if not Integer part MS word
+	b.eq	20f			// this is int L.S word, special case
+	ldr	x0, [x11, x9]
+	cbnz	x0, 100f		// non-zero can't use 32 bit, do full
+20:
+	add	x9, x9, BYTE_PER_WORD
+	sub	x10, x10, #1
+	cbnz	x10, 10b
+	//
+	// Case of faster 64 bit processor word multiplication
+	//
+	// -------------------------
+	ldr	x0, [x11, x8]		// L.S word integer part
+	mov	x1, HAND_OPR		// Use main variable
+	mov	x2, HAND_ACC		// Use main variable
+	bl	Reg64BitMultiplication
+	// -------------------------
+	b.al	999f
+100:
+	//
+	// Default, do full precision multiplication
+	//
+	// -------------------------
+	bl	WordMultiplication
+	// -------------------------
+
+999:
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x8,  [sp, #40]
+	ldr	x9,  [sp, #48]
+	ldr	x10, [sp, #56]
+	ldr	x11, [sp, #64]
+	add	sp, sp, #96
+	ret
+
+/* --------------------------------------------------------------
+   Multiply Variable by 64 bit word
+
+   Input: x0 = 64 bit word with 64 bit factor, positive only
+          x1 = Source factor Variable Handle (may be negtive)
+	  x2 = Destination Product variable Handle
+
+   Output:  none
+
+   This will utilize 64 bit * 64 bit ARM64 to produce
+   128 bit product (low word, high word)
+
+-------------------------------------------------------------- */
+Reg64BitMultiplication:
+	sub	sp, sp, #128		// Reserve 16 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]	// <-- do not renumber (factor)
+	str	x2,  [sp, #32]  // <-- do not renumber (product)
+	str	x3,  [sp, #40]
+	str	x4,  [sp, #48]
+	str	x9,  [sp, #56]
+	str	x10, [sp, #64]
+	str	x11, [sp, #72]
+	str	x12, [sp, #80]
+	str	x17, [sp, #88]
+	str	x18, [sp, #96]
+
+	mov	x18, x0			// save x0 64 bit factor (register)
+	//
+	// Check 64 bit register for zero, if so return zero
+	cmp	x18, #0			// zero?
+	b.ne	10f			// no branch
+	ldr	x1,  [sp, #32]		// Product (Destination) register handle
+	bl	ClearVariable
+	b.al	999f
+10:
+	//
+	// Check factor for zero, if so, return 0
+	//
+	ldr	x1,  [sp, #24]		// Dividend (Source) register handle
+	bl	TestIfZero
+	cbz	x0, 40f
+	// is zero, return zero value
+	ldr	x1,  [sp, #32]		// Product (Destination) register handle
+	bl	ClearVariable
+	b.al	999f
+40:
+	// variable for negative sign
+	mov	x17, #0			// default sign flag
+	ldr	x1, [sp, #24]		// Factor (Source) register handle
+	bl	TestIfNegative
+	cbz	x0, 50f
+
+	mov	x17, #1			// result sign flag
+
+	ldr	x1, [sp, #24]
+	ldr	x2, [sp, #24]
+	bl	TwosCompliment
+50:
+
+//                           [hi ][low]
+//                      [hi ][low]
+//                 [hi ][low]
+//            [hi ][low]
+//       [hi ] <-- last word
+//  [   ][   ][   ] <--- <--- <--- 1 extra for decial point align
+
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	bl	set_x10_to_Word_Size_Static
+	ldr	x1, [sp, #24]		// Source (factor) handle
+	bl	set_x11_to_Var_LS_Word_Address
+	ldr	x2, [sp, #32]		// Source (factor) handle
+	bl	set_x12_to_Var_LS_Word_Address
+
+	//
+	// Adjust input 1 word left to high 128 bit result will fit
+	//
+	sub	x10, x10, #1
+	add	x11, x11, BYTE_PER_WORD	// first word shifted
+	//
+	// Case of first multiplication
+	ldr	x1, [x11, x9]
+	mul	x3, x1, x18		// x3 is mult product bit 63-0
+	umulh	x4, x1, x18		// x4 is mult product bit 127-64
+	str	x3, [x12, x9]		// store lowest word
+	add	x9, x9, BYTE_PER_WORD	// increment pointer
+	sub	x10, x10, #1		// decrement counter
+	//
+	// Perform ARM64 Multiplication
+	// low word bit 63-0 mul x3, x2, x1      -->  x3(63-0)   = X1 * x2
+	// high word bit 127-64 umulh x4, x2, x1 -->  x4(127-64) = X1 * x2
+	//
+100:
+	mov	x2, x4			// save last high word
+	ldr	x1, [x11, x9]		// fetch next word from ACC
+	mul	x3, x1, x18		// x3 is mult product bit 63-0
+	umulh	x4, x1, x18		// x4 is mult product bit 127-64
+	adds	x3, x3, x2		// add last high word (carry imapcted)
+	adcs	x4, x4, xzr		// add carry flag to high word (carry impacted)
+	b.cc	110f			// verify assumption no carry
+	// Fatal error
+	ldr	x0, =MsgRegMultCarry	// Error message pointer
+	mov	x1, #677		// 12 bit error code
+	b	FatalError
+110:
+	str	x3, [x12, x9]		// low word
+	add	x9, x9, BYTE_PER_WORD
+	sub	x10, x10, #1
+	cbnz	x10, 100b
+	//
+	// Top word from multiplication needs store in top word variable
+	str	x4, [x12, x9]
+	//
+	// Done
+
+	//
+	// Due to offset decimal point, we are shifted 1 word.
+	// This is a potential loss of 64 bits on low end.
+	//
+	// TODO  ? option to shift input left before to save bits
+	// although guard words should absorb them.
+	//
+	ldr	x1, [sp, #32]		// product destination variable handle
+	bl	Left64Bits		// Bit alignment for decimal point
+	//
+	// Check for two's compliment
+	//
+	tst	x17, #1			// check sign bit
+	beq	999f
+	ldr	x1, [sp, #32]		// Product destination variable handle
+	bl	TwosCompliment
+999:
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x3,  [sp, #40]
+	ldr	x4,  [sp, #48]
+	ldr	x9,  [sp, #56]
+	ldr	x10, [sp, #64]
+	ldr	x11, [sp, #72]
+	ldr	x12, [sp, #80]
+	ldr	x17, [sp, #88]
+	ldr	x18, [sp, #96]
+	add	sp, sp, #128
+	ret
+
+MsgRegMultCarry:	.asciz	"Reg64BitMultiplication: Error: (internal carry flag fault)"
+MsgRegMultInvalid:	.asciz	"Reg64BitMultiplication: Error: Invalid input (Out of range)"
+		.align 4
 
 /*-----------------------------------------
 
@@ -98,7 +322,7 @@ WordMultiplication:
 	// is zero, return zero value
 	mov	x1, HAND_ACC
 	bl	ClearVariable
-	b.al	LongDivisionExit
+	b.al	WordMultiplicationExit
 110:
 	//
 	// Check for negative, Exclusive OR to set sign flag
@@ -111,7 +335,7 @@ WordMultiplication:
 	//
 	//
 	mov	x8, #0			// temporary sign flag
-	// Check Dividend for negative sign
+	// Check for negative sign
 	mov	x1, HAND_OPR
 	bl	TestIfNegative
 	cbz	x0, 120f
@@ -122,7 +346,7 @@ WordMultiplication:
 	mov	x2, HAND_OPR
 	bl	TwosCompliment
 120:
-	// Check divisor for negative sign
+	// Check for negative sign
 	mov	x1, HAND_ACC
 	bl	TestIfNegative
 	cbz	x0, 130f
@@ -136,7 +360,7 @@ WordMultiplication:
 	// save sign flag for end (two's compliment)
 	str	x8, [sp, MultSignFlag]
 
-	// WORKA and WORKB will be used in the long division
+	// WORKA and WORKB will be used in the multiplication
 	//
 	mov	x1, HAND_WORKA
 	bl	ClearVariable

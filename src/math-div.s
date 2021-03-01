@@ -88,7 +88,7 @@ DivideVariable:
 	// Case of faster 32 bit division
 	//
 	// -------------------------
-	ldr	x0, [x11, x8]		// L.S word integer part			// Divisor from word
+	ldr	x0, [x11, x8]		// L.S word integer part
 	mov	x1, HAND_OPR		// Use main variable
 	mov	x2, HAND_ACC		// Use main variable
 	bl	Reg32BitDivision
@@ -120,7 +120,7 @@ DivideVariable:
 	ret
 
 /* --------------------------------------------------------------
-   Divide Variable by 10
+   Divide Variable by 32 bit word
 
    Input: x0 = 64 bit word with 32 bit divisor, positive only
           x1 = Source Dividend Variable Handle (may be negtive)

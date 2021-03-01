@@ -512,3 +512,14 @@ to improve loss of significant bits on the least significant end.
 - Fixed error in sign flag on multiplication
 - Added function Reg32BitDivision to divide full variable with 32 bit integer
 - Added division selector to choose long division or faster 32 bit division
+- Added function Reg64BitMultiplication to multiply full variable with 64 bit integer
+- Added multiplication selector to choose long multiplication or faster 64 bit multiplication
+
+This is a moment to step back and summarize. The core arithmetic functions are now
+working. This includes addition, subtraction, multiplication (matrix 64bit*64bit-->128 bit),
+long division (bitwise), and 32 bit division by integer, and 64bit multiplication by
+by integer. There may be some edge case errors, but the best way to find these is to move
+forward with the rest of the program. It would be nice to add a reciprocal function (1/x),
+because multiplication of reciprocal is much faster than equivalent long division.
+The reciprocal would be nice for square root calculation, but I think simple
+series summation can move forward without it for now. I may add reciprocal later.

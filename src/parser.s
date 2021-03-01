@@ -922,14 +922,11 @@ Command_test:
 	mov	x1, HAND_ACC
 	bl	SetToOne
 	bl	MultiplyByTen
-	bl	MultiplyByTen
-	bl	MultiplyByTen
 
 	mov	X0, 10
 	mov	x1, HAND_ACC
 	mov	x2, HAND_ACC
-	bl	Reg32BitDivision
-
+	bl	Reg64BitMultiplication
 	mov	x1, HAND_ACC
 	bl	PrintVar
 
