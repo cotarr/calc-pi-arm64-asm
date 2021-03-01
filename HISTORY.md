@@ -509,3 +509,4 @@ to improve loss of significant bits on the least significant end.
 ### 2021-03-01 - Day 16 (13 days to go until pi day)
 
 - Fixed and tested bit alignment for word multiplication
+- Fixed error in sign flag on multiplication

@@ -78,8 +78,6 @@ WordMultiplication:
 	.set MultSignFlag,  168		// save sign flag during main compute
 	.set PostMultShift, 176		// save bit alignment for end
 
-	mov	x0, #0			// initialize flag register
-	str	x0, [sp, MultSignFlag]	// bit 0 is sign flag
 	//
 	// Check ACC for zero, if so return zero result
 	//
@@ -112,13 +110,13 @@ WordMultiplication:
 	// Save sign in bit 0 of x8 for two's compliment later
 	//
 	//
+	mov	x8, #0			// temporary sign flag
 	// Check Dividend for negative sign
 	mov	x1, HAND_OPR
 	bl	TestIfNegative
 	cbz	x0, 120f
 
-	mov	x0, #1		// result sign flag
-	str	x0, [sp, MultSignFlag]
+	eor	x8, x8, #1		// result sign flag
 
 	mov	x1, HAND_OPR
 	mov	x2, HAND_OPR
@@ -135,6 +133,9 @@ WordMultiplication:
 	mov	x2, HAND_ACC
 	bl	TwosCompliment
 130:
+	// save sign flag for end (two's compliment)
+	str	x8, [sp, MultSignFlag]
+
 	// WORKA and WORKB will be used in the long division
 	//
 	mov	x1, HAND_WORKA
