@@ -423,6 +423,10 @@ PrintAddressOffsets:
 	bl	StrOut
 	mov	x0, x9
 	bl	Print0xWordHex
+	mov	x0, #' '
+	bl	CharOut
+	mov	x0, x9
+	bl	PrintWordB10
 	ldp	x29, x30, [sp], 16	// restore return address
 	ret
 

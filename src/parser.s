@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-02-27
+	Last edit: 2021-02-28
 
 	PrintCommandList
 	ParseCmd
@@ -148,6 +148,10 @@ Command_Table:
 	.ascii	"rup"
 	.byte	0,0,0,0,0
 	.quad	Command_rup
+
+	.ascii	"sf"
+	.byte	0,0,0,0,0,0
+	.quad	Command_sigfigs
 
 	.ascii	"sigfigs"
 	.byte	0
@@ -330,6 +334,10 @@ ParseCmd:
 	mov	x0, #' '
 	bl	CharOut
 	mov	x0, x3
+	bl	Print0xWordHex
+	mov	x0, #' '
+	bl	CharOut
+	sub	x0, x3, x2
 	bl	Print0xWordHex
 	bl	CROut
 20:
@@ -702,7 +710,6 @@ Command_D_fill:
 20:
 	.asciz	"D.fill: Error, invalid argument\n\n"
 	.align 4
-
 //
 //
 //
@@ -912,6 +919,47 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
+/*	mov	x1, HAND_ACC
+	bl	DebugFillVariable
+	mov	x1, HAND_ACC
+	mov	x2, HAND_XREG
+	bl	CopyVariable
+	mov	x1, HAND_XREG
+	bl	PrintVar */
+
+	mov	x1, HAND_ACC
+	bl	ClearVariable
+
+	mov	x1, HAND_OPR
+	bl	SetToOne
+	bl	MultiplyByTen
+
+	mov	x1, HAND_OPR
+	mov	x2, HAND_ACC
+	mov	x3, HAND_ACC
+//	bl	AddVariable
+
+	mov	x1, HAND_ACC
+	mov	x2, HAND_XREG
+//	bl	CopyVariable
+
+	bl	PrintHex
+
+	mov	x1, HAND_OPR
+	bl	PrintVar
+
+/*
+	mov	x1, HAND_ACC
+	// bl	DebugFillVariable
+	bl	SetToOne
+	mov	X1, HAND_OPR
+	// bl	DebugFillVariable
+	bl	SetToOne
+	//bl	SetToTwo
+	bl	MultiplyVariable
+	mov	x1, HAND_ACC
+	bl	PrintVar
+*/
 	// ------- start RightNBits LeftNBits ----------
 //	cbz	x0, 10f			// if arg missing skip test
 //	bl	IntWordInput		// ascii --> 64 bit binary

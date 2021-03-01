@@ -3,7 +3,7 @@
 	Include file for math.s
 
 	Created:   2021-02-19
-	Last edit: 2021-02-25
+	Last edit: 2021-02-28
 
 ----------------------------------------------------------------
 MIT License
@@ -243,7 +243,7 @@ ExchangeVariable:
 	ldr	x10, [sp, #48]
 	ldr	x11, [sp, #56]
 	ldr	x12, [sp, #64]
-	ldr	x17, [sp, #72]
+
 	add	sp, sp, #80
 	ret
 
@@ -394,7 +394,7 @@ TwosCompliment:
 	str	x1,  [sp, #24]		// input argument / scratch
 	str	x2,  [sp, #32]		// input argument / scratch
 	str	x9,  [sp, #40]		// word index
-	str	x10, [sp, #49]		// word counter
+	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
 	str	x12, [sp, #64]		// source 1 address
 
@@ -599,13 +599,18 @@ MultiplyByTen:
 
 	// Argument x1 contains variable handle number
 	bl	set_x11_to_Fct_LS_Word_Address_Static
+	add	x11, x11, #4		// offset for half word
 
 	// set x10 to count of words -1
 	ldr	x10, =Word_Size_Static	// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in mantissa
-	lsl	x10, x10, #2		// Multiply * 2 to address 32 bit word size
+	lsl	x10, x10, #1		// Multiply * 2 to address 32 bit word size
 
 	mov	x12, #10		// constant value, (multiply by 10 from register)
+	mov	x1, #0
+	mov	x2, #0
+	mov	x3, #0
+	mov	x4, #0
 	//
 	// Loop back to here
 	//
@@ -668,9 +673,8 @@ DivideByTen:
 	// set x10 to (count of 32 bit half-words) -1
 	ldr	x10, =Word_Size_Static	// Pointer to of words in mantissa
 	ldr	x10, [x10]		// Number words in mantissa
-	lsl	x10, x10, #2		// Multiply two word32 per word64
+	lsl	x10, x10, #1		// Multiply two word32 per word64
 	sub	x10, x10, #1		// Count - 1
-
 	// Argument x1 is variable handle number
 	bl	set_x11_to_Int_MS_Word_Address
 

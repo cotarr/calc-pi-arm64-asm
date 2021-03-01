@@ -4,7 +4,7 @@
 	Floating point division routines
 
 	Created:   2021-02-15
-	Last edit: 2021-02-25
+	Last edit: 2021-02-28
 
 ----------------------------------------------------------------
 MIT License
@@ -65,7 +65,7 @@ LongDivision:
 	str	x1,  [sp, #24]
 	str	x2,  [sp, #32]
 	str	x3,  [sp, #40]
-	str	x4,  [sp, #49]
+	str	x4,  [sp, #48]
 	str	x9,  [sp, #56]
 	str	x10, [sp, #64]
 	str	x11, [sp, #72]

@@ -4,7 +4,7 @@
 	Sandbox for playing with various code
 
 	Created:   2021-02-17
-	Last edit: 2021-02-21
+	Last edit: 2021-02-28
 
 ----------------------------------------------------------------
 MIT License
@@ -59,15 +59,20 @@ practice:
 //
 // Comment each test as needed
 //
+	// b save_carry_flag
+	// b ConditionalAssembly
+	b	multiply
 	// b	sub_carry_loop
 	// b	shift_addition
+	// b	addition
 	// b	subtraction
 	// b	bit_shift
 	// b	test_error
 	// b	integer_addition
+	// b	cmp_flags
 	// b	conditional_branching
 	// b	EndianCheck
-	b	print_registers_test
+	// b	print_registers_test
 	// b	print_status_flags
 	// b	print_reg_base10_unsigned
 	// b	load_64_bit_immediate
@@ -83,6 +88,112 @@ test_error:
 	b	FatalError
 TestErrorMsg:
 	.asciz "A test error was generated in the practive sandbox"
+	.align 4
+
+
+// -----------------------------------------------------------------------------------
+//
+save_carry_flag:
+	ldr	x1, =100f
+	ldr	x1, [x1]
+	mov	x2, #1
+	adds	x3, x1, x2	// NE LO/CC MI VS (CF==0)
+
+	// ------- Preserve carry in register  ------
+	sbc	x10, xzr, xzr	// x0 =  0xFFFFFFFFFFFFFFFF
+	and	x10, x10, 1	// x10 = 0x0x0000000000000001
+	// ------------------------------------------
+
+	// ------------Restore carry from register-----------
+	subs	xzr, xzr, x10	// NE LO/CC MI VS (Carry restored to 0)
+	//---------------------------------------------------
+
+	bl	PrintFlags
+	bl	CROut
+
+	ldr	x1, =100f
+	ldr	x1, [x1]
+	ldr	x2, =101f
+	ldr	x2, [x2]
+	adds	x3, x1, x2	// NE HS/CS PL VC (CF==1)
+	// preserve inverse carry in x10
+	sbc	x0, xzr, xzr	// x0 =  0x0000000000000000
+	and	x10, x0, 1	// x10 = 0x0000000000000000
+	// later use of x10 to restore carry
+	subs	xzr, xzr, x10	// EQ HS/CS PL VC (Carry restored to 1)
+	bl	PrintFlags
+	bl	CROut
+	b	exit_prac
+
+//      aRuler -->0123456789abcdef
+100:	.quad	0x8000000000000001
+101:	.quad	0x8000000000000001
+	.align 4
+
+// -----------------------------------------------------------------------------------
+//
+ConditionalAssembly:
+	// Message always displayed
+	bl	CROut
+	ldr	x0, =110f
+	bl	StrOut
+	bl	CROut
+
+//.set MYDEF, 1
+.ifdef MYDEF
+	// message conditionally displayed
+	ldr	x0, =111f
+	bl	StrOut
+	bl	CROut
+.endif
+	b	exit_prac
+
+110:	.asciz	"always assembly"
+111:	.asciz	"conditional assembly"
+	.align 4
+// -----------------------------------------------------------------------------------
+//
+multiply:
+	ldr	x4, =103f
+	ldr	x4, [x4]
+//	ldr	x5, =103f
+//	ldr	x5, [x5]
+
+	mov	x4, #5
+	mov	x3, #1
+	sub	x5, xzr, x3
+
+	mov	x0, x4
+	bl	Print0xWordHex
+	bl	CROut
+	mov	x0, x5
+	bl	Print0xWordHex
+	bl	CROut
+
+	// bits 63-0
+	mul	x6, x4, x5
+
+	bl	PrintFlags
+	mov	x0, x6
+	bl	Print0xWordHex
+	bl	CROut
+
+	//bits 127-64
+	umulh	x7, x4, x5
+
+	bl	PrintFlags
+	mov	x0, x7
+	bl	Print0xWordHex
+	bl	CROut
+
+	b	exit_prac
+
+
+//      aRuler -->0123456789abcdef
+100:	.quad	0x1111111111111111
+101:	.quad	0x1111111111111111
+102:    .quad	0xffffffffffffff7f
+103:	.quad	0x0000000000000004
 	.align 4
 
 
@@ -216,6 +327,32 @@ shift_addition:
 	bl	PrintWordHex
 	b	exit_prac
 // -----------------------------------------------------------------------------------
+
+addition:
+
+	mov	x1, #0
+	mov	x2, #0
+	adds	x0, x1, x2	// EQ LO/CC PL VC
+
+	ldr	x1, =100f
+	ldr	x1, [x1]
+	mov	x2, #1
+	adds	x0, x1, x2	// NE LO/CC MI VS
+
+	ldr	x1, =100f
+	ldr	x1, [x1]
+	ldr	x2, =100f
+	ldr	x2, [x2]
+	adds	x0, x1, x2	// EQ HS/CS PL VC
+
+
+
+	bl	PrintFlags
+	b	exit_prac
+//      aRuler -->0123456789abcdef
+100:	.quad	0x8000000000000000
+	.align 4
+
 //
 subtraction:
 	// x0 = x11 - x10
@@ -276,8 +413,25 @@ integer_addition:
 	add	x0, x0, x1, lsl #2
 	// 0x5555555555555555
 	bl	PrintWordHex
-
 	b	exit_prac
+
+
+cmp_flags:
+	mov	x1, #0
+	mov	x2, #0
+	cmp	x1, x2	// EQ HS/CS PL VC
+	mov	x1, #1
+	mov	x2, #0
+	cmp	x1, x2  // NE HS/CS PL VC
+	mov	x1, #0
+	mov	x2, #1
+	cmp	x1, x2  // NE LO/CC MI VS
+	mov	x1, #1
+	mov	x2, #1
+	cmp	x1, x2  // EQ HS/CS PL VC
+	bl	PrintFlags
+	b	exit_prac
+
 
 // -----------------------------------------------------------------------------------
 //

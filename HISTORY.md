@@ -486,7 +486,21 @@ git clone 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
 ```
 git clone 191ee7b1f0919b68e7c724ad209033c94228514b
 ```
-### 2021-02-26 - Day 12 (15 days to go until pi day)
+### 2021-02-27 - Day 13 (15 days to go until pi day)
 
 - Complete all edge cases of RightNBits and LeftNBits (some test code at end of rotate.s)
 - Setup placeholder file for multiplication
+- Spent rest of day writing multiplication.
+
+### 2021-02-28 - Day 14 (14 days to go until pi day)
+
+Most of today was spent debugging the multiplication function.
+This method breaks the number into 64 bit words. They words are multiplied
+using the ARM64 mul and umulh instructions in a matrix and recombined
+into a product. It is functional for debug, but needs some optimization
+to improve loss of significant bits on the least significant end.
+
+- Fixed bug in MultiplyByTen DivideByTen with wrong left shift value.
+- Fixed several stack push/pop typographic errors
+- Fixed bug in input routine with random digits in lowest 32 bits.
+- Multiplication is working for debug but not optimized yet.

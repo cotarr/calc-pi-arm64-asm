@@ -4,7 +4,7 @@
 	Logical shift bit, bytes and words
 
 	Created:   2021-02-10
-	Last edit: 2021-02-27
+	Last edit: 2021-02-28
 
 ----------------------------------------------------------------
 MIT License
@@ -673,7 +673,7 @@ LeftNBits:
 	ldr	x15, [sp, #88]
 	ldr	x16, [sp, #96]
 	ldr	x17, [sp, #104]
-	ldr	x18, [sp, #116]
+	ldr	x18, [sp, #112]
 	add	sp, sp, #128
 	ret
 

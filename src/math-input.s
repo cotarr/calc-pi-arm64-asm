@@ -4,7 +4,7 @@
 	Input binary variable from base 10
 
 	Created:   2021-02-23
-	Last edit: 2021-02-23
+	Last edit: 2021-02-28
 
 ----------------------------------------------------------------
 MIT License
@@ -71,16 +71,18 @@ SOFTWARE.
 	.align 4
 
 InputVariable:
-	sub	sp, sp, #80		// Reserve 16 words
+	sub	sp, sp, #128		// Reserve 16 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
 	str	x2,  [sp, #24]
 	str	x3,  [sp, #32]
-	str	x10, [sp, #40]		// fraction power of 10 counter
-	str	x11, [sp, #48]		// Point OPR IntMSWord
-	str	x15, [sp, #56]		// Pointer to input string
-	str	x16, [sp, #64]		// Input status flag showing state bits
+	str	x4,  [sp, #40]
+	str	x10, [sp, #48]		// fraction power of 10 counter
+	str	x11, [sp, #56]		// Point OPR IntMSWord
+	str	x12, [sp, #64]		// Point OPR IntMSWord
+	str	x15, [sp, #72]		// Pointer to input string
+	str	x16, [sp, #80]		// Input status flag showing state bits
 	//
 	// Set x15 pointer to input string
 	//
@@ -94,8 +96,8 @@ InputVariable:
 	//
 	// x11 is constant (address of OPR M.S. World)
 	//
-	mov	x1, HAND_OPR		// Variable handle number
-	bl	set_x11_to_Int_LS_Word_Address
+	mov	x2, HAND_OPR		// Variable handle number
+	bl	set_x12_to_Int_LS_Word_Address
 
 	mov	x16, #0x00		// State of input process
 	sub	x15, x15, #1		// Decrement so it can increment start of loop
@@ -180,11 +182,11 @@ next_character:
 	bl	MultiplyByTen
 
 	// this places character in OPR
-	mov	x0, #0
-	str	x0, [x11]		// [address, offset] L.S Word on integer part
+	mov	x1, HAND_OPR
+	bl	ClearVariable
 	ldrb	w0, [x15]		// get character
 	and	w0, w0, 0x0f		// ASCII --> BCD
-	strb	w0, [x11]		// save digit as BCD number in OPR
+	strb	w0, [x12]		// save digit as BCD number in OPR
 	// This is addition of variables
 	mov	x1, HAND_ACC		// Variable handle number
 	mov	x2, HAND_OPR
@@ -200,7 +202,7 @@ next_character:
 	// this places character in OPR
 	ldrb	w0, [x15]		// get character
 	and	w0, w0, 0x0f		// ASCII --> BCD
-	strb	w0, [x11]		// save digit as BCD number in OPR
+	strb	w0, [x12]		// save digit as BCD number in OPR
 	// Multiplication loop
 	mov	x2, x10			// division counter
 710:	mov	x1, HAND_OPR
@@ -235,9 +237,11 @@ end_of_string:
 	ldr	x0,  [sp, #16]
 	ldr	x2,  [sp, #24]
 	ldr	x3,  [sp, #32]
-	ldr	x10, [sp, #40]
-	ldr	x11, [sp, #48]
-	ldr	x15, [sp, #56]
-	ldr	x16, [sp, #64]
-	add	sp, sp, #80
+	ldr	x4,  [sp, #40]
+	ldr	x10, [sp, #48]
+	ldr	x11, [sp, #56]
+	ldr	x12, [sp, #64]
+	ldr	x15, [sp, #72]
+	ldr	x16, [sp, #80]
+	add	sp, sp, #128
 	ret
