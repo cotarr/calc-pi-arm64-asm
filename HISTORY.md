@@ -504,3 +504,8 @@ to improve loss of significant bits on the least significant end.
 - Fixed several stack push/pop typographic errors
 - Fixed bug in input routine with random digits in lowest 32 bits.
 - Multiplication is working for debug but not optimized yet.
+
+
+### 2021-03-01 - Day 16 (13 days to go until pi day)
+
+- Fixed and tested bit alignment for word multiplication

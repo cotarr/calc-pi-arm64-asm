@@ -144,6 +144,13 @@ LongDivision:
 	lsl	x16, x16, X8SHIFT3BIT	// 8 bits per byte
 	sub	x16, x16, #1		// Don't use sign bit for data
 
+//---------------------------------------------------
+//
+// TODO test bit alignment with size of integer part
+//      set other than two words
+//
+// --------------------------------------------------
+
 //--------------------------------------------------------------------
 // At this point, the number must be shifted to accommodate the
 // position of the decimal point. For example:

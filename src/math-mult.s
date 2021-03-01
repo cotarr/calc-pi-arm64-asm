@@ -76,6 +76,7 @@ WordMultiplication:
 	str	x17, [sp, #152]		// LSW Offset address (constant)
 	str	x18, [sp, #160]		// MSW Offset address
 	.set MultSignFlag,  168		// save sign flag during main compute
+	.set PostMultShift, 176		// save bit alignment for end
 
 	mov	x0, #0			// initialize flag register
 	str	x0, [sp, MultSignFlag]	// bit 0 is sign flag
@@ -139,14 +140,116 @@ WordMultiplication:
 	mov	x1, HAND_WORKA
 	bl	ClearVariable
 
-	// temporary
-	mov	x1, HAND_OPR
-//	bl	Right64Bits
-//	bl	Right64Bits
 
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// TODO: Count zero bits and add overflow range check
-// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	//
+	// Check for multiply overflow (exceed integer part)
+	//
+	//
+	// x4 contains bit shift needed to stay in range
+	ldr	x4, =IntWSize
+	ldr	x4, [x4]
+	lsl	x4, x4, X64SHIFT4BIT	// Bit's needed for decimal separator alignment
+	//
+	// X3 is space to shift ACC left
+	//
+	mov	x1, HAND_ACC
+	bl	CountLeftZerobits
+	mov	x3, x0
+	//
+	// X2 is space to shift OPR left
+	//
+	mov	x1, HAND_OPR
+	bl	CountLeftZerobits
+	mov	x2, x0
+
+	sub	x5, x4, #2		// Safety bits for overflow
+	add	x0, x2, x3		// Total left shift available
+	cmp	x5, x0			// Check for multiplication overflow
+	// -------------------------
+	// Check for overflow
+	// -------------------------
+	b.lo	150f			// If negative, overlow error
+	// Fatal error
+	ldr	x0, =Mult_Err_Msg3	// Error message pointer
+	mov	x1, #603		// 12 bit error code
+	b	FatalError
+150:
+	// ----------------------------------------------------------
+	// By experimenting, with integer part size set to two 64-bit words,
+	// a post multiplication shift left of 128 bits left is needed.
+	// This is assumed to be related to the size of the integer part.
+	// Pre-multiplication rotation left accomplishes the same thing
+	// but has the advantage of reducing risk of loss of significant
+	// bits on L.S side of variable.
+	// The approach here is to shift OPR, then ACC left as needed
+	// to get 128 bits total while leaving 64 bit safety margin.
+	// Remaining bits (not shifted before mult) will be
+	// shifted left after multiplication is complete.
+	//
+	// If already left at limit, no right shift is done (should?)
+	//---------------------------------------------------
+	//
+	// TODO test bit alignment with size of integer part
+	//      set other than two words
+	//
+	// --------------------------------------------------
+	// Shift OPR, then ACC left
+	//
+	// OPR
+	//
+	// Check OPP zero bits > 64 bit word size
+	subs	x5, x2, BIT_PER_WORD	// OPR available bits - safety word
+	b.lo	170f			// Less than safety word, skip, try ACC
+	cmp	x4, x5			// Requested bits - OPR available
+	b.lo	160f
+	// Case Requested >= OPR availble bits, shift available, then do ACC
+	mov	x0, x5			// available bits is argument
+	mov	x1, HAND_OPR
+	bl	LeftNBits		// shift bits
+	sub	x4, x4, x5		// bits needed by ACC afterwards
+	b.al	170f			// Next shift ACC remaining
+160:
+	// Case Requested < available, shift requested, then done...
+	mov	x0, x4			// requested bits is argument
+	mov	x1, HAND_OPR
+	bl	LeftNBits		// shift bits
+	mov	x4, #0			// requested now zero
+	b.al	190f			// done shifting bits
+170:
+	//
+	// ACC
+	//
+	// Check ACC zero bits > 64 bit word size
+	subs	x5, x3, BIT_PER_WORD	// ACC available bits - safety word
+	b.lo	190f			// Less than safety word, skip,
+	cmp	x4, x5			// Requested bits - ACC available
+	b.lo	180f
+	// Case Requested >= ACC availble bits, shift available
+	mov	x0, x5			// available bits is argument
+	mov	x1, HAND_ACC
+	bl	LeftNBits		// shift bits
+	sub	x4, x4, x5		// bits needed Post multiplication
+	b.al	190f			// Next shift ACC remaining
+180:
+	// Case Requested < available, shift requested, then done...
+	mov	x0, x4			// requested bits is argument
+	mov	x1, HAND_ACC
+	bl	LeftNBits		// shift bits
+	mov	x4, #0			// requested now zero
+	b.al	190f			// done shifting bits
+190:
+	cmp	x4, xzr			// post mult shift must be >= 0
+	b.pl	195f
+	// Fatal error
+	ldr	x0, =Mult_Err_Msg4	// Error message pointer
+	mov	x1, #677		// 12 bit error code
+	b	FatalError
+195:
+
+// any remiaining bits to shift do after multiplicaiton done
+str	x4, [sp, PostMultShift]
+
+
 
 //--------------------------------------------------------------------
 	//
@@ -316,7 +419,7 @@ pre_loop_0:
 
 // Should not have fallen through
 	// Fatal error
-	ldr	x0, =Msg_Error1		// Error message pointer
+	ldr	x0, =Mult_Err_Msg1		// Error message pointer
 	mov	x1, #834		// 12 bit error code
 	b	FatalError
 
@@ -502,7 +605,7 @@ mult_loop_3:
 	b.ne	exit_loop_3		// CD was not set, expected, exit loop
 
 	// Fatal error
-	ldr	x0, =Msg_Error2		// Error message pointer
+	ldr	x0, =Mult_Err_Msg2		// Error message pointer
 	mov	x1, #835		// 12 bit error code
 	b	FatalError
 
@@ -563,7 +666,7 @@ exit_loop_3:
 	b.ne	no_carry			// CF = 0, (x6 = 1)
 
 	// Fatal error
-	ldr	x0, =Msg_Error2		// Error message pointer
+	ldr	x0, =Mult_Err_Msg2		// Error message pointer
 	mov	x1, #836		// 12 bit error code
 	b	FatalError
 
@@ -591,13 +694,14 @@ no_carry:
 	mov	x2, HAND_ACC
 	bl	CopyVariable
 
-	// TODO: optimize Shift for alignment
-
-	mov	x0, #128
+	//
+	// Align bits for proper decimal point
+	ldr	x0, [sp, PostMultShift]
 	mov	x1, HAND_ACC
 	bl	LeftNBits
-
-
+	//
+	// Check sign flag and 2's compliment if needed
+	//
 	ldr	x0, [sp, MultSignFlag]
 	tst	x0, #1			// check sign bit
 	b.eq	400f
@@ -630,6 +734,8 @@ WordMultiplicationExit:
 	add	sp, sp, #192
 	ret
 
-Msg_Error1:	.asciz	"FP_Word_Multiplication: Error, pre-loop exit without non-zero word"
-Msg_Error2:	.asciz	"FP_Word_Multiplication: Error, CF not zero above M.S.Word"
+Mult_Err_Msg1:	.asciz	"WordMultiplication: Error, pre-loop exit without non-zero word"
+Mult_Err_Msg2:	.asciz	"WordMultiplication: Error, CF not zero above M.S.Word"
+Mult_Err_Msg3:	.asciz	"WordMultiplication: Error: Overlow (number too big)"
+Mult_Err_Msg4:	.asciz	"WordMultiplication: Error: Bit alignment error"
 	.align 4

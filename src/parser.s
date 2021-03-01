@@ -919,47 +919,21 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
-/*	mov	x1, HAND_ACC
-	bl	DebugFillVariable
+	mov	x1, HAND_ACC
+	bl	SetToOne
+
+	mov	X1, HAND_OPR
+	bl	SetToOne
+	bl	MultiplyVariable
+	mov	x1, HAND_OPR
+	bl	PrintVar
+	mov	x1, HAND_ACC
+	bl	PrintVar
+
 	mov	x1, HAND_ACC
 	mov	x2, HAND_XREG
 	bl	CopyVariable
-	mov	x1, HAND_XREG
-	bl	PrintVar */
 
-	mov	x1, HAND_ACC
-	bl	ClearVariable
-
-	mov	x1, HAND_OPR
-	bl	SetToOne
-	bl	MultiplyByTen
-
-	mov	x1, HAND_OPR
-	mov	x2, HAND_ACC
-	mov	x3, HAND_ACC
-//	bl	AddVariable
-
-	mov	x1, HAND_ACC
-	mov	x2, HAND_XREG
-//	bl	CopyVariable
-
-	bl	PrintHex
-
-	mov	x1, HAND_OPR
-	bl	PrintVar
-
-/*
-	mov	x1, HAND_ACC
-	// bl	DebugFillVariable
-	bl	SetToOne
-	mov	X1, HAND_OPR
-	// bl	DebugFillVariable
-	bl	SetToOne
-	//bl	SetToTwo
-	bl	MultiplyVariable
-	mov	x1, HAND_ACC
-	bl	PrintVar
-*/
 	// ------- start RightNBits LeftNBits ----------
 //	cbz	x0, 10f			// if arg missing skip test
 //	bl	IntWordInput		// ascii --> 64 bit binary
