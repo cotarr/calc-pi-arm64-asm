@@ -224,6 +224,11 @@ PrintVariable:
 	cbnz	x15, 60f
 	mov	x0, #'.'		// When reach zero, add decimal point to print character stream
 	bl	CharOutFmt
+
+	ldr	x16, =NoSigDig		// Reset number of digits (in fraction part)
+	ldr	x16, [x16]		// i.e. counting starts right of decimal point
+	add	x16, x16, #1		// align counter to requested digits
+
 60:
 	//
 	// multi by 10 to emit the binary coded decimal value

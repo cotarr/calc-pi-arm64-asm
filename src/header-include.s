@@ -54,11 +54,10 @@ SOFTWARE.
 // NOTE: these are too big to be used as ARM64 immediate,
 // so they are also stored in math.s as constants.
 //--------------------------------------------------------------------
-.set	INT_WSIZE, 	0x2
-
+.set	INT_WSIZE, 	0x02	// WARNING USE ONLY 0x02 UNTIL TESTED
 .set	FCT_WSIZE, 	0x10
 // .set	FCT_WSIZE, 	0x40
-// .set	FCT_WSIZE, 	0x80
+// .set	FCT_WSIZE, 	0x400
 // .set	FCT_WSIZE, 	0x40000
 
 .set	VAR_WSIZE,	(INT_WSIZE + FCT_WSIZE)

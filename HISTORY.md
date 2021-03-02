@@ -532,3 +532,7 @@ git clone 99f360ec560a8a56ca043fd7bc4f6685c4d6dc5d
 
 - Added command mmode to disable shortcut multiplication and division
 - Added command enter to duplicate x into y and roll stack
+- Add range check on number input when integer part exceeds word size.
+- Added argument "f" to print command to formatted or un-formatted
+- Improved format print page layout, large integer part, and extended digits
+- Multiple bug fixes in input, output, and formatted print

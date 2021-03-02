@@ -58,7 +58,7 @@ SOFTWARE.
 Help_Table:
 	.ascii	"."
 	.byte	0,0,0,0,0,0,0
-	.quad	Help_print
+	.quad	Help_print_dot
 
 	.ascii	"+"
 	.byte	0,0,0,0,0,0,0
@@ -122,7 +122,7 @@ Help_Table:
 
 	.ascii	"print"
 	.byte	0,0,0
-	.quad	Help_print
+	.quad	Help_print_print
 
 	.ascii	"q"
 	.byte	0, 0, 0, 0, 0, 0, 0
@@ -259,14 +259,25 @@ Help_mmode:
 	.ascii	"   8   (0x08)  Disable: ARM 32 bit UDIV/MSUB matrix division\n"
 	.byte	0
 
-Help_print:
-	.ascii	"Usage: .   (print X-Reg, equivalent command is 'print')\n\n"
-//	.ascii	"Usage: . f (formated - 10 and 1000 digit block output.\n"
+Help_print_dot:
+	.ascii	"Usage: .   (print X-Reg)\n\n"
+	.ascii	"Usage: . f (formated - 10 and 1000 digit block output.\n"
 //	.ascii	"Usage: . q (quiet - terminal output suppressed, 10 1000 format\n"
 //	.ascii	"Usage: . u (unformatted - no line feed or page formatting\n"
-	.ascii	"Description: The . (period character) or 'print' will convert\n"
+	.ascii	"\nDescription: The . (period character) or 'print' will convert\n"
 	.ascii	"the contents of X-reg from binary to decimail. The output\n"
 	.ascii	"will be printed to stdout.\n"
+	.ascii	"\nCommands '.' and 'print' are synonymous\n"
+	.byte	0
+Help_print_print:
+	.ascii	"Usage: print   (print X-Reg)\n\n"
+	.ascii	"Usage: print f (formated - 10 and 1000 digit block output.\n"
+//	.ascii	"Usage: print q (quiet - terminal output suppressed, 10 1000 format\n"
+//	.ascii	"Usage: print u (unformatted - no line feed or page formatting\n"
+	.ascii	"\nDescription: The . (period character) or 'print' will convert\n"
+	.ascii	"the contents of X-reg from binary to decimail. The output\n"
+	.ascii	"will be printed to stdout.\n"
+	.ascii	"\nCommands \".\" and \"print\" are synonymous\n"
 	.byte	0
 
 Help_q:
@@ -382,10 +393,11 @@ Help:
 	str	x30, [sp, #0]		// Preserve these registers
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]		// Command line argument pointer
-	str	x9,  [sp, #24]		// Scratch
-	str	x10, [sp, #32]		// Index
-	str	x11, [sp, #40]		// Argument address pointer
-	str	x12, [sp, #48]		// Table address pointer
+	str	x1,  [sp, #24]
+	str	x9,  [sp, #32]		// Scratch
+	str	x10, [sp, #40]		// Index
+	str	x11, [sp, #48]		// Argument address pointer
+	str	x12, [sp, #56]		// Table address pointer
 
 	bl	CROut
 	mov	x11, x0			// Save pointer to command line argument
@@ -461,10 +473,11 @@ help_exit:
 	ldr	x30, [sp, #0]		// restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]
-	ldr	x9,  [sp, #24]
-	ldr	x10, [sp, #32]
-	ldr	x11, [sp, #40]
-	ldr	x12, [sp, #48]
+	ldr	x1,  [sp, #24]
+	ldr	x9,  [sp, #32]
+	ldr	x10, [sp, #40]
+	ldr	x11, [sp, #48]
+	ldr	x12, [sp, #56]
 	add	sp, sp, #64
 	ret
 

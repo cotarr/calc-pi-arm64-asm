@@ -398,8 +398,20 @@ ParseCmd:
 	b.eq	not_number
 	cmp	w0, #0x002E		// Compare '.' + 00
 	b.eq	not_number
-	// cmp	w0, #0x0020		// Compare ' ' + 00
-	// b.eq	not_number
+	//cmp	w0, #0x0020		// Compare ' ' + 00
+	//b.eq	not_number
+
+	// case of ". " (dot space) for print arguments
+	ldrb	w0, [x8]
+	cmp	w0, #'.'		// decimal point
+	b.ne	40f
+	ldrh	w0, [x8]
+	lsr	w0, w0, #8
+	and	w0, w0, #0xff
+	cmp	w0, #' '		// space character
+	b.eq	not_number
+40:
+
 //
 // Now check numeric characters
 //
@@ -832,13 +844,33 @@ Command_prac:
 	b	ParseCmd
 
 Command_print:
+	cmp	x0, #0			// Check for argument
+	b.eq	30f
+
+	ldrb	w0, [x0]		// get character
+	cmp	w0, #'f'		// f for formatted
+	b.ne	20f
+
 	mov	x1, HAND_XREG
 	mov	x2, HAND_ACC
 	bl	CopyVariable
 
-	bl	CROut
 	mov	x0, #1			// enable format print
+	bl	CROut
 	bl	CharOutFmtInit		// Initialize counters for formatting
+	bl	PrintVariable		// print variable
+	bl	CROut
+	b	ParseCmd
+20:
+
+30:	// no argument
+	mov	x1, HAND_XREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+
+	mov	x0, #0			// enable format print
+	bl	CROut
+	bl	CharOutFmtInit		// disable formatting
 	bl	PrintVariable		// print variable
 	bl	CROut
 	b	ParseCmd

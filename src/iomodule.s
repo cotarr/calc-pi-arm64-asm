@@ -263,12 +263,28 @@ CharOutFmt:
 	bl	CharOut
 	b.al	99f
 10:
+	cmp	x2, #'+'
+	b.eq	11f
+	cmp	x2, #'-'
+	b.eq	11f
+	b.al	14f
+11:	mov	x0, x2			// get the + or - character
+	bl	CharOut			// output the + or - sign
+	ldr	x1, =OutCharacterCounter
+	ldr	x0, [x1]		// get current count
+	sub	x0, x0, #1		// decrement
+	str	x0, [x1]		// and save
+	b.al	99f
+14:
 	cmp	x2, #'.'
 	b.ne	15f
 	mov	x0,#'.'
+	bl	CharOut			// print decimal point
+	bl	CROut			// print end of line return
+	mov	x0,#' '			// print 2 leading ascii space characters
 	bl	CharOut
-	mov	x0, #0x0a		// line feed
 	bl	CharOut
+
 	ldr	x1, =OutCharacterCounter
 	mov	x0, #-1
 	str	x0, [x1]
@@ -280,14 +296,15 @@ CharOutFmt:
 	str	x0, [x1]
 	b.al	99f
 15:
-	cmp	x2, #'('
+	cmp	x2, #'('		// separate extended digits with ( )
 	b.ne	16f
-	mov	x0, #0x0a		// line feed
+	bl	CROut
+	mov	x0, #' '		// leading space
 	bl	CharOut
-	mov	x0, #'('
+	mov	x0, #'('		// parenthesis
 	bl	CharOut
 	ldr	x1, =OutCharacterCounter
-	mov	x0, #0
+	mov	x0, #-1
 	str	x0, [x1]
 	ldr	x1, =OutParagraphCounter
 	mov	x0, #0
@@ -297,11 +314,6 @@ CharOutFmt:
 	str	x0, [x1]
 	b.al	99f
 16:
-
-
-
-
-
 	ldr	x1, =OutCharacterLimit
 	ldr	x1, [x1]
 	ldr	x0, =OutCharacterCounter
@@ -330,7 +342,9 @@ CharOutFmt:
 	ldr	x1, =OutParagraphCounter
 	mov	x0, #0
 	str	x0, [x1]
-	mov	x0, #0x0a	// 0x0a = line feed
+	bl	CROut
+	mov	x0, #' '		// print 2 blank spaces
+	bl	CharOut
 	bl	CharOut
 	b.al	30f
 29:
@@ -348,7 +362,8 @@ CharOutFmt:
 	ldr	x1, =OutLineCounter
 	mov	x0, #0
 	str	x0, [x1]
-	mov	x0, #0x0a	// 0x0a = line feed
+	bl	CROut			// print 2 end of line returns
+	mov	x0, #' '		// print 2 blank spaces
 	bl	CharOut
 	bl	CharOut
 	b.al	50f
@@ -389,7 +404,7 @@ CharOutFmtInit:
 	ldr	x1, =PrintVarFormatMode
 	str	x0, [x1]
 
-	mov	x0, #-1
+	mov	x0, #0
 	ldr	x1, =OutCharacterCounter
 	str	x0, [x1]
 	mov	x0, #0
@@ -397,6 +412,10 @@ CharOutFmtInit:
 	str	x0, [x1]
 	ldr	x1, =OutLineCounter
 	str	x0, [x1]
+
+	mov	x0, #' '		// lead number with 1 blank spaces to left
+	bl	CharOut
+
 
 	ldr	x30, [sp, #0]		// restore registers
 	ldr	x29, [sp, #8]

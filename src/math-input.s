@@ -64,7 +64,7 @@ SOFTWARE.
   0x0002 0 = positive, 1 = negative  need 2's compliment
   0x0004 0 = Accepting integer part before decimal point, 1=done
 
-  TODO Add overflow and underflow check for too many digits
+  TODO underflow check for too many digits (low risk)
 
  ------------------------------------------------------- */
 
@@ -89,12 +89,7 @@ InputVariable:
 	mov	x15, x0
 
 	//
-	// x11 is constant (address of ACC M.S. World)
-	//
-	mov	x1, HAND_ACC		// Variable handle number
-	bl	set_x11_to_Int_LS_Word_Address
-	//
-	// x11 is constant (address of OPR M.S. World)
+	// x12 is constant (address of OPR M.S. World)
 	//
 	mov	x2, HAND_OPR		// Variable handle number
 	bl	set_x12_to_Int_LS_Word_Address
@@ -177,6 +172,28 @@ next_character:
 	tst	x16, #0x04		// Integer part, or fraction part?
 	b.ne	700f			// bit set, process as fraction digit
 
+	//
+	// Overflow check
+	//
+	//
+	mov	x1, HAND_ACC		// Variable handle number
+	bl	set_x11_to_Int_MS_Word_Address
+	ldr	x1, [x11]		// x1 is M.S. word of integer part of number
+
+	ldr	x2, =511f		// get address of bit mask
+	ldr	x2, [x2]		// x2 is bitmask 0xF000000000000000
+
+	tst	x1, x2			// test if mult by 10 will oveflow
+	b.eq	599f
+	// Fatal error
+	ldr	x0, =512f		// Error message pointer
+	mov	x1, #277		// 12 bit error code
+	b	FatalError
+//       Ruler -->1234567812345678
+511:	.quad	0xFC00000000000000	// value set by experiment
+512:	.asciz	"InputVariable: Error: overflow (number too big)"
+	.align	4
+599:
 					// else process as integer part digit
 	mov	x1, HAND_ACC		// Variable handle number
 	bl	MultiplyByTen
