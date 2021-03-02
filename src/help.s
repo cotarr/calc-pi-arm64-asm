@@ -104,6 +104,10 @@ Help_Table:
 	.byte	 0, 0
 	.quad	Help_D_vars
 
+	.ascii	"enter"
+	.byte	0, 0, 0
+	.quad	Help_enter
+
 	.ascii	"exit"
 	.byte	0, 0, 0, 0
 	.quad	Help_exit
@@ -226,6 +230,11 @@ Help_D_ofst:
 Help_D_vars:
 	.ascii	"Usage: D.vars\n\n"
 	.ascii	"Description: Show accuracy variables in hex and decimal\n"
+	.byte	0
+
+Help_enter:
+	.ascii	"Usage: enter\n\n"
+	.ascii	"Description: Duplicate X-Reg and roll X-->Y, Y-->Z, Z-->T (T is discarded)\n"
 	.byte	0
 
 Help_exit:

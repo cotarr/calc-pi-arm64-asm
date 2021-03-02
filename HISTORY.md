@@ -531,3 +531,4 @@ git clone 99f360ec560a8a56ca043fd7bc4f6685c4d6dc5d
 ### 2021-03-02 - Day 17 (12 days to go until pi day)
 
 - Added command mmode to disable shortcut multiplication and division
+- Added command enter to duplicate x into y and roll stack

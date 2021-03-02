@@ -112,6 +112,10 @@ Command_Table:
 	.byte	0,0
 	.quad	Command_D_ofst
 
+	.ascii	"enter"
+	.byte	0,0,0
+	.quad	Command_enter
+
 	.ascii	"exit"
 	.byte	0,0,0,0
 	.quad	Command_exit
@@ -721,7 +725,23 @@ Command_D_ofst:
 	bl	PrintAddressOffsets
 	b	ParseCmd
 //
+//
+//
+Command_enter:
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_TREG
+	bl	CopyVariable
 
+	mov	x1, HAND_YREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	bl	PrintResult
+	b	ParseCmd
 //
 //
 //
