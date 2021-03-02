@@ -536,3 +536,5 @@ git clone 99f360ec560a8a56ca043fd7bc4f6685c4d6dc5d
 - Added argument "f" to print command to formatted or un-formatted
 - Improved format print page layout, large integer part, and extended digits
 - Multiple bug fixes in input, output, and formatted print
+- Output rounding, moved round bit up to bit 8 of second guard word.
+- Add calculation timer to display calculation interval with accuracy in milliseconds.

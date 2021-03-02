@@ -47,6 +47,8 @@ main:
 //
 // Welcome message
 //
+	bl	InitTimerAtProgramStart
+
 	bl	ClrScr			// Terminal setup
 	bl	Help_Welcome
 

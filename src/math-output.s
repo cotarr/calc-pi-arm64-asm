@@ -142,10 +142,14 @@ PrintVariable:
 	ldr	x9, =Word_Size_Static
 	ldr	x9, [x9]		// x0 is count integer words
 	sub	x9, x9, #1		// subtract 1 now x0 = (words - 1)
+	//
+	// Index to guard word 2
+	sub	x9, x9, #1
+
 	sub	x9, xzr, x9, lsl X8SHIFT3BIT // (0 - (x9 * 8) = Neg offset to L.S. word
 
 	// ----- select this to round off -------------
-	movz	x0, #0x1000, lsl #32	// 0x0000000010000000
+	movz	x0, #0x1, lsl #32	// 0x0000000100000000
 	str	x0, [x12, x9]		// x12 address x9 offset
 	// --------------------------------------------
 

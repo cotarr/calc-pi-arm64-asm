@@ -42,6 +42,7 @@ PrintCommandList
 /* ------------------------------------------------------------ */
 
 	.global		ParseCmd
+	.global		InitTimerAtProgramStart
 
 //----------------------------------------
 	.data
@@ -206,7 +207,8 @@ message_input_error:
 			.byte	27
 			.ascii	"[0m"
 			.byte 0
-
+timeStr1:		.asciz	"Elapsed time: "
+timeStr2:		.asciz	" Seconds"
 			.align 4
 
 StackPtrSnapshot:
@@ -219,6 +221,8 @@ StackPtrSnapshot:
 // ---------------------------------------
 // unitialized allocatred memory
 //	.bss
+
+TimeLastSec:	.quad	0
 
 
 //----------------------------------------
@@ -268,6 +272,34 @@ PrintCommandList:
 	ldr	x9, [sp, #24]
 	ldr	x10, [sp, #32]
 	add	sp, sp, #48
+	ret
+
+// ------------------------------------------
+// Initialize system timers at program start
+//    Input:  none
+//    Output: none
+// ------------------------------------------
+InitTimerAtProgramStart:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x1, [sp, #24]
+	str	x2, [sp, #32]
+	str	x3, [sp, #40]
+
+	bl	ReadSysTime
+	mov	x2, x0			// seconds now
+	ldr	x1, =TimeLastSec
+	str	x2, [x1]
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0, [sp, #16]
+	ldr	x1, [sp, #24]
+	ldr	x2, [sp, #32]
+	ldr	x3, [sp, #40]
+	add	sp, sp, #64
 	ret
 
 /*******************************************
@@ -372,6 +404,40 @@ ParseCmd:
 35:
 
 //
+// Elapsed time
+//
+	ldr	x0, =timeStr1
+	bl	StrOut
+	bl	ReadSysTime
+	mov	x4, x0			// current time
+	ldr	x1, =TimeLastSec
+	ldr	x2, [x1]		// last time
+	str	x4, [x1]
+	sub	x1, x4, x2		// difference milliseconds
+	mov	x2, #1000
+	udiv	x3, x1, x2		// integer seconds
+	msub	x4, x3, x2, x1		// integer milliseconds
+	mov	x0, x3
+	bl	PrintWordB10
+	mov	x0, #'.'
+	bl	CharOut
+	mov	x2, #100
+	cmp	x4, x2
+	b.hs	36f
+	mov	x0, #'0'
+	bl	CharOut
+36:	mov	x2, #10
+	cmp	x4, x2
+	b.hs	37f
+	mov	x0, #'0'
+	bl	CharOut
+37:	mov	x0, x4
+	bl	PrintWordB10
+	ldr	x0, =timeStr2
+	bl	StrOut
+	bl	CROut
+	bl	CROut
+//
 // Show prompt string
 //
 	ldr	x0,=PromptString
@@ -380,6 +446,12 @@ ParseCmd:
 // Get input line from stdin
 //
 	bl	KeyIn			// Return pointer in x8
+	//
+	// Start timer (does not change x8 pointer)
+	//
+	bl	ReadSysTime
+	ldr	x1, =TimeLastSec
+	str	x0, [x1]
 //
 // check for number input
 //
@@ -1016,20 +1088,13 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
-	mov	x1, HAND_ACC
-	bl	SetToOne
-	bl	MultiplyByTen
-
-	mov	X0, 10
-	mov	x1, HAND_ACC
-	mov	x2, HAND_ACC
-	bl	Reg64BitMultiplication
-	mov	x1, HAND_ACC
-	bl	PrintVar
-
-	mov	x1, HAND_ACC
-	mov	x2, HAND_XREG
-	bl	CopyVariable
+	bl	ReadSysTime
+	bl	PrintWordB10
+	mov	x0, #'.'
+	bl	CharOut
+	mov	x0, x1
+	bl	PrintWordB10
+	b	ParseCmd
 
 	// ------- start RightNBits LeftNBits ----------
 //	cbz	x0, 10f			// if arg missing skip test

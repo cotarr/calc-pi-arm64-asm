@@ -53,8 +53,9 @@ SOFTWARE.
 	.global CharOutFmtInit
 	.global	CROut
 	.global	ClrScr
+	.global ReadSysTime
 
-.bss    // Section containing uninitialized data
+	.bss    // Section containing uninitialized data
 
 OutChar: // Character output buffer (1 64 bit word)
 	.skip	8
@@ -70,12 +71,12 @@ OutLineCounter:		.skip	BYTE_PER_WORD
 OutCharacterLimit:	.skip	BYTE_PER_WORD
 OutParagraphLimit:	.skip	BYTE_PER_WORD
 OutLineLimit:		.skip	BYTE_PER_WORD
-/* ------------------------------------------------------------ */
 
+time_buf:		.skip	16	// for read sys clock
+
+/* ------------------------------------------------------------ */
 	.text
 	.align	4
-
-
 /******************************************************
   Initialize I/O
 
@@ -480,6 +481,50 @@ Clear_String:
 	.ascii	"[H"			// Home Cursor
 	.byte	0			// End of string
 	.align 4
+
+
+//--------------------------------------------------------------
+//
+//  Get system time
+//
+//  Input:   none
+//
+//  Output:  x0  Time in seconds
+//           x1  Time in microseconds
+//
+//--------------------------------------------------------------
+ReadSysTime:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x1, [sp, #24]
+	str	x2, [sp, #32]
+	str	x8, [sp, #40]
+
+//	bl	ClearRegisters
+
+	ldr	x0, =time_buf
+	mov	x8, sys_time		// 64 bit syscall code (169)
+	svc	#0
+
+	ldr	x1, =time_buf		// sys call buffer
+	ldr	x0, [x1]		// time in seconds
+	mov	x2, #1000		// seconds --> milliseconds
+	mul	x0, x2, x0
+	ldr	x1, [x1, #8]		// microseconds
+	udiv	x1, x1, x2		// microseconds --> milliseconds
+	add	x0, x0, x1
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+//	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x8,  [sp, #40]
+	add	sp, sp, #64
+	ret
+
 
 // ------------------------------------------------------------
 	.data
