@@ -61,6 +61,11 @@ DivideVariable:
 	str	x10, [sp, #56]
 	str	x11, [sp, #64]
 
+	ldr	x0, =MathMode
+	ldr	x0, [x0]
+	tst	x0, #8			// disable resister mult
+	b.ne	100f			// skip
+
 	bl	set_x9_to_Int_LS_Word_Addr_Offset
 	mov	x8, x9
 	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static

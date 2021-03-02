@@ -124,6 +124,10 @@ Command_Table:
 	.byte	0,0,0,0,0
 	.quad	Command_hex
 
+	.ascii	"mmode"
+	.byte	0,0,0
+	.quad	Command_mmode
+
 	.ascii	"prac"
 	.byte	0,0,0,0
 	.quad	Command_prac
@@ -752,11 +756,52 @@ Command_hex:
 	bl	PrintHex
 	b	ParseCmd
 20:
-	ldr	x0, =30f
+	ldr	x0, =30f		// print agrument error message
 	bl	StrOut
 	b	ParseCmd
 30:
 	.asciz	"Hex: Error, invalid argument\n\n"
+	.align 4
+
+Command_mmode:
+	cmp	x0, #0			// Check for argument
+	b.eq	10f			// No argument
+	ldrb	w1, [x0]
+	cmp	w1, #'0'		// Check first character of command
+	b.lt	20f			// less than '0'? then skip
+	cmp	w1, #'9'		// greater than '9'? then skip
+	b.gt	20f
+	bl	IntWordInput		// x0 in binary 64 bit data
+	cmp	x1, #0			// Check for input error
+	b.ne	20f			// yes error
+	and	x0, x0, 0x0C		// mask valid bits
+	ldr	x1, =MathMode
+	str	x0, [x1]
+	// fall through to display
+10:
+	ldr	x0, =31f
+	bl	StrOut
+	ldr	x0, =MathMode
+	ldr	x0, [x0]
+	bl	PrintWordB10
+	ldr	x0, =32f
+	bl	StrOut
+	ldr	x0, =MathMode
+	ldr	x0, [x0]
+	bl	PrintByteHex
+	mov	x0, #')'
+	bl	CharOut
+	bl	CROut
+	bl	CROut
+	b	ParseCmd
+20:
+	ldr	x0, =30f		// Print argument rerror message
+	bl	StrOut
+	b	ParseCmd
+
+30:	.asciz	"\nmmode: Error, invalid argument\n\n"
+31:	.asciz	"\nmmode: "
+32:	.asciz	" (0x"
 	.align 4
 //
 //

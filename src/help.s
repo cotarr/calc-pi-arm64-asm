@@ -112,6 +112,10 @@ Help_Table:
 	.byte	0, 0, 0, 0, 0
 	.quad	Help_hex
 
+	.ascii	"mmode"
+	.byte	0, 0, 0
+	.quad	Help_mmode
+
 	.ascii	"print"
 	.byte	0,0,0
 	.quad	Help_print
@@ -237,6 +241,13 @@ Help_hex:
 	.ascii	"showing the first 3 words, the last word, and exponent in\n"
 	.ascii	"64-bit words in hexidecimal. If a variable hands is \n"
 	.ascii	"is provided, the entire variable is printed.\n"
+	.byte	0
+
+Help_mmode:
+	.ascii	"Usage: mmode <optional integer bit pattern>\n\n"
+	.ascii	"Descripton: Without argument, mmode displays MathMode variable.\n"
+	.ascii	"   4   (0x04)  Disable: ARM 64 bit MUL/UMULH matrix multiplication\n"
+	.ascii	"   8   (0x08)  Disable: ARM 32 bit UDIV/MSUB matrix division\n"
 	.byte	0
 
 Help_print:

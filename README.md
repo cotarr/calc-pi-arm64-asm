@@ -1,4 +1,4 @@
-# 13 Days to go ...
+# 12 Days to go ...
 
 Read file [HISTORY.md](../master/HISTORY.md) to see progress to date.
 
@@ -53,6 +53,6 @@ Calculate pi, on a pi, by pi-day.
 ```
 + - / . chs clrstk clrx cmdlist
 D.vars D.fill D.ofst exit help
-hex prac print q quit rdown rup
+hex mmode prac print q quit rdown rup
 sigfigs test version xy
 ```

@@ -430,9 +430,9 @@ PrintAddressOffsets:
 	ldp	x29, x30, [sp], 16	// restore return address
 	ret
 
-100:	.asciz	"Int MS Word Addr Ofst: "
+100:	.asciz	  "Int MS Word Addr Ofst: "
 101:	.asciz	"\nInt LS Word Addr Ofst: "
-102:	.asciz	"\nFct LS Word Addr Ofst: "
+102:	.asciz	"\nFct MS Word Addr Ofst: "
 103:	.asciz	"\nFct LS Word Addr Ofst: "
 104:	.asciz	" (Static)\nFct LS Word Addr Ofst: "
 105:	.asciz	" (Optimized)\nVar LS Word Addr Ofst: "
@@ -461,6 +461,7 @@ PrintAccuracyVars:
 	bl	CROut
 	ldr	x0, =100f
 	ldr	x1, =NoSigDig
+	bl	99f
 
 	ldr	x0, =101f
 	ldr	x1, =NoExtDig

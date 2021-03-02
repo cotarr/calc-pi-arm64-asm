@@ -523,3 +523,11 @@ forward with the rest of the program. It would be nice to add a reciprocal funct
 because multiplication of reciprocal is much faster than equivalent long division.
 The reciprocal would be nice for square root calculation, but I think simple
 series summation can move forward without it for now. I may add reciprocal later.
+
+```
+git clone 99f360ec560a8a56ca043fd7bc4f6685c4d6dc5d
+```
+
+### 2021-03-02 - Day 17 (12 days to go until pi day)
+
+- Added command mmode to disable shortcut multiplication and division

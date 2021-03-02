@@ -53,6 +53,7 @@ SOFTWARE.
 	.global	NoSigDig, NoExtDig
 	.global	FctLSW_WdPtr_Static, FctLSW_WdPtr_Optimized
 	.global	Word_Size_Static, Word_Size_Optimized
+	.global	MathMode
 
 	//  Constants, do not change
 	.global IntWSize, FctWsize, VarWSize
@@ -177,6 +178,8 @@ IntMSW_WdPtr:	.quad	VAR_WSIZE - 1
 IntLSW_WdPtr:	.quad	VAR_WSIZE - INT_WSIZE
 FctMSW_WdPtr:	.quad	VAR_WSIZE - INT_WSIZE - 1
 VarLSW_WdPtr:	.quad	0
+
+MathMode:	.quad	0
 
 WordFFFF:	.quad	0x0FFFFFFFFFFFFFFFF
 Word8000:	.quad	0x08000000000000000
