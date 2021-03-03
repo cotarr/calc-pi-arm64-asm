@@ -366,7 +366,7 @@ WelcomeMsg:
 	.ascii	"SOFTWARE.\n\n"
 	.ascii	"Source code: https://github.com/cotarr/calc-pi-arm64-asm\n\n"
 
-	.ascii	"\nW O R K  I N   P R O G R E S S (no calculation yet)\n"
+	.ascii	"\nW O R K  I N   P R O G R E S S (no pi calculation yet)\n"
 	.ascii	"\nCalculation of Pi on Raspberry Pi\n"
 	.ascii	"Written in GNU Assembler (as)\n"
 	.ascii	"Assembled arch=armv8-a cpu=cortex-a72\n\n"

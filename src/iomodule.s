@@ -144,10 +144,10 @@ KeyIn:
 	str	x1, [sp, #24]
 	str	x2, [sp, #32]
 
-	mov	x0, stdin		// stdin stream
+	mov	x0, STDIN_FILENO		// stdin stream
 	ldr	x1, =KeyBuf		// point to buffer
  	mov	x2, #(KeyBufLen-8)	// buffer size (count)
-	mov	x8, sys_read		// Request code
+	mov	x8, __NR_read		// Request code
 	svc	#0			// kernel syscall
 
 	tst	x0, x0			// count zero?
@@ -224,9 +224,9 @@ CharOut:
 
 	ldr	x1, =OutChar		// buffer address
 	str	x0, [x1]		// store character for print
-	mov	x0, stdout		// stream
+	mov	x0, STDOUT_FILENO	// stream
 	mov	x2, #1  		// count
-	mov	x8, sys_write		// write
+	mov	x8, __NR_write		// write
 	svc	#0			// syscall
 
 	ldr	x30, [sp, #0]		// restore registers
@@ -505,7 +505,7 @@ ReadSysTime:
 //	bl	ClearRegisters
 
 	ldr	x0, =time_buf
-	mov	x8, sys_time		// 64 bit syscall code (169)
+	mov	x8, __NR_gettimeofday	// 64 bit syscall code (169)
 	svc	#0
 
 	ldr	x1, =time_buf		// sys call buffer

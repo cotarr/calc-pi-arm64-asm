@@ -538,3 +538,19 @@ git clone 99f360ec560a8a56ca043fd7bc4f6685c4d6dc5d
 - Multiple bug fixes in input, output, and formatted print
 - Output rounding, moved round bit up to bit 8 of second guard word.
 - Add calculation timer to display calculation interval with accuracy in milliseconds.
+
+### 2021-03-03 - Day 18 (11 days to go until pi day)
+
+There is no point to calculating pi if the number can not be saved to a file.
+I spent some time working in practice.s to learn how to read and write
+text file from ARM64. This was difficult. Google as I would, I could only
+find ARM32 examples. The code definitions and registers are different. Also,
+`open` is deprecated in ARM64, and `openat` must be used. I knew there were
+4 arguments, dirfd, *filename, mode, and flags. I tried different
+registers in x0, x1, x2, and x3 until it got it to work by trial and error.
+I'm not sure this is fully correct, but it works to write text to a file, then
+read the text back for printing. I'll put the git clone hash if it is useful
+to anyone.
+```
+git clone (tbd)
+```

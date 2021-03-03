@@ -40,6 +40,9 @@ SOFTWARE.
 
 	.global		practice
 
+	.bss	// un-initialized data
+
+FileBuf:	.skip	1024
 
 	.text
 	.align 4
@@ -59,9 +62,11 @@ practice:
 //
 // Comment each test as needed
 //
-	// b save_carry_flag
-	// b ConditionalAssembly
-	b	multiply
+	b	file_write_then_read
+
+	// b	save_carry_flag
+	// b	ConditionalAssembly
+	// b	multiply
 	// b	sub_carry_loop
 	// b	shift_addition
 	// b	addition
@@ -90,6 +95,230 @@ TestErrorMsg:
 	.asciz "A test error was generated in the practive sandbox"
 	.align 4
 
+file_write_then_read:
+	//
+	// Note: Web search could not find an example of ARM64 file I/O in assembly language.
+	// The code below is the result of trial and error with arugments in
+	// different registers.
+	//
+	// The code AT_FDCWD was referred to as use current directory in place
+	// of directory file descriptor. I could not find this definition in
+	// the local library header, but it seems to work with value -100
+	// as found in other documentation.
+	//
+	// ----------------------------------------
+	// Test of file open, create if not exist, write, and close
+	// ----------------------------------------
+	//
+	// Open file, create if not exist, and save file description in x10
+	//
+	mov	x0, AT_FDCWD		// (dirfd) Special code to use current directory
+	ldr	x1, =112f		// (*pathname) address pointer to filename
+	mov	x2, O_CREAT + O_WRONLY	// (mode)
+	mov	x3, #0644		// (flags) File perimission flags
+	mov	x8, __NR_openat		// (openat())
+	svc	0			// system call
+	mov	x10, x0			// save file descriptor (or error)
+	//
+	// Check if error opening file
+	//
+	adds	xzr, xzr, x0		// error?
+	b.pl	10f			// no branch
+	//
+	// Case of error, print error code and exit program
+	//
+	ldr	x0, =121f		// Message with error string
+	bl	StrOut
+	sub	x0, xzr, x10		// print error code
+	bl	PrintWordB10
+	bl	CROut
+	b	exit_prac		// and exit due to error
+10:
+	//
+	// Print message showing successful open and print file descriptor
+	//
+	ldr	x0, =120f		// Message showing successful open
+	bl	StrOut
+	mov	x0, x10			// print file descriptor
+	bl	PrintWordB10
+	bl	CROut
+	//
+	// Write "Hello world" string to file
+	//
+	mov	x0, x10			// (fd) file descriptor
+	ldr	x1, =100f		// (*buf) buffer address
+	mov	x2, (111f - 100f)	// (size_t) count of bytes to write
+	mov	x8, __NR_write		// (write())
+	svc	#0			// system call
+	mov	x11, x0			// save return code
+	//
+	// Check for error writing to file
+	//
+	adds	xzr, xzr, x0		// error?
+	b.pl	11f			// no branch
+	//
+	// Case of error, show error, but continue to close file
+	//
+	ldr	x0, =124f		// Message with error string
+	bl	StrOut
+	sub	x0, xzr, x11		// print error code
+	bl	PrintWordB10
+	bl	CROut
+11:
+	//
+	// Close the file
+	//
+	mov	x0, x10			// (fd) file descriptor
+	mov	x1, #0
+	mov	x2, #0
+	mov	x3, #0
+	mov	x8, __NR_close		// (close())
+	svc	0			// system call
+	//
+	// Check if error closing file
+	//
+	adds	xzr, xzr, x0		// return code
+	b.mi	15f
+	//
+	// case of success, print successful close message
+	//
+	ldr	x0, =122f		// successful close message
+	bl	StrOut
+	bl	CROut
+	b.al	file_read		// continue to try to read the file back again
+15:
+	//
+	// Case of error closing file, print error
+	//
+	mov	x10, x0			// save error
+	ldr	x0, =123f
+	bl	StrOut
+	sub	x0, xzr, x10		// error code
+	bl	PrintWordB10
+	bl	CROut
+	b	file_read		// continue to try to reaqd the file back again
+
+100:	.asciz	"Hello World!\n"
+111:	.asciz	"/home/pi/test.txt"
+112:	.asciz	"test2.txt"
+120:	.asciz	"File opened for write, handle: "
+121:	.asciz	"File Open for write error: "
+122:	.asciz	"File closed."
+123:	.asciz	"File Close Error: "
+124:	.asciz	"File write error: "
+	.align 4
+
+	// ----------------------------------------
+	// Test of open, read and close
+	// ----------------------------------------
+file_read:
+	//
+	// Open file for read and save file description in x12
+	//
+	mov	x0, AT_FDCWD		// (dirfd) Special code to use current directory
+	ldr	x1, =212f		// (*pathname) address pointer to filename
+	mov	x2, O_RDONLY		// (mode)
+	mov	x3, #0644		// (flags) File perimission flags
+	mov	x8, __NR_openat		// (openat())
+	svc	0			// system call
+	mov	x12, x0			// save file descriptor (or error)
+	//
+	// Check if error opening file
+	//
+	adds	xzr, xzr, x0		// error?
+	b.pl	50f			// no branch
+	//
+	// Case of error, print error code and exit program
+	//
+	ldr	x0, =221f		// Message with error string
+	bl	StrOut
+	sub	x0, xzr, x12		// print error code
+	bl	PrintWordB10
+	bl	CROut
+	b	exit_prac		// and exit due to error
+50:
+	//
+	// Print message showing successful open and print file descriptor
+	//
+	ldr	x0, =220f		// Message showing successful open
+	bl	StrOut
+	mov	x0, x12			// print file descriptor
+	bl	PrintWordB10
+	bl	CROut
+	//
+	// Read to data into buffer, with maximum buffer length in x2
+	//
+	mov	x0, x12			// (fd) File descriptor
+	ldr	x1, =FileBuf		// (*buf) dpoint to buffer
+ 	mov	x2, #256		// (size_t) buffer size (count)
+	mov	x8, __NR_read		// (read())
+	svc	#0			// system call
+	mov	x13, x0			// save count or error
+	//
+	// Check for read error
+	//
+	adds	xzr, xzr, x0		// error?
+	b.pl	60f			// no branch
+	//
+	// Case of error, print error message, but continue to close file
+	//
+	ldr	x0, =224f		// Message with error string
+	bl	StrOut
+	sub	x0, xzr, x13		// print error code
+	bl	PrintWordB10
+	bl	CROut
+	b.al	70f
+	//
+	// print string that was read from the file
+	//
+60:	ldr	x1, =FileBuf		// need to null terminate string
+	mov	x0, #0
+	str	x0, [x1, x13]		// store zero byte at length
+	mov	x0, x1			// buffer address
+	bl	StrOut			// print string from buffer
+
+70:	//
+	// Close the file
+	//
+	mov	x0, x12			// (fd) file descriptor
+	mov	x1, #0
+	mov	x2, #0
+	mov	x3, #0
+	mov	x8, __NR_close		// (close())
+	svc	0			// system call
+	//
+	// Check for error closing file
+	//
+ 	adds	xzr, xzr, x0		// return code
+	b.mi	15f
+	//
+	// Case of success, print successful close message
+	//
+	ldr	x0, =222f
+	bl	StrOut
+	bl	CROut
+	b.al	20f
+15:
+	//
+	// case of error, print error code
+	//
+	mov	x13, x0			// save error
+	ldr	x0, =223f
+	bl	StrOut
+	sub	x0, xzr, x13		// error code
+	bl	PrintWordB10
+	bl	CROut
+20:
+	b exit_prac
+
+211:	.asciz	"/home/pi/test.txt"
+212:	.asciz	"test2.txt"
+220:	.asciz	"File opened for read, handle: "
+221:	.asciz	"File Open for read error: "
+222:	.asciz	"File closed."
+223:	.asciz	"File Close Error: "
+224:	.asciz	"File read error: "
+	.align 4
 
 // -----------------------------------------------------------------------------------
 //

@@ -63,7 +63,7 @@ ProgramExit:
 	ldr	x0, =NormalExitStr2	// An error code provided
 	bl	StrOut
 	mov	x0, #0  		// exit with status 0
-	mov	x8, sys_exit 		// exit
+	mov	x8, __NR_exit 		// exit
 	svc	#0      		// syscall
 
 // ------------------------------------------------------
@@ -88,7 +88,7 @@ FatalError:
 	ldr	x0, =ErrorMsg2
 	bl	StrOut
 	mov	x0, #1			// exit with error 1
-	mov	x8, sys_exit		// terminate program
+	mov	x8, __NR_exit		// terminate program
 	svc	#0
 
 // ----------------

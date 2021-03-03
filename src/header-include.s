@@ -33,14 +33,27 @@ SOFTWARE.
 ------------------------------------------------------------- */
 // .nolist
 // ------------------------------------------------------------
+// /usr/include/asm-generic/fcntl.h
+.equ	O_CREAT,	100	//new (not fcntl)
+.equ	O_RDONLY,	0
+.equ	O_WRONLY,	1
+.equ	O_APPEND,	2000	//new
 
-.set	sys_read, 63
-.equ	sys_write, 64
-.equ	sys_exit, 93
-.equ	sys_time, 169
 
-.equ	stdout, 1
-.equ	stdin,  1
+// /usr/include/asm-generic/unistd.h
+.set	__NR_openat,		56
+.set	__NR_close,		57
+.set	__NR_read,		63
+.equ	__NR_write,		64
+.equ	__NR_exit,		93
+.equ	__NR_gettimeofday, 	169
+
+// from google
+.equ	AT_FDCWD,	-100	// for openat dirfd in x0
+
+// /usr/include/unistd.h
+.equ	STDOUT_FILENO, 1
+.equ	STDIN_FILENO,  1
 
 .set	BIT_PER_WORD,	0x040   // 020H for 32 Bit, 040H for 64 Bit
 .set	BYTE_PER_WORD,	0x08    // 004H for 32 Bit, 008H for 64 Bit
