@@ -381,7 +381,7 @@ Op Code: 0.1
 - Input Decimal to binary and Output binary to base-10 decimal are working now.
 
 ```
-git clone 27f3dfa83583c4d55c1a7b44d5785812d7c2a3c2
+git checkout 27f3dfa83583c4d55c1a7b44d5785812d7c2a3c2
 ```
 - Added function PrintResult to be used with each command entry show intermediate result
 - Added ChartOutFmt to implement formatted output
@@ -421,7 +421,7 @@ defects that were difficult to debug. Further testing is needed
 tomorrow to make sure there are no other issues.
 
 ```
-git cone 88c904e9643fea472503de0aef034be49a59b5ea
+git checkout 88c904e9643fea472503de0aef034be49a59b5ea
 ```
 ### 2021-02-25 - Day 11 (17 days to go until pi day)
 
@@ -471,7 +471,7 @@ Op Code: .
 ```
 
 ```
-git clone 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
+git checkout 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
 ```
 
 ### 2021-02-26 - Day 12 (16 days to go until pi day)
@@ -484,7 +484,7 @@ git clone 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
 - Added commands xy, rup, rdown
 
 ```
-git clone 191ee7b1f0919b68e7c724ad209033c94228514b
+git checkout 191ee7b1f0919b68e7c724ad209033c94228514b
 ```
 ### 2021-02-27 - Day 13 (15 days to go until pi day)
 
@@ -525,7 +525,7 @@ The reciprocal would be nice for square root calculation, but I think simple
 series summation can move forward without it for now. I may add reciprocal later.
 
 ```
-git clone 99f360ec560a8a56ca043fd7bc4f6685c4d6dc5d
+git checkout 99f360ec560a8a56ca043fd7bc4f6685c4d6dc5d
 ```
 
 ### 2021-03-02 - Day 17 (12 days to go until pi day)
@@ -549,8 +549,8 @@ find ARM32 examples. The code definitions and registers are different. Also,
 4 arguments, dirfd, *filename, mode, and flags. I tried different
 registers in x0, x1, x2, and x3 until it got it to work by trial and error.
 I'm not sure this is fully correct, but it works to write text to a file, then
-read the text back for printing. I'll put the git clone hash if it is useful
+read the text back for printing. I'll put the git commit hash if it is useful
 to anyone.
 ```
-git clone (tbd)
+git checkout 43760215ecf87cd60f2f7f97a68306e4b21a7e99
 ```
