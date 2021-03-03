@@ -129,6 +129,14 @@ Command_Table:
 	.byte	0,0,0,0,0
 	.quad	Command_hex
 
+	.ascii	"log"
+	.byte	0,0,0,0,0
+	.quad	Command_log
+
+	.ascii	"logoff"
+	.byte	0,0
+	.quad	Command_logoff
+
 	.ascii	"mmode"
 	.byte	0,0,0
 	.quad	Command_mmode
@@ -193,7 +201,7 @@ Command_TableEnd:
 
 StackPtrErrorMsg:	.asciz	"\nWarning: Stack pointer moving.\n"
 PromptString:		.asciz	"Op Code: "
-OpCodeErrString:	.asciz	"     Input Error: Illegal Op Code.  (Type: cmdlist)\n\n"
+OpCodeErrString:	.asciz	"\nInput Error: Illegal Op Code.  (Type: cmdlist)\n\n"
 // Fatal error messages
 AlignErrorMsg:		.asciz	"Error: Command table not aligned in 128 bit blocks"
 Byte8ErrorMsg:		.asciz	"Error: Command table not zero byte8"
@@ -201,14 +209,14 @@ ACC_Error:		.asciz	"\n     Warning: [Word_Size_Static] not equal [Word_Size_Opti
 
 message_input_error:
 			// red text
-			.byte	27
-			.ascii	"[31m"
-			.ascii	"\n  Error converting string to floating point number, stack not rotated.\n\n"
-			.byte	27
-			.ascii	"[0m"
+			//.byte	27
+			//.ascii	"[31m"
+			.ascii	"\nError converting string to floating point number, stack not rotated.\n\n"
+			//.byte	27
+			//.ascii	"[0m"
 			.byte 0
-timeStr1:		.asciz	"Elapsed time: "
-timeStr2:		.asciz	" Seconds"
+timeStr1:		.asciz	"  (Elapsed: "
+timeStr2:		.asciz	" Sec) "
 			.align 4
 
 StackPtrSnapshot:
@@ -435,8 +443,7 @@ ParseCmd:
 	bl	PrintWordB10
 	ldr	x0, =timeStr2
 	bl	StrOut
-	bl	CROut
-	bl	CROut
+
 //
 // Show prompt string
 //
@@ -907,6 +914,18 @@ Command_mmode:
 31:	.asciz	"\nmmode: "
 32:	.asciz	" (0x"
 	.align 4
+//
+//
+//
+Command_log:
+	bl	StartEcho
+	b	ParseCmd
+//
+//
+//
+Command_logoff:
+	bl	StopEcho
+	b	ParseCmd
 //
 //
 //

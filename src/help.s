@@ -116,6 +116,15 @@ Help_Table:
 	.byte	0, 0, 0, 0, 0
 	.quad	Help_hex
 
+	.ascii	"log"
+	.byte	0, 0, 0, 0, 0
+	.quad	Help_log
+
+	.ascii	"logoff"
+	.byte	0, 0
+	.quad	Help_logoff
+
+
 	.ascii	"mmode"
 	.byte	0, 0, 0
 	.quad	Help_mmode
@@ -250,6 +259,19 @@ Help_hex:
 	.ascii	"showing the first 3 words, the last word, and exponent in\n"
 	.ascii	"64-bit words in hexidecimal. If a variable hands is \n"
 	.ascii	"is provided, the entire variable is printed.\n"
+	.byte	0
+Help_log:
+	.ascii	"Usage: log\n\n"
+	.ascii	"Description: The command 'log' starts a terminal log session.\n"
+	.ascii	"The filenames are sequential as follows:\n"
+	.ascii	"out/out001.txt, out/out002.txt, out/out003.txt ...\n"
+	.ascii	"the folder 'out' is expected in the working directory.\n"
+	.ascii	"Logging is stopped with the 'logoff' command\n"
+	.byte	0
+
+Help_logoff:
+	.ascii	"Usage: logoff\n\n"
+	.ascii	"Description: The command 'log' stops a terminal log session.\n"
 	.byte	0
 
 Help_mmode:

@@ -53,6 +53,7 @@ Calculate pi, on a pi, by pi-day.
 ```
 + - * / . chs clrstk clrx cmdlist
 D.vars D.fill D.ofst enter exit
-help hex mmode prac print q quit
-rdown rup sf sigfigs test version xy
+help hex log logoff mmode prac print
+q quit rdown rup sf sigfigs test
+version xy
 ```

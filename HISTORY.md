@@ -554,3 +554,12 @@ to anyone.
 ```
 git checkout 43760215ecf87cd60f2f7f97a68306e4b21a7e99
 ```
+- Added commands log and logoff. These echo stdout to sequentially numbered files out/out001.txt
+
+This turned out to be more experimenting with ARM64 file I/O. Since the text files
+are stored in a separate folder "out", then it was necessary to call `openat`
+with mode `O_PATH` to obtain a file descriptor for the sub-directory.
+The `openat` was called again with the sub-directory descriptor as the x0 dirfd attribute.
+
+This files are numbered sequentially. They start at out/out000.txt, then increment up
+to out/out999.txt.

@@ -34,10 +34,11 @@ SOFTWARE.
 // .nolist
 // ------------------------------------------------------------
 // /usr/include/asm-generic/fcntl.h
-.equ	O_CREAT,	100	//new (not fcntl)
+.equ	O_CREAT,	00000100	//new (not fcntl)
 .equ	O_RDONLY,	0
 .equ	O_WRONLY,	1
-.equ	O_APPEND,	2000	//new
+.equ	O_APPEND,	00002000
+.equ	O_PATH,		010000000
 
 
 // /usr/include/asm-generic/unistd.h

@@ -62,6 +62,13 @@ main:
 ProgramExit:
 	ldr	x0, =NormalExitStr2	// An error code provided
 	bl	StrOut
+	//
+	// If logging, close log file
+	//
+	bl	FileCloseForExit
+	//
+	// Terminate Program
+	//
 	mov	x0, #0  		// exit with status 0
 	mov	x8, __NR_exit 		// exit
 	svc	#0      		// syscall
@@ -87,9 +94,16 @@ FatalError:
 20:
 	ldr	x0, =ErrorMsg2
 	bl	StrOut
+	//
+	// If logging, close log file
+	//
+	bl	FileCloseForExit
+	//
+	// Terminate Program
+	//
 	mov	x0, #1			// exit with error 1
 	mov	x8, __NR_exit		// terminate program
-	svc	#0
+	svc	#0			// syscall
 
 // ----------------
 	.data
