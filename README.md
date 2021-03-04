@@ -51,9 +51,26 @@ Calculate pi, on a pi, by pi-day.
 ## Commands available:
 
 ```
-+ - * / . chs clrstk clrx cmdlist
++ - * / . c.e chs clrstk clrx cmdlist
 D.vars D.fill D.ofst enter exit
 help hex log logoff mmode prac print
 q quit rdown rup sf sigfigs test
 version xy
+```
+
+## First benchmark 2021-03-04 Calculation of e
+
+First benchmark was able to calculate e to 1 million digits in
+less than 5 minutes.
+
+```
+Terms    Request  Verified   Elapsed Time
+(n)       Digits    Digits     In Seconds
+-----    -------   -------   ------------
+22            10        20
+80           100       118
+452         1000      1005
+3255       10000     10021          0.168
+25210     100000    100017          3.368
+205027   1000000   1000024        279.820
 ```

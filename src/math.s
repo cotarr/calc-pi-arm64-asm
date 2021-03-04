@@ -33,6 +33,10 @@ SOFTWARE.
 
    	.include "arch-include.s"	// .arch and .cpu directives
    	.include "header-include.s"
+
+	.text
+	.align	4
+
 	.include "math-subr.s"
 	.include "math-rotate.s"
 	.include "math-mult.s"

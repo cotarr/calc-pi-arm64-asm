@@ -76,6 +76,10 @@ Help_Table:
 	.byte	0,0,0,0,0,0,0
 	.quad	Help_star_symbol
 
+	.ascii	"c.e"
+	.byte	0,0,0,0,0
+	.quad	Help_c_e
+
 	.ascii	"clrstk"
 	.byte	0,0
 	.quad	Help_clrstk
@@ -192,6 +196,13 @@ Help_star_symbol:
 	.ascii	"Description: Floating Point Multiplication\n"
 	.ascii	"Parser: XReg = YReg * XReg\n"
 	.ascii	"Stack: YReg --> XReg, then roll stack down.\n"
+	.byte	0
+
+Help_c_e:
+	.ascii	"Usage: c.e\n\n"
+	.ascii	"Description: Calculation of the constant e.\n"
+	.ascii	"The calculation is performed by the summation of 1/n!.\n"
+	.ascii	"Division loop calculates 1/n using ARM register 64/32 bit udiv/msub.\n"
 	.byte	0
 
 Help_chs:

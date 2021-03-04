@@ -62,8 +62,8 @@ practice:
 //
 // Comment each test as needed
 //
-	b	file_write_then_read
-
+	b	partial_register_addressing
+	// b	file_write_then_read
 	// b	save_carry_flag
 	// b	ConditionalAssembly
 	// b	multiply
@@ -94,6 +94,27 @@ test_error:
 TestErrorMsg:
 	.asciz "A test error was generated in the practive sandbox"
 	.align 4
+
+
+partial_register_addressing:
+
+	ldr	x1, =WordFFFF
+	ldr	x1, [x1]
+	ldr	x2, =word_64bit
+
+	// memory contains 0x1122334455667788 before test
+	str	w1, [x2]
+	ldr	x0, [x2]	// x0 = 0x11223344FFFFFFFF
+
+	str	x1, [x2]
+	ldr	x0, [x2]	// x0 = 0xFFFFFFFFFFFFFFFF
+
+	// memory contains 0x1122334455667788 before test
+	str	w1, [x2]
+	ldr	x0, [x2]	// x0 = 0xFFFFFFFFFFFFFFFF
+	bl	Print0xWordHex
+	b	exit_prac
+
 
 file_write_then_read:
 	//

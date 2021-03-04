@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-03-03
+	Last edit: 2021-03-04
 
 	PrintCommandList
 	ParseCmd
@@ -84,6 +84,10 @@ Command_Table:
 	.ascii	"."
 	.byte	0,0,0,0,0,0,0
 	.quad	Command_print
+
+	.ascii	"c.e"
+	.byte	0,0,0,0,0
+	.quad	Command_c_e
 
 	.ascii	"chs"
 	.byte	0,0,0,0,0
@@ -732,6 +736,15 @@ Command_star_symbol:
 	b	ParseCmd
 
 //
+// Calculate e
+//
+Command_c_e:
+	bl	Function_calc_e
+
+	bl	PrintResult
+	b	ParseCmd
+
+//
 //
 //
 Command_chs:
@@ -1107,12 +1120,14 @@ Command_test:
 	// b	ParseCmd
 	// --------------------------
 
-	bl	ReadSysTime
-	bl	PrintWordB10
-	mov	x0, #'.'
-	bl	CharOut
-	mov	x0, x1
-	bl	PrintWordB10
+	mov	x1, HAND_ACC
+	bl	SetToOne
+	bl	PrintVar
+	mov	x0, #2
+	mov	x1, HAND_ACC
+	mov	x2, HAND_ACC
+	bl	Reg32BitDivision
+	bl	PrintVar
 	b	ParseCmd
 
 	// ------- start RightNBits LeftNBits ----------

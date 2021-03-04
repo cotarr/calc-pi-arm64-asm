@@ -193,7 +193,7 @@ git checkout ef153bbb5fa1e279d214abb7029f15f3841bec91
 git checkout 019035bfb629efc95ab513a0a3e9ab3990725183
 ```
 
-### 2021-02-20 Day 7 (22 days to go until pi day)
+### 2021-02-20 - Day 7 (22 days to go until pi day)
 
 - Added function Left1Bit to perform shift right 1 bit, zero fill l.s. bit
 
@@ -423,7 +423,7 @@ tomorrow to make sure there are no other issues.
 ```
 git checkout 88c904e9643fea472503de0aef034be49a59b5ea
 ```
-### 2021-02-25 - Day 11 (17 days to go until pi day)
+### 2021-02-25 - Day 12 (17 days to go until pi day)
 
 - Finished code clean up in file math-subr.s
 - Added commands "+", "-", and "chs" to help test program with RPN calculation.
@@ -474,7 +474,7 @@ Op Code: .
 git checkout 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
 ```
 
-### 2021-02-26 - Day 12 (16 days to go until pi day)
+### 2021-02-26 - Day 13 (16 days to go until pi day)
 
 - Add function Right64bit, Left64Bit to logical shift even words
 - First benchmark test bit-wise long division time 100000 digits 11 seconds on Pi 4
@@ -486,13 +486,13 @@ git checkout 24e5f1f024dd4ba9e2fcb9d0d4295de9300be6c6
 ```
 git checkout 191ee7b1f0919b68e7c724ad209033c94228514b
 ```
-### 2021-02-27 - Day 13 (15 days to go until pi day)
+### 2021-02-27 - Day 14 (15 days to go until pi day)
 
 - Complete all edge cases of RightNBits and LeftNBits (some test code at end of rotate.s)
 - Setup placeholder file for multiplication
 - Spent rest of day writing multiplication.
 
-### 2021-02-28 - Day 14 (14 days to go until pi day)
+### 2021-02-28 - Day 15 (14 days to go until pi day)
 
 Most of today was spent debugging the multiplication function.
 This method breaks the number into 64 bit words. They words are multiplied
@@ -564,4 +564,37 @@ The `openat` was called again with the sub-directory descriptor as the x0 dirfd 
 This files are numbered sequentially. They start at out/out000.txt, then increment up
 to out/out999.txt.
 
-### 2021-03-04 - Day 18 (10 days to go until pi day)
+### 2021-03-04 - Day 19 (10 days to go until pi day)
+
+- Add calc.s as base file to include calculations
+- Add calc-e.s to calculate e by summation 1/n!
+
+Today the first series summation was added. To try this I used e where
+
+e is infinite sum of  1 + (1/1) + (1/2) + (1/6) + (1/24) + ... + (1/n!)
+
+Where n factorial is n! = 1 * 2 * 3 * 4 * 5 * ... * (n)
+
+To simplify arithmetic, I am using the ARM udiv/msub instructions
+to divide 64 bit Dividend by 32 bit divisor to get 32 bit quotient
+and 32 bit remainder. Division is in a loop. There, n
+may not exceed 32 bits and this is upper limit on this calculation.
+
+There seems to be some accuracy range issues to work out
+relative to 64 bit word size and overflowing bits.
+This is my first series summation on a raspberry pi.
+
+First benchmark was able to calculate e to 1 million digits in
+less than 5 minutes.
+
+```
+Terms    Request  Verified   Elapsed Time
+(n)       Digits    Digits     In Seconds
+-----    -------   -------   ------------
+22            10        20
+80           100       118
+452         1000      1005
+3255       10000     10021          0.168
+25210     100000    100017          3.368
+205027   1000000   1000024        279.820
+```
