@@ -563,3 +563,5 @@ The `openat` was called again with the sub-directory descriptor as the x0 dirfd 
 
 This files are numbered sequentially. They start at out/out000.txt, then increment up
 to out/out999.txt.
+
+### 2021-03-04 - Day 18 (10 days to go until pi day)

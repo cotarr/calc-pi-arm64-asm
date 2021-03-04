@@ -4,7 +4,7 @@
 	Input binary variable from base 10
 
 	Created:   2021-02-23
-	Last edit: 2021-02-28
+	Last edit: 2021-03-02
 
 ----------------------------------------------------------------
 MIT License

@@ -3,7 +3,7 @@
 	Include file for math.s
 
 	Created:   2021-02-18
-	Last edit: 2021-02-23
+	Last edit: 2021-02-26
 
 ----------------------------------------------------------------
 MIT License

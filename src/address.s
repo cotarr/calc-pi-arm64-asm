@@ -4,7 +4,7 @@
 	Calculate address pointers and offset pointers
 
 	Created:   2021-02-24
-	Last edit: 2021-02-25
+	Last edit: 2021-03-02
 
 ----------------------------------------------------------------
 MIT License
