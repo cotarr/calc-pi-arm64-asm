@@ -5,7 +5,7 @@
 	subroutines.
 
 	Created:   2021-02-14
-	Last Edit: 2021-03-03
+	Last Edit: 2021-03-05
 
 ----------------------------------------------------------------
 MIT License
@@ -89,6 +89,7 @@ OutLineCounter:		.skip	BYTE_PER_WORD
 OutCharacterLimit:	.skip	BYTE_PER_WORD
 OutParagraphLimit:	.skip	BYTE_PER_WORD
 OutLineLimit:		.skip	BYTE_PER_WORD
+ParagraphLabelCounter:	.skip	BYTE_PER_WORD
 
 time_buf:		.skip	16	// for read sys clock
 
@@ -817,7 +818,22 @@ CharOutFmt:
 	ldr	x1, =OutLineCounter
 	mov	x0, #0
 	str	x0, [x1]
-	bl	CROut			// print 2 end of line returns
+
+	mov	x0, #' '		// print 2 blank spaces
+	bl	CharOut
+	bl	CharOut
+	bl	CharOut
+	mov	x0, #'('		// print 2 blank spaces
+	bl	CharOut
+	ldr	x1, =ParagraphLabelCounter
+	ldr	x0, [x1]
+	add	x0, x0, #1000
+	str	x0, [x1]
+	bl	PrintWordB10
+	mov	x0, #')'		// print 2 blank spaces
+	bl	CharOut
+
+	bl	CROut			// print 2nd end of line returns (first from paragraph)
 	mov	x0, #' '		// print 2 blank spaces
 	bl	CharOut
 	bl	CharOut
@@ -866,6 +882,8 @@ CharOutFmtInit:
 	ldr	x1, =OutParagraphCounter
 	str	x0, [x1]
 	ldr	x1, =OutLineCounter
+	str	x0, [x1]
+	ldr	x1, =ParagraphLabelCounter
 	str	x0, [x1]
 
 	mov	x0, #' '		// lead number with 1 blank spaces to left

@@ -645,3 +645,4 @@ sub-routine. This is to allow use of the matrix multiply
 part to be used in the reciprocal function.
 
 - Function WordMultiplication split into WordMultiplication and _internal_matrix_multiply
+- Added label of count of digits between paragraphs of 1000 digits.
