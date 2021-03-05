@@ -26,26 +26,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-----------------------------------------------------------------
-	FP_Initialize
-	Set_Word_Size
+
 ------------------------------------------------------------- */
 
    	.include "arch-include.s"	// .arch and .cpu directives
    	.include "header-include.s"
 
-	.text
-	.align	4
-
-	.include "math-subr.s"
-	.include "math-rotate.s"
-	.include "math-mult.s"
-	.include "math-div.s"
-	.include "math-input.s"
-	.include "math-output.s"
-	.include "math-debug.s"
-
-/* ------------------------------------------------------------ */
+// ------------------------------------------------------------
 	// Functions
 	.global	FP_Initialize
 	.global	Set_Word_Size
@@ -234,14 +221,22 @@ FctLSW_WdPtr_Optimized:	.skip	BYTE_PER_WORD
 	.align 4
 // -----------------------------------------------------
 
-/*--------------------------------------------------------------
-  On program start, initialize the variable space
+	.include "math-subr.s"
+	.include "math-rotate.s"
+	.include "math-mult.s"
+	.include "math-div.s"
+	.include "math-input.s"
+	.include "math-output.s"
+	.include "math-debug.s"
 
-  Input:   none
-
-  Output:  none
-
---------------------------------------------------------------*/
+//--------------------------------------------------------------
+// On program start, initialize the variable space
+//
+//  Input:   none
+//
+//  Output:  none
+//
+//--------------------------------------------------------------
 FP_Initialize:
 	sub	sp, sp, #48		// Reserve 4 words
 	str	x30, [sp, #0]		// Preserve Registers

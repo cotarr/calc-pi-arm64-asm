@@ -588,8 +588,10 @@ First benchmark was able to calculate e to 1 million digits in
 less than 5 minutes.
 
 ```
+Calculation of e
+
 Terms    Request  Verified   Elapsed Time
-(n)       Digits    Digits     In Seconds
+  (n)    Digits    Digits     In Seconds
 -----    -------   -------   ------------
 22            10        20
 80           100       118
@@ -597,4 +599,33 @@ Terms    Request  Verified   Elapsed Time
 3255       10000     10021          0.168
 25210     100000    100017          3.368
 205027   1000000   1000024        279.820
+```
+
+Rewrote some of the accuracy routines to set
+number of printed digits and binary word count.
+There was still an issue where changing the number
+of guard words did not add more accuracy to
+the calculation of e.
+
+It turns out the problem was that the function TestIfZero
+was not including guard bytes in the zero check.
+Due to various round off errors I think I should probably
+add a second function TestForNearlyZero. For now
+the zero check looks at all words including the guard words.
+the impact of guard words looks like this:
+
+```
+Calculation of e with different number of guard words
+
+Guard   Terms    Request  Verified
+Words     (n)    Digits    Digits
+------  -----    -------   -------
+0         450       1000       992
+1         458       1000       991
+2         466       1000      1009
+3         473       1000      1030
+4         480       1000      1049
+2	25217     100000    100018
+3	25222     100000    100038
+4       25226     100000    100057
 ```

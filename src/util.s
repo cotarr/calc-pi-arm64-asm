@@ -108,30 +108,51 @@ PrintAccVerbose:
 	str	x12, [sp, #64]
 	str	x13, [sp, #72]
 
-//
-//  Decimal Section
-//
 
-// Integer digits
-	ldr	x0, =sftext1
-	bl	StrOut
-	ldr	x0, =IntWSize
-	ldr	x0, [x0]
-	bl	Words_2_Digits
-	sub	x0, x0, #1
-	bl	PrintWordB10
-// Fraction digits
-	ldr	x0, =sftext2
+// Printed Fraction part
+	ldr	x0, =sftext0
 	bl	StrOut
 	ldr	x0, =NoSigDig
 	ldr	x0, [x0]
 	bl	PrintWordB10
-// Extended digits
+// Printed Extended digits
 	ldr	x0, =sftext3
 	bl	StrOut
 	ldr	x0, =NoExtDig
 	ldr	x0, [x0]
 	bl	PrintWordB10
+//
+//  Decimal Section
+//
+
+// Integer digits from words
+	ldr	x0, =sftext1
+	bl	StrOut
+	ldr	x0, =IntWSize
+	ldr	x0, [x0]
+	bl	Words_2_Digits
+	bl	PrintWordB10
+
+// Fraction digits from words less guard
+	ldr	x0, =sftext2
+	bl	StrOut
+	ldr	x1, =Word_Size_Static
+	ldr	x0, [x1]
+	ldr	x1, =IntWSize
+	ldr	x1, [x1]
+	sub	x0, x0, x1
+	sub	x0, x0, GUARDWORDS
+	bl	Words_2_Digits
+	bl	PrintWordB10
+
+// Fraction digits fro Guard words
+	ldr	x0, =sftext2A
+	bl	StrOut
+	mov	x0, GUARDWORDS
+	bl	Words_2_Digits
+	bl	PrintWordB10
+
+
 // Total digits
 	ldr	x0, =sftext4
 	bl	StrOut
@@ -142,7 +163,7 @@ PrintAccVerbose:
 // Available digits
 	ldr	x0, =sftext5
 	bl	StrOut
-	ldr	x0, =VarWSize
+	ldr	x0, =FctWsize
 	ldr	x0, [x0]
 	sub	x0, x0, GUARDWORDS
 	bl	Words_2_Digits
@@ -163,8 +184,10 @@ PrintAccVerbose:
 	bl	StrOut
 	ldr	x0, =Word_Size_Static
 	ldr	x0, [x0]
-	sub	x0, x0, GUARDWORDS
+	ldr	x1, =IntWSize
+	ldr	x1, [x1]
 	sub	x0, x0, x1
+	sub	x0, x0, GUARDWORDS
 	bl	PrintWordB10
 
 // Guard Words
@@ -205,19 +228,27 @@ PrintAccVerbose:
 	ret
 
 	.align 4
+sftext0:
+	.ascii	"\nPrinted digits"
+	.ascii	"\n  Integer part:        [From number]"
+	.asciz	"\n  Fraction part:       "
+
 sftext1:
 	// .ascii	"\n1234567812345678123456781234567812345678"
-	.ascii	"\nDecimal (base 10) Accuracy:\n"
-	.asciz	"  Integer Part:        "
+	.ascii	" \tDigits\n\nDecimal (base 10) Accuracy:\n"
+	.asciz	"  Max Integer Part:    "
 
 sftext2:
 	.asciz	" \tDigits\n  Fraction Part:       "
+sftext2A:
+	.asciz	" \tDigits\n  Guard Words:         "
+
 sftext3:
-	.asciz  " \tDigits\n  Extended Digits:     "
+	.asciz  " \tDigits\n  Extended:            "
 sftext4:
-	.asciz	" \tDigits\n  Calculation Digits:  "
+	.asciz	" \tDigits\n  Calculation:         "
 sftext5:
-	.asciz	" \tDigits\n  Available Digits:    "
+	.asciz	" \tDigits\n  Max Fraction Part:   "
 
 sftext11:
 	.ascii	" \tDigits\n\n"
@@ -280,11 +311,11 @@ SetDigitAccuracy:
 
 	// compute word size
 	mov	x0, x9			// digits
-	ldr	x9, =IntWSize
-	ldr	x9, [x9]		// number of Int part words
-	add	x9, x9, GUARDWORDS
+	ldr	x9, =IntWSize		// words in integer part
+	ldr	x9, [x9]		// load words in integer part
+	add	x9, x9, GUARDWORDS	// add guard words
 	bl	Digits_2_Words		// Convert base 10 digit to 64 bit words
-	add	x0, x0, x9		// add total wordsl
+	add	x0, x0, x9		// add total words
 
 	// check minimum word size
 	cmp	x0, MINIMUM_WORD
@@ -377,7 +408,7 @@ Words_2_Digits:
 	ldr	x1, =TempNum1E8		// Address pointer
 	ldr	x1, [x1]		// x1 = x10 = 100000000 (0x05F5E100 is 32 bit)
 	udiv	x0, x0, x1
-	add	x0, x0, #1
+	sub	x0, x0, #1		// reduce 1 digit for rounding
 
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]

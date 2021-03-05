@@ -283,14 +283,17 @@ TestIfNegative:
 	add	sp, sp, #48
 	ret
 
-/* --------------------------------------------------------------
-  Test function to see if zero
 
-  Input:    x1 = Handle Number of source 1 variable
 
-  Output:   x0  1 if zero, 0 in non-zero
-
----------------------------------------------------------------- */
+// --------------------------------------------------------------
+//  Test function to see if zero
+//
+//  Input:    x1 = Handle Number of source 1 variable
+//
+//  Output:   x0  1 if zero, 0 in non-zero
+//
+// TODO: create function for "nearly zero" to ignore roundoff bits
+//----------------------------------------------------------------
 TestIfZero:
 	sub	sp, sp, #64		// Reserve 8 words
 	str	x30, [sp, #0]		// Preserve Registers
@@ -305,25 +308,19 @@ TestIfZero:
 // ------------------
 // Case of negative
 // ------------------
+	//
+	// This does an "on the fly" 2's compliment
+	//
 	// Argument x1 contains variable handle
 	bl	set_x11_to_Fct_LS_Word_Address_Static
 
 	bl	set_x10_to_Word_Size_Static
-	sub	x10, x10, GUARDWORDS	// Subtract guard words, already checked
 
 	mov	x1, #1			// sign flag, default 1 for zero
 
 	mov	x0, #0
 	subs	x0, x0, x0		// set carry C=1  (NOT carry)
 
-	mov	x1, GUARDWORDS		// first loop guard words
-	cbz	x1, 20f		// skip if no guardwords
-10:
-	// loop ignoring guard words
-	ldr	x0, [x11], BYTE_PER_WORD // x0 is first word
-	sbcs	x0, xzr, x0		// subtract register and NOT carry from zero (flags set)
-	sub	x1, x1, #1		// decrement word counter
-	cbnz	x1, 10b			// Done Guard words?
 20:
 	ldr	x0, [x11], BYTE_PER_WORD // x0 is first word
 	sbcs	x0, xzr, x0		// subtract register and NOT carry from zero (flags set)
@@ -338,13 +335,9 @@ TestIfZero:
 // --------------------
 50:
 	bl	set_x10_to_Word_Size_Static
-	sub	x10, x10, GUARDWORDS	// less guard words
 
 	// Argument x1 variable handl enumber
 	bl	set_x11_to_Fct_LS_Word_Address_Static
-	mov	x0, GUARDWORDS
-	lsl	x0, x0, X8SHIFT3BIT	// convert words to bytes
-	add	x11, x11, x0
 
 	mov	x1, #1			// default flag 1 = zero
 60:

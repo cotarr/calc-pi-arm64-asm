@@ -139,8 +139,8 @@ calc_e_loop:
 //	bl	PrintWordB10
 //	bl	CROut
 
-	// cmp	x8, #4			// DEBUG - exit loop at this many divisions
-	// b.HS	20f			// DEBUG
+//	cmp	x8, #4			// DEBUG - exit loop at this many divisions
+//	b.HS	20f			// DEBUG
 
 	cmp	x10, x0			// Done? (variable_bits) - (zero_bits)
 	b.hs	calc_e_loop
