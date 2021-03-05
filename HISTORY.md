@@ -629,3 +629,19 @@ Words     (n)    Digits    Digits
 3	25222     100000    100038
 4       25226     100000    100057
 ```
+
+### 2021-03-05 - Day 20 (9 days to go until pi day)
+
+I have decided to try writing a reciprocal function.
+Reciprocal is much faster than long division.
+This may have an issue, because number must be
+shifted into the range 0.5 to 1.0 for the reciprocal
+to work. This is complicated because I am using
+fixed precision (no exponent), but it is worth a try.
+
+I decided to split multiplication into two separate functions.
+The matrix processor multiplication is split into an internal
+sub-routine. This is to allow use of the matrix multiply
+part to be used in the reciprocal function.
+
+- Function WordMultiplication split into WordMultiplication and _internal_matrix_multiply

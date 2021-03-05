@@ -4,7 +4,7 @@
 	Floating point multiplicatoin routines
 
 	Created:   2021-02-27
-	Last edit: 2021-03-02
+	Last edit: 2021-03-05
 
 ----------------------------------------------------------------
 MIT License
@@ -33,6 +33,7 @@ SOFTWARE.
 	.global MultiplyVariable
 	.global WordMultiplication
 	.global Reg64BitMultiplication
+	.global _internal_matrix_multiply
 
 // ----------------------------------------
 // Multiply variable
@@ -400,7 +401,7 @@ WordMultiplication:
 	// -------------------------
 	b.lo	150f			// If negative, overlow error
 	// Fatal error
-	ldr	x0, =Mult_Err_Msg3	// Error message pointer
+	ldr	x0, =MultErrMsg1	// Error message pointer
 	mov	x1, #603		// 12 bit error code
 	b	FatalError
 150:
@@ -471,16 +472,17 @@ WordMultiplication:
 	cmp	x4, xzr			// post mult shift must be >= 0
 	b.pl	195f
 	// Fatal error
-	ldr	x0, =Mult_Err_Msg4	// Error message pointer
+	ldr	x0, =MultErrMsg4	// Error message pointer
 	mov	x1, #677		// 12 bit error code
 	b	FatalError
 195:
 
-// any remiaining bits to shift do after multiplicaiton done
-str	x4, [sp, PostMultShift]
+	// any remiaining bits to shift do after multiplicaiton done
+	str	x4, [sp, PostMultShift]
 
 
-
+//--------------------------------------------------------------------
+// Internal function for matrix multiplication
 //--------------------------------------------------------------------
 	//
 	// Setup address pointers x11,x12,x13,x14(these will not change)
@@ -492,15 +494,116 @@ str	x4, [sp, PostMultShift]
 	bl	set_x12_to_Var_LS_Word_Address
 	bl	set_x13_to_Var_LS_Word_Address
 
+	//
+	// Setup x17 LSW and x18 MSW as constant value address offset
+	//
+	bl set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	mov	x17, x9			// save LSW offset in x17
+	bl set_x9_to_Int_MS_Word_Addr_Offset
+	mov	x18, x9			// save MSW offset in x18
+	mov	x9, #0			// x9 value was temporary
+
+	// ==============================================
+	// Internal function for matrix multiplicaiton
+	// using processor 64bit x 64 bit --> 128 bit
+	//
+	// Assume registers x0 to x18 are NOT preserved
+	//
+	bl	_internal_matrix_multiply
+	//
+	// ===============================================
+
+	//
+	// Move result back to ACC
+	//
+	mov	x1, HAND_WORKA
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+
+	//
+	// Align bits for proper decimal point
+	ldr	x0, [sp, PostMultShift]
+	mov	x1, HAND_ACC
+	bl	LeftNBits
+	//
+	// Check sign flag and 2's compliment if needed
+	//
+	ldr	x0, [sp, MultSignFlag]
+	tst	x0, #1			// check sign bit
+	b.eq	400f
+	mov	x1, HAND_ACC
+	mov	x2, HAND_ACC
+	bl	TwosCompliment
+400:
+WordMultiplicationExit:
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x3,  [sp, #40]
+	ldr	x4,  [sp, #48]
+	ldr	x5,  [sp, #56]
+	ldr	x6,  [sp, #64]
+	ldr	x7,  [sp, #72]
+	ldr	x8,  [sp, #80]
+	ldr	x9,  [sp, #88]
+	ldr	x10, [sp, #96]
+	ldr	x11, [sp, #104]
+	ldr	x12, [sp, #112]
+	ldr	x13, [sp, #120]
+	ldr	x14, [sp, #128]
+	ldr	x15, [sp, #136]
+	ldr	x16, [sp, #144]
+	ldr	x17, [sp, #152]
+	ldr	x18, [sp, #160]
+	add	sp, sp, #192
+	ret
+
+
+MultErrMsg1:	.asciz	"WordMultiplication: Error: Overlow (number too big)"
+MultErrMsg4:	.asciz	"WordMultiplication: Error: Bit alignment error"
+	.align 4
+
+// -------------------------------------------------------
+// Note: Used by WordMultiplication and Reciprocal
+// -------------------------------------------------------
 //
-//----------------------------------------
+// DO NOT CALL DIRECTLY This is an internal function.
+//
+// WARNING, registers are NOT preserved.
+//
+// * If one of the factors is a small integer, it should be Factor1 at x11 address.
+//
+// On entry, these are treated as constants
+//	x11 - Factor1 LS Word Address
+//	x12 - Factor2 LS Word Address
+//	x13 - Product LS Word Address
+//      x17 - L.S. word address offset
+//	x18 - M.S. word address offset
+//
+// Local variables:
+//	x5  - Holds under range word
+//	x6  - Under range pseudo variable (for migrate carry)
+//	x7  - (Factor1) Loop-1 Index
+//      x14 - (Factor2) Loop-1 Index
+//      x8  - (Factor2) Loop-2 Index
+//	x15 - (Product) Loop-2 Index
+//	x10 - (Product) Loop-3 Index
+//	x9  - (Product-1W) This is X10 - 1 word (8 byte)
+//
+// Scratch variables
+//	x0 argument
+//	x1 multiply argument
+//	x2 multiply argument
+//	x3 multiply argument
+//	x4 multiply argument
+
+// ----------------------------------------
 // Setup for 64 bit word multiplication
 //
 //  Pseudo Code showing indexing loops
 //
-//  L.S. Word Address Offset --> x17
-//  M.S. Word Address Offset --> x18
-
 //  x17(LSWOfst)-->x7
 //  x18(MSWOfst) -->x14
 //  Loop1
@@ -529,39 +632,41 @@ str	x4, [sp, PostMultShift]
 //  Trace 8 word loop index values
 // .set	INT_WSIZE, 	0x2
 // .set	FCT_WSIZE, 	0x10
+// .set	GUARDWORDS,	4
+
 //
 // Int MS Word Addr Ofst: 0x0000000000000088 136
 // Int LS Word Addr Ofst: 0x0000000000000080 128
-// Fct LS Word Addr Ofst: 0x0000000000000078 120
+// Fct MS Word Addr Ofst: 0x0000000000000078 120
 // Fct LS Word Addr Ofst: 0x0000000000000040 64 (Static)
+// Fct LS Word Addr Ofst: 0x0000000000000040 64 (Optimized)
+// Var LS Word Addr Ofst: 0x0000000000000000 0
+
 //
 // Trace:  (1/7) * (1/7)
-//
-// x7=64
-// x8=136 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 //
 // x7=72
 // x8=128 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=136 ur x10=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
-//
+
 // x7=80
 // x8=120 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=128 ur x10=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=136 x9=72 x10=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
-//
+
 // x7=88
 // x8=112 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=120 ur x10=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=128 x9=72 x10=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=136 x9=80 x10=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
-//
+
 // x7=96
 // x8=104 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=112 ur x10=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=120 x9=72 x10=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=128 x9=80 x10=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=136 x9=88 x10=96 cf=104 cf=112 cf=120 cf=128 cf=136
-//
+
 // x7=104
 // x8=96 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=104 ur x10=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
@@ -569,7 +674,7 @@ str	x4, [sp, PostMultShift]
 // x8=120 x9=80 x10=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=128 x9=88 x10=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=136 x9=96 x10=104 cf=112 cf=120 cf=128 cf=136
-//
+
 // x7=112
 // x8=88 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=96 ur x10=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
@@ -578,7 +683,7 @@ str	x4, [sp, PostMultShift]
 // x8=120 x9=88 x10=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=128 x9=96 x10=104 cf=112 cf=120 cf=128 cf=136
 // x8=136 x9=104 x10=112 cf=120 cf=128 cf=136
-//
+
 // x7=120
 // x8=80 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=88 ur x10=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
@@ -588,7 +693,7 @@ str	x4, [sp, PostMultShift]
 // x8=120 x9=96 x10=104 cf=112 cf=120 cf=128 cf=136
 // x8=128 x9=104 x10=112 cf=120 cf=128 cf=136
 // x8=136 x9=112 x10=120 cf=128 cf=136
-//
+
 // x7=128
 // x8=72 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=80 ur x10=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
@@ -599,7 +704,7 @@ str	x4, [sp, PostMultShift]
 // x8=120 x9=104 x10=112 cf=120 cf=128 cf=136
 // x8=128 x9=112 x10=120 cf=128 cf=136
 // x8=136 x9=120 x10=128 cf=136
-//
+
 // x7=136
 // x8=64 ur x10=64 cf=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
 // x8=72 ur x10=72 cf=80 cf=88 cf=96 cf=104 cf=112 cf=120 cf=128 cf=136
@@ -611,45 +716,62 @@ str	x4, [sp, PostMultShift]
 // x8=120 x9=112 x10=120 cf=128 cf=136
 // x8=128 x9=120 x10=128 cf=136
 // x8=136 x9=128 x10=136
+
 //
 //---------------------------------------------------------------------------------------------------------
 //
-// .set MULTTRACE, 1
-//www
-	//
-	// Setup X18 LSW and X18 MSW as constant value address offset
-	//
-	bl set_x9_to_Fct_LS_Word_Addr_Offset_Static
-	mov	x17, x9			// save LSW offset in x17
-	bl set_x9_to_Int_MS_Word_Addr_Offset
-	mov	x18, x9			// save MSW offset in x18
-	mov	x9, #0			// x9 value was temporary
 
+// .set MULTTRACE, 1
+_internal_matrix_multiply:
+	sub	sp, sp, #32		// Reserve 4 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+
+	cmp	x11, x13		// Product variable must not be same as factor variable
+	beq	10f
+	cmp	x12, x13		// Product variable must not be same as factor variable
+	beq	10f
+	b.al	20f
+
+	// Fatal error
+10:
+	ldr	x0, =MatMultErrMsg1	// Error message pointer
+	mov	x1, #834		// 12 bit error code
+	b	FatalError
+20:
 	mov	x6, #0			// Under range pseudo variable
 	//
 	// Init for preloop
 	//
-	mov	x7, x17			// (ACC Loop-1 Index), init to LSW Address Offset
-	mov	x14, x18		// (OPR Loop-1 Index), init to MSW address pointer
+	mov	x7, x17			// (Factor1 Loop-1 Index), init to LSW Address Offset
+	mov	x14, x18		// (Factor2 Loop-1 Index), init to MSW address pointer
 
 //---------------
 //  Pre-Loop 0
 //---------------
-
+	//
+	// The purpose of the pre-loop is to save time in the case where Factor1
+	// contains many zero words on the right (least significant) side of the
+	// variable. When these are multiplied, the result would be zero, so
+	// the range of valid index values can be reduced.
+	// The index pointer for Factor1 is incremented left until a zon-zero word is found.
+	// For each increment of the Factor1 index, the Factor2 index is
+	// decremented in the opposite direcction.
+	//
 pre_loop_0:
-	ldr	x0, [x11,x7]		// (ACC) Check word
+	ldr	x0, [x11,x7]		// (Factor1) Check word for non-zero value
 	cbnz	x0, mult_loop_1		// Non-zero? exit loop, begin multipications
-//
-// Decrement index and loop
-//
-	sub	x14, x14, BYTE_PER_WORD	// (OPR loop-1 index) decrement (MS-->LS) ( will init --> x8 loop 2)
-	add	x7, x7, BYTE_PER_WORD	// (ACC loop-1 index) inc (LS-->MS)
+	//
+	// Decrement index and loop
+	//
+	sub	x14, x14, BYTE_PER_WORD	// (Factor2 loop-1 index) decrement (MS-->LS) ( will init --> x8 loop 2)
+	add	x7, x7, BYTE_PER_WORD	// (Factor1 loop-1 index) inc (LS-->MS)
 	cmp	x18, x7 		// x7 above top word? (MSW - x7)
 	b.hs	pre_loop_0		// higher or same (C==1)
 
-// Should not have fallen through
+	// Should not have fallen through if parent function performed zero check.
 	// Fatal error
-	ldr	x0, =Mult_Err_Msg1		// Error message pointer
+	ldr	x0, =MatMultErrMsg1	// Error message pointer
 	mov	x1, #834		// 12 bit error code
 	b	FatalError
 
@@ -657,7 +779,7 @@ pre_loop_0:
 //  L O O P - 1
 //---------------
 mult_loop_1:
-//
+
 .ifdef MULTTRACE
 // - - - - Trace Code  - - - -
 	bl	CROut
@@ -673,11 +795,11 @@ mult_loop_1:
 	bl	CharOut
 .endif
 // - - - - - - - - - - - - - -
-//
-// Setup x8 to index input words from OPr for multiplicatioon
-//
-	mov	x8, x14			// (OPR   Loop-2 index), init x8 (from loop-1 x14)
-	mov	x15, x17		// (WORKA Loop-2 index), init x15 (from LSWOfset for --> init x10)
+	//
+	// Setup x8 to index input words from (Factor2) for multiplicatioon
+	//
+	mov	x8, x14			// (Factor2 Loop-2 index), init x8 (from loop-1 x14)
+	mov	x15, x17		// (Product Loop-2 index), init x15 (from LSWOfset for --> init x10)
 
 	// options to align
 //	add	x15, x15, BYTE_PER_WORD
@@ -687,10 +809,10 @@ mult_loop_1:
 //  L O O P - 2
 //---------------
 mult_loop_2:
-//
-// Initialize x10 index to store output of multiplication into WorkA
-//
-	add	x10, x15, BYTE_PER_WORD			// (WORKA Loop 3 Index) init from loop-2 index (for loop 3 too)
+	//
+	// Initialize x10 index to store output of multiplication into WorkA
+	//
+	add	x10, x15, BYTE_PER_WORD	// (Product Loop 3 Index) init from loop-2 index (for loop 3 too)
 	mov	x9, x15		 	// x9 is x10 - 1 word (8 byte)
 
 // - - - - Trace Code  - - - -
@@ -708,34 +830,24 @@ mult_loop_2:
 	bl	CharOut
 .endif
 // - - - - - - - - - - - - - -
-
-//
-// Perform ARM64 Multiplication
-// low word bit 63-0 mul x3, x2, x1      -->  x3(63-0)   = X1 * x2
-// high word bit 127-64 umulh x4, x2, x1 -->  x4(127-64) = X1 * x2
-//
-	ldr	x1, [x11, x7]		// fetch next word from ACC
-	ldr	x2, [x12, x8]		// fetch next word from OPR
+	//
+	//      M U L T I P L Y
+	//
+	// Perform ARM64 Multiplication
+	// low word bit 63-0 mul x3, x2, x1      -->  x3(63-0)   = X1 * x2
+	// high word bit 127-64 umulh x4, x2, x1 -->  x4(127-64) = X1 * x2
+	//
+	ldr	x1, [x11, x7]		// fetch next word from Factor1
+	ldr	x2, [x12, x8]		// fetch next word from Factor2
 	mul	x3, x1, x2		// x3 is mult product bit 63-0
 	umulh	x4, x1, x2		// x4 is mult product bit 127-64
-
-//	mov	rbx, [x11+x7]
-//	mov	rax, [x12+x8]
-//	mov	rdx, 0
-//	mul	rbx	; Multiply RAX * RBX = RDX:RAX
-//
-//  Save Result of multiplication
-//
-
-//	mov	x0, x10
-//	bl	CROut
-//	bl	PrintWordB10
-//	bl	CROut
-
+	//
+	//  Save Result of multiplication
+	//
 	cmp	x17, x9			// Is loop-3 index (save product) below LSWord?
 	b.hs	index_under_range	// LOwer than (C=0), branch
 	//
-	// Add Low Word to Work A
+	// Add Low Word to (Product)
 	//
 	// need shift tremporarily 1 word (TBD: better way)
 	ldr	x0, [x13, x9]		// get word
@@ -786,7 +898,7 @@ index_in_range:
 	//
 	// Add High word
 	//
-	ldr	x0, [x13, x10]		// get word from workA
+	ldr	x0, [x13, x10]		// get word from (Product)
 	// restore (inverted) carry
 	subs	xzr, xzr, x6
 	// addition
@@ -795,7 +907,7 @@ index_in_range:
 	sbc	x6, xzr, xzr		// x6 bit 1 is inverted carry flag
 	and	x6, x6, 1
 
-	str	x0, [x13, x10]		// store result word in workA
+	str	x0, [x13, x10]		// store result word in (Product)
 
 // - - - - Trace Code  - - - -
 .ifdef MULTTRACE
@@ -827,20 +939,19 @@ mult_loop_3:
 .ifndef MULTTRACE
 	b.ne	exit_loop_3		// no carry to add (x6==1), exit loop
 .endif
-	add	x10, x10, BYTE_PER_WORD	// (WORKA Loop-3 index) increment (LS-->MS)
+	add	x10, x10, BYTE_PER_WORD	// (Product Loop-3 index) increment (LS-->MS)
 	cmp	x18, x10		// x18 MSW address offset
 					// Check if above M.S.Word
-	b.hs	mult_go_add		// Higher Same (C=1), go add carry flag
+	b.hs	100f			// Higher Same (C=1), go add carry flag
 	tst	x6, #1			// Check Carry, expect C = 0 (x6 == 1)
 	b.ne	exit_loop_3		// CD was not set, expected, exit loop
 
 	// Fatal error
-	ldr	x0, =Mult_Err_Msg2		// Error message pointer
+	ldr	x0, =MatMultErrMsg2	// Error message pointer
 	mov	x1, #835		// 12 bit error code
 	b	FatalError
-
-mult_go_add:
-	ldr	x0, [x13, x10]		// Get word from workA
+100:
+	ldr	x0, [x13, x10]		// Get word from (Product)
 
 	// restore (inverted) carry
 	subs	xzr, xzr, x6		// x6 bit 0 inverted carry flag
@@ -852,7 +963,7 @@ mult_go_add:
 	sbc	x6, xzr, xzr
 	and	x6, x6, 1		// x6 bit0 = inverted carry flag
 
-	str	x0, [x13, x10]		// store word in WORKA
+	str	x0, [x13, x10]		// store word in (Product)
 
 //
 // - - - - Trace Code  - - - -
@@ -881,8 +992,8 @@ exit_loop_3:
 //
 // Increment/Decrement index, check done, else loop
 //
-	add	x15, x15, BYTE_PER_WORD	// (WORKA Loop-2 index) increment (LS --> MS)
-	add	x8, x8, BYTE_PER_WORD	// (OPR   Loop-2 index) increment (LS --> MS)
+	add	x15, x15, BYTE_PER_WORD	// (Product Loop-2 index) increment (LS --> MS)
+	add	x8, x8, BYTE_PER_WORD	// (Factor2 Loop-2 index) increment (LS --> MS)
 	cmp	x18, x8			// x18 MSW address offset
 	b.hs	mult_loop_2		// higher same (C=1)
 //---------------
@@ -892,15 +1003,14 @@ exit_loop_3:
 //
 // Check that no CF = 1 condition is left, zero is expected
 //
-	tst	x6, #1				// What is the CF value?
-	b.ne	no_carry			// CF = 0, (x6 = 1)
-
+	tst	x6, #1			// What is the CF value?
+	b.ne	110f			// CF = 0, (x6 = 1)
 	// Fatal error
-	ldr	x0, =Mult_Err_Msg2		// Error message pointer
+	ldr	x0, =MatMultErrMsg2	// Error message pointer
 	mov	x1, #836		// 12 bit error code
 	b	FatalError
 
-no_carry:
+110:
 // - - - - Trace Code  - - - -
 .ifdef MULTTRACE
 	bl	CROut
@@ -909,63 +1019,20 @@ no_carry:
 //
 // Increment/Decrement index, check done, else loop
 //
-	sub	x14, x14, BYTE_PER_WORD	// (OPR Loop-1 Index) decrement (LS --> MS)
-	add	x7, x7, BYTE_PER_WORD   // (ACC Loop-1 Index) increment (LS --> MS)
+	sub	x14, x14, BYTE_PER_WORD	// (Factor2 Loop-1 Index) decrement (LS --> MS)
+	add	x7, x7, BYTE_PER_WORD   // (Factor1 Loop-1 Index) increment (LS --> MS)
 	cmp	x18, x7			// x18 MSW address offset
-					// Is ACC index above MSW? if so, done looping
+					// Is Factor1 index above MSW? if so, done looping
 	b.hs	mult_loop_1		// Higher same (C=1) loop again
 //---------------
 //  E N D - 1
 //---------------
-//
-// Move result back to ACC
-//
-	mov	x1, HAND_WORKA
-	mov	x2, HAND_ACC
-	bl	CopyVariable
-
-	//
-	// Align bits for proper decimal point
-	ldr	x0, [sp, PostMultShift]
-	mov	x1, HAND_ACC
-	bl	LeftNBits
-	//
-	// Check sign flag and 2's compliment if needed
-	//
-	ldr	x0, [sp, MultSignFlag]
-	tst	x0, #1			// check sign bit
-	b.eq	400f
-	mov	x1, HAND_ACC
-	mov	x2, HAND_ACC
-	bl	TwosCompliment
-400:
-WordMultiplicationExit:
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
-	ldr	x0,  [sp, #16]
-	ldr	x1,  [sp, #24]
-	ldr	x2,  [sp, #32]
-	ldr	x3,  [sp, #40]
-	ldr	x4,  [sp, #48]
-	ldr	x5,  [sp, #56]
-	ldr	x6,  [sp, #64]
-	ldr	x7,  [sp, #72]
-	ldr	x8,  [sp, #80]
-	ldr	x9,  [sp, #88]
-	ldr	x10, [sp, #96]
-	ldr	x11, [sp, #104]
-	ldr	x12, [sp, #112]
-	ldr	x13, [sp, #120]
-	ldr	x14, [sp, #128]
-	ldr	x15, [sp, #136]
-	ldr	x16, [sp, #144]
-	ldr	x17, [sp, #152]
-	ldr	x18, [sp, #160]
-	add	sp, sp, #192
+	add	sp, sp, #32
 	ret
 
-Mult_Err_Msg1:	.asciz	"WordMultiplication: Error, pre-loop exit without non-zero word"
-Mult_Err_Msg2:	.asciz	"WordMultiplication: Error, CF not zero above M.S.Word"
-Mult_Err_Msg3:	.asciz	"WordMultiplication: Error: Overlow (number too big)"
-Mult_Err_Msg4:	.asciz	"WordMultiplication: Error: Bit alignment error"
+MatMultErrMsg1:	.asciz	"WordMultiplication: Error, pre-loop exit without non-zero word"
+MatMultErrMsg2:	.asciz	"WordMultiplication: Error, CF not zero above M.S.Word"
+MatMultErrMsg3:	.asciz	"WordMultiplication: Error, Product variable may not be same as any factor variable"
 	.align 4
