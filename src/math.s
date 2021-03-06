@@ -2,7 +2,7 @@
 	math.s
 
 	Created:   2021-02-18
-	Last edit: 2021-03-02
+	Last edit: 2021-03-06
 
 ----------------------------------------------------------------
 MIT License
@@ -225,6 +225,7 @@ FctLSW_WdPtr_Optimized:	.skip	BYTE_PER_WORD
 	.include "math-rotate.s"
 	.include "math-mult.s"
 	.include "math-div.s"
+	.include "math-recip.s"
 	.include "math-input.s"
 	.include "math-output.s"
 	.include "math-debug.s"

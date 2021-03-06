@@ -4,7 +4,7 @@
  This module contains user help
 
 	Created:   2021-02-19
-	Last Edit: 2021-03-03
+	Last Edit: 2021-03-06
 
 ----------------------------------------------------------------
 MIT License
@@ -148,6 +148,10 @@ Help_Table:
 	.ascii	"rdown"
 	.byte	0,0,0
 	.quad	Help_rdown
+
+	.ascii	"recip"
+	.byte	0,0,0
+	.quad	Help_recip
 
 	.ascii	"rup"
 	.byte	0,0,0,0,0
@@ -321,6 +325,12 @@ Help_q:
 Help_rdown:
 	.ascii	"Usage: rdown\n\n"
 	.ascii	"Stack Roll DOWN: T-->Z, Z-->Y, Y-->X, X-->T\n"
+	.byte	0
+
+Help_recip:
+	.ascii	"Usage: recip\n\n"
+	.ascii	"Calculate reciprocal (1/x) of XReg\n"
+	.ascii	"Stack not rotated after 1/x.\n"
 	.byte	0
 
 Help_rup:

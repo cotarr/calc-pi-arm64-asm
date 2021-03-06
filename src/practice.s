@@ -62,7 +62,8 @@ practice:
 //
 // Comment each test as needed
 //
-	b	partial_register_addressing
+	b	sub_carry_0_or_1
+	// b	partial_register_addressing
 	// b	file_write_then_read
 	// b	save_carry_flag
 	// b	ConditionalAssembly
@@ -447,6 +448,19 @@ multiply:
 	.align 4
 
 
+sub_carry_0_or_1:
+
+	// confirm cleared carry C=1 not subtracted
+	mov	x1, #4
+	mov	X2, #4
+	// set carry C=1  (NOT carry)
+	mov	x0, #0
+	subs	x0, x0, x0
+	// subtract value of carry
+	sbcs	x0, x1, x2 // EQ HS/CS PL VC 0x0000000000000000
+	bl	PrintFlags
+	bl	Print0xWordHex
+	b	exit_prac
 // -----------------------------------------------------------------------------------
 //
 sub_carry_loop:

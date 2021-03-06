@@ -4,7 +4,7 @@
 	Input binary variable from base 10
 
 	Created:   2021-02-14
-	Last edit: 2021-03-05
+	Last edit: 2021-03-06
 
 ----------------------------------------------------------------
 MIT License
@@ -62,6 +62,7 @@ SOFTWARE.
 .set	X4SHIFT2BIT,	0x02	// how many bit to shift for multiply by 8 (word size)
 .set	X8SHIFT3BIT,	0x03	// how many bit to shift for multiply by 8 (word size)
 .set	X16SHIFT4BIT,	0x04	// how many bit to shift for multiply by 8 (word size)
+.set	X32SHIFT5BIT,	0x05	// how many bit to shift for multiply by 8 (word size)
 .set	X64SHIFT4BIT,	0x06	// how many bit to shift for multiply by 8 (word size)
 
 // -------------------------------------------------------------------
@@ -71,7 +72,7 @@ SOFTWARE.
 //--------------------------------------------------------------------
 .set	INT_WSIZE, 	0x02	// WARNING USE ONLY 0x02 UNTIL TESTED
 .set	FCT_WSIZE, 	0x10	// 193 dig in fraction part
-// .set	FCT_WSIZE, 	0x40
+.set	FCT_WSIZE, 	0x40
 // .set	FCT_WSIZE, 	0x400	// 19680 fraction part
 // .set	FCT_WSIZE, 	0x40000	// 5050407 fractio part
 

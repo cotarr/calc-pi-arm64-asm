@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-03-04
+	Last edit: 2021-03-06
 
 	PrintCommandList
 	ParseCmd
@@ -156,6 +156,10 @@ Command_Table:
 	.ascii	"q"
 	.byte	0,0,0,0,0,0,0
 	.quad	Command_exit
+
+	.ascii	"recip"
+	.byte	0,0,0
+	.quad	Command_recip
 
 	.ascii	"quit"
 	.byte	0,0,0,0
@@ -1003,6 +1007,20 @@ Command_rdown:
 	bl	PrintResult
 	b	ParseCmd
 
+Command_recip:
+	mov	x1, HAND_XREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+
+	bl	Reciprocal
+
+	mov	x1, HAND_ACC
+	mov	x2, HAND_XREG
+	bl	CopyVariable
+
+	bl	PrintResult
+	b	ParseCmd
+
 Command_rup:
 	mov	x1, HAND_TREG
 	mov	x2, HAND_ACC
@@ -1122,12 +1140,21 @@ Command_test:
 
 	mov	x1, HAND_ACC
 	bl	SetToOne
-	bl	PrintVar
-	mov	x0, #2
-	mov	x1, HAND_ACC
+	bl	MultiplyByTen
+//
+//	bl	Left1Bit
+//	bl	Left1Bit
+	//bl	Right64Bits
+	mov	x1, HAND_OPR
+	bl	SetToOne
+
 	mov	x2, HAND_ACC
-	bl	Reg32BitDivision
-	bl	PrintVar
+	mov	x1, HAND_OPR
+//	bl	CountLSBitsDifferent
+	bl	CountAbsValDifferenceBits
+
+	bl	PrintWordB10
+	bl	CROut
 	b	ParseCmd
 
 	// ------- start RightNBits LeftNBits ----------

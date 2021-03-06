@@ -4,7 +4,7 @@
 	Logical shift bit, bytes and words
 
 	Created:   2021-02-10
-	Last edit: 2021-02-28
+	Last edit: 2021-03-05
 
 ----------------------------------------------------------------
 MIT License
@@ -338,9 +338,15 @@ RightNBits:
 	lsl	x0, x0, X64SHIFT4BIT	// mult * 8 for 64 bits
 	cmp	x0, x15
 	b.gt	10f
-	ldr	x0, =RotateNRangeMsgRight // Error message pointer
-	mov	x1, #372		// 12 bit error code
-	b	FatalError
+//	ldr	x0, =RotateNRangeMsgRight // Error message pointer
+//	mov	x1, #372		// 12 bit error code
+//	b	FatalError
+	//
+	// Instead of error, clear to zero, all bits rotated
+	//
+	ldr	x1, [sp, #24]		// variable handle
+	bl	ClearVariable
+	b.al	999f
 10:
 	// ------------------------------------------------
 	// Divide to get words and bits
@@ -476,7 +482,7 @@ RightNBits:
 	ldr	x15, [sp, #88]
 	ldr	x16, [sp, #96]
 	ldr	x17, [sp, #104]
-	ldr	x18, [sp, #116]
+	ldr	x18, [sp, #112]
 	add	sp, sp, #128
 	ret
 
@@ -536,9 +542,15 @@ LeftNBits:
 	lsl	x0, x0, X64SHIFT4BIT	// mult * 8 for 64 bits
 	cmp	x0, x15
 	b.gt	10f
-	ldr	x0, =RotateNRangeMsgLeft // Error message pointer
-	mov	x1, #374		// 12 bit error code
-	b	FatalError
+//	ldr	x0, =RotateNRangeMsgLeft // Error message pointer
+//	mov	x1, #374		// 12 bit error code
+//	b	FatalError
+	//
+	// Instead of error, clear to zero, all bits rotated
+	//
+	ldr	x1, [sp, #24]		// variable handle
+	bl	ClearVariable
+	b.al	999f
 10:
 	// ------------------------------------------------
 	// Divide to get words and bits

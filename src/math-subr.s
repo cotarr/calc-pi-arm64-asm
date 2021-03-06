@@ -3,7 +3,7 @@
 	Include file for math.s
 
 	Created:   2021-02-19
-	Last edit: 2021-02-28
+	Last edit: 2021-03-06
 
 ----------------------------------------------------------------
 MIT License
@@ -37,6 +37,8 @@ SOFTWARE.
 	.global	ExchangeVariable
 	.global TestIfNegative
 	.global TestIfZero
+	.global CountLSBitsDifferent
+	.global CountAbsValDifferenceBits
 	.global	TwosCompliment
 	.global	AddVariable
 	.global	SubtractVariable
@@ -284,7 +286,6 @@ TestIfNegative:
 	ret
 
 
-
 // --------------------------------------------------------------
 //  Test function to see if zero
 //
@@ -359,6 +360,220 @@ TestIfZero:
 	ldr	x10, [sp, #24]
 	ldr	x11, [sp, #32]
 	add	sp, sp, #64
+	ret
+
+// --------------------------------------------------------------
+//  Count number of bits that are different on the
+//       least significant side of the word
+//
+//  Input:    x1 = Handle Number of source1 variable
+//  Input:    x2 = Handle Number of source2 variable
+//
+//  Output:   x0  Count of bits different
+//
+//  Note: this is literal so the following round off would be issue
+//  as they are really only different 1 bit
+//  0000200000000000000000
+//  00001FFFFFFFFFFFFFFFFF
+//----------------------------------------------------------------
+
+CountLSBitsDifferent:
+	sub	sp, sp, #96		// Reserve 12 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]		// input argument / scratch
+	str	x2,  [sp, #32]		// input argument / scratch
+	str	x9,  [sp, #40]		// word index
+	str	x10, [sp, #48]		// word counter
+	str	x11, [sp, #56]		// source 1 address
+	str	x12, [sp, #64]		// source 1 address
+	str	x17, [sp, #72]		// source 1 address
+	str	x18, [sp, #80]		// source 1 address
+
+	bl	set_x10_to_Word_Size_Static
+
+	// Argument x1 contains variable handle
+	bl	set_x11_to_Int_MS_Word_Address
+
+	// Argument x2 contains variable handle
+	bl	set_x12_to_Int_MS_Word_Address
+
+	mov	x18, BIT_PER_WORD
+	mov	x17, #0			// initialize bit counter
+	//
+	// Part 1, check 64 bit words the same
+	//
+10:
+	ldr	x0, [x11], -BYTE_PER_WORD
+	ldr	x2, [x12], -BYTE_PER_WORD
+	cmp	x0, x2
+	b.ne	100f
+	add	x17, x17, x18		// add bits per word (64)
+	sub	x10, x10, #1		// decrement counter
+	cbnz	x10, 10b
+	b.al	200f
+100:
+	//
+	// Part 2 check bits the same
+	//
+	mov	x10, BIT_PER_WORD	// loop counter <-- number of bits
+	add	x17, x17, BIT_PER_WORD	// (assume all bits same then subtract each)
+110:
+	sub	x17, x17, #1		// subtract 1 bit as same
+	lsr	x0, x0, #1
+	lsr	x1, x1, #1
+	cmp	x0, x1
+	b.eq	200f
+	sub	x10, x10, #1		// decrement counter
+	cbnz	x10, 110b
+200:
+	//
+	// Subtract (total bits) - (same bits) to get different bits
+	//
+	bl	set_x10_to_Word_Size_Static
+	lsl	x10, x10, X64SHIFT4BIT	// bits per variable
+	sub	x0, x10, x17		// x0 = bits different
+	//
+	// Return with result in x0
+	//
+
+999:
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	// x0 is return value  <-- return
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x9,  [sp, #40]
+	ldr	x10, [sp, #48]
+	ldr	x11, [sp, #56]
+	ldr	x12, [sp, #64]
+	ldr	x17, [sp, #72]
+	ldr	x18, [sp, #80]
+	add	sp, sp, #96
+	ret
+
+
+// --------------------------------------------------------------
+//  Count LS difference bits after absolute value subtraction
+//
+//  Input:    x1 = Handle Number of source1 variable
+//  Input:    x2 = Handle Number of source2 variable
+//
+//  Output:   x0  Count of bits different
+//
+// Subtract Source1 - Source2
+// If negative, then
+// Subtract Source2 - Source1
+//
+// Then counts bits non-zero on right (L.S. side)
+//----------------------------------------------------------------
+CountAbsValDifferenceBits:
+	sub	sp, sp, #128		// Reserve 16 words
+	str	x30, [sp, #0]		// Preserve Registers
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]		// input argument / scratch
+	str	x2,  [sp, #32]		// input argument / scratch
+	str	x8,  [sp, #40]		// saved offset index
+	str	x9,  [sp, #48]		// offset index
+	str	x10, [sp, #56]		// wcounter
+	str	x11, [sp, #64]		// source 1 address
+	str	x12, [sp, #72]		// source 2 address
+	str	x17, [sp, #80]		// bit counter
+	str	x18, [sp, #88]		// bit counter remembered
+
+
+	// Argument x1 contains variable handle
+	bl	set_x11_to_Var_LS_Word_Address
+
+	// Argument x2 contains variable handle
+	bl	set_x12_to_Var_LS_Word_Address
+
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	bl	set_x10_to_Word_Size_Static
+	mov	x17, #0			// init counters
+	mov	x18, #0			// init counters
+
+	// set carry C=1  (NOT carry) for subtraction
+	mov	x0, #0
+	subs	x0, x0, x0
+10:
+	ldr	x1, [x11, x9]		// Source 1
+	ldr	x2, [x12, x9]		// source 2
+	sbcs	x0, x1, x2		// subtract register and NOT carry from zero (flags set)
+	b.eq	20f			// This is flag from "sbcs"
+	mov	x18, x17		// Total difference bits
+	mov	x8, x0			// save highest difference word
+20:
+	// increment and loop
+	add	x17, x17, BIT_PER_WORD	// running total of bits checked
+	add	x9, x9, BYTE_PER_WORD	// increment word offset pointer
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 10b		// non-zero, loop back
+	//
+	// was result negative, then reverse order of subtraction
+	//
+	add	x0, xzr, x0		// was it negative?
+	b.mi	500f
+
+	b.al	800f
+
+500:
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	bl	set_x10_to_Word_Size_Static
+	mov	x17, #0			// init counters
+	mov	x18, #0			// init counters
+
+	// set carry C=1  (NOT carry) for subtraction
+	mov	x0, #0
+	subs	x0, x0, x0
+510:
+	ldr	x1, [x12, x9]		// source 2
+	ldr	x2, [x11, x9]		// Source 1
+	sbcs	x0, x1, x2		// subtract register and NOT carry from zero (flags set)
+	b.eq	520f			// This is flag from "sbcs"
+	mov	x18, x17		// Total difference bits
+	mov	x8, x0			// save highest difference word
+520:
+	// increment and loop
+	add	x17, x17, BIT_PER_WORD	// running total of bits checked
+	add	x9, x9, BYTE_PER_WORD	// increment word offset pointer
+	sub	x10, x10, #1		// decrement word counter
+	cbnz	x10, 510b		// non-zero, loop back
+	//
+	// Flag shoud still be set from subtraction
+	// was result negative, then reverse order of subtraction
+	//
+800:
+	//
+	// x8 contains last difference word (non-zero)
+	//
+	mov	x10, BIT_PER_WORD	// counter
+810:
+	add	x18, x18, #1		// add diffrent bit
+	lsr	x8, x8, #1		// shift 1 bit
+	cbz	x8, 850f		// all bits now zero, leave with count
+	sub	x10, x10, #1
+	cbnz	x10, 810b
+850:
+
+999:
+	mov	x0, x18			// return result
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	// x0 returns result
+	ldr	x1,  [sp, #24]
+	ldr	x2,  [sp, #32]
+	ldr	x8,  [sp, #40]
+	ldr	x9,  [sp, #48]
+	ldr	x10, [sp, #56]
+	ldr	x11, [sp, #64]
+	ldr	x12, [sp, #72]
+	ldr	x17, [sp, #80]
+	ldr	x18, [sp, #88]
+	add	sp, sp, #128
 	ret
 
 /* --------------------------------------------------------------

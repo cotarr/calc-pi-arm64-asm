@@ -646,3 +646,29 @@ part to be used in the reciprocal function.
 
 - Function WordMultiplication split into WordMultiplication and _internal_matrix_multiply
 - Added label of count of digits between paragraphs of 1000 digits.
+- WordMultiplication rewrite of bit alignment of decimal separator and range check.
+- WordMultiplication range check broken, commented out for now (TODO)
+
+### 2021-03-06 - Day 21 (8 days to go until pi day)
+- Created math-recip.s to hold reciprocal calculation
+- Write reciprocal function using Newton Raphson method
+- Added function CountLSBitsDifferent to compare two variables bit by bit
+- Added function CountAbsValDifferenceBits compare absolute value of subtracted variables.
+- RightNBits and LeftNBits allow input more than word size, returning zero work (all bits shifted, previously error)
+
+Reciprocal Loop digit accuracy
+
+```
+Use Newton Raphson method
+D = Demonimator
+x = 1/D ,  make guesses for next Xn
+Xn+1 =  Xn + (Xn*(1-Xn*D))
+
+loops   Verified
+  (n)     Digits
+    5          6
+    6         13
+    7         26
+    8         52
+    9        104
+```

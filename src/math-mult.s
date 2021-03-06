@@ -4,7 +4,7 @@
 	Floating point multiplicatoin routines
 
 	Created:   2021-02-27
-	Last edit: 2021-03-05
+	Last edit: 2021-03-06
 
 ----------------------------------------------------------------
 MIT License
@@ -305,8 +305,11 @@ WordMultiplication:
 	str	x16, [sp, #144]
 	str	x17, [sp, #152]		// LSW Offset address (constant)
 	str	x18, [sp, #160]		// MSW Offset address
+	// Local variables on stack
 	.set MultSignFlag,  168		// save sign flag during main compute
-	.set PostMultShift, 176		// save bit alignment for end
+	.set PostMultShift1, 176	// save bit alignment Factor1 for end
+	.set PostMultShift2, 184	// save bit alignment Factor2 for end
+	.set PostMultShift3, 192	// save bit alignment Product for end
 
 	//
 	// Check ACC for zero, if so return zero result
@@ -371,115 +374,60 @@ WordMultiplication:
 	mov	x1, HAND_WORKA
 	bl	ClearVariable
 
+	//
+	// Alignment for multiplicaiton
+	//
+	// 1 Shift Acc left until M.S. bit is 1
+	// 2 Shift Opr left until M.S. bit is 1
+	// 3 Save position of intended decimal separator after multiplication
+	// 4 Range check integer part big enough to hold number
+	// 5 Multiply
+	// 6 Shift product to proper position of decimal separator
 
-	//
-	// Check for multiply overflow (exceed integer part)
-	//
-	//
-	// x4 contains bit shift needed to stay in range
 	ldr	x4, =IntWSize
 	ldr	x4, [x4]
 	lsl	x4, x4, X64SHIFT4BIT	// Bit's needed for decimal separator alignment
+
 	//
-	// X3 is space to shift ACC left
+	// X3 is bits to shift ACC left, do the shift
 	//
 	mov	x1, HAND_ACC
 	bl	CountLeftZerobits
+	str	x0, [sp, PostMultShift1]
+	bl	LeftNBits
 	mov	x3, x0
 	//
-	// X2 is space to shift OPR left
+	// X2 is bits to shift OPR left, do the shift
 	//
 	mov	x1, HAND_OPR
 	bl	CountLeftZerobits
+	str	x0, [sp, PostMultShift2]
+	bl	LeftNBits
 	mov	x2, x0
 
-	sub	x5, x4, #2		// Safety bits for overflow
-	add	x0, x2, x3		// Total left shift available
-	cmp	x5, x0			// Check for multiplication overflow
-	// -------------------------
-	// Check for overflow
-	// -------------------------
-	b.lo	150f			// If negative, overlow error
+	//
+	// Determine alignment of decimal separator at end of the calculation.
+	//
+	// Subtract (Integer part bit size) - (leading zero count)
+	sub	x0, x4, x3		// decimal separator alignment bits ACC
+	sub	x1, x4, x2		// decimal deparator alignment bits OPR
+	// Add values for both factors to get total post calculation position of decimal separator
+	add	x0, x0, x1		// total decimal separator alignment bits
+	str	x0, [sp, PostMultShift3]// Save for later
+
+/* TODO reange check need accommodate positive and negative
+	//
+	// Range Check, Does ineger part have enough bits to hold the result?
+	//
+	add	x0, x0, #2		// 2 bits for safety
+	subs	x0, x4, x0		// Is integer part big enough to hold this variable?
+	b.hs	140f			// Yes enought space, branch ahead and continue
 	// Fatal error
 	ldr	x0, =MultErrMsg1	// Error message pointer
-	mov	x1, #603		// 12 bit error code
+	mov	x1, #641		// 12 bit error code
 	b	FatalError
-150:
-	// ----------------------------------------------------------
-	// By experimenting, with integer part size set to two 64-bit words,
-	// a post multiplication shift left of 128 bits left is needed.
-	// This is assumed to be related to the size of the integer part.
-	// Pre-multiplication rotation left accomplishes the same thing
-	// but has the advantage of reducing risk of loss of significant
-	// bits on L.S side of variable.
-	// The approach here is to shift OPR, then ACC left as needed
-	// to get 128 bits total while leaving 64 bit safety margin.
-	// Remaining bits (not shifted before mult) will be
-	// shifted left after multiplication is complete.
-	//
-	// If already left at limit, no right shift is done (should?)
-	//---------------------------------------------------
-	//
-	// TODO test bit alignment with size of integer part
-	//      set other than two words
-	//
-	// --------------------------------------------------
-	// Shift OPR, then ACC left
-	//
-	// OPR
-	//
-	// Check OPP zero bits > 64 bit word size
-	subs	x5, x2, BIT_PER_WORD	// OPR available bits - safety word
-	b.lo	170f			// Less than safety word, skip, try ACC
-	cmp	x4, x5			// Requested bits - OPR available
-	b.lo	160f
-	// Case Requested >= OPR availble bits, shift available, then do ACC
-	mov	x0, x5			// available bits is argument
-	mov	x1, HAND_OPR
-	bl	LeftNBits		// shift bits
-	sub	x4, x4, x5		// bits needed by ACC afterwards
-	b.al	170f			// Next shift ACC remaining
-160:
-	// Case Requested < available, shift requested, then done...
-	mov	x0, x4			// requested bits is argument
-	mov	x1, HAND_OPR
-	bl	LeftNBits		// shift bits
-	mov	x4, #0			// requested now zero
-	b.al	190f			// done shifting bits
-170:
-	//
-	// ACC
-	//
-	// Check ACC zero bits > 64 bit word size
-	subs	x5, x3, BIT_PER_WORD	// ACC available bits - safety word
-	b.lo	190f			// Less than safety word, skip,
-	cmp	x4, x5			// Requested bits - ACC available
-	b.lo	180f
-	// Case Requested >= ACC availble bits, shift available
-	mov	x0, x5			// available bits is argument
-	mov	x1, HAND_ACC
-	bl	LeftNBits		// shift bits
-	sub	x4, x4, x5		// bits needed Post multiplication
-	b.al	190f			// Next shift ACC remaining
-180:
-	// Case Requested < available, shift requested, then done...
-	mov	x0, x4			// requested bits is argument
-	mov	x1, HAND_ACC
-	bl	LeftNBits		// shift bits
-	mov	x4, #0			// requested now zero
-	b.al	190f			// done shifting bits
-190:
-	cmp	x4, xzr			// post mult shift must be >= 0
-	b.pl	195f
-	// Fatal error
-	ldr	x0, =MultErrMsg4	// Error message pointer
-	mov	x1, #677		// 12 bit error code
-	b	FatalError
-195:
-
-	// any remiaining bits to shift do after multiplicaiton done
-	str	x4, [sp, PostMultShift]
-
+140:
+*/
 
 //--------------------------------------------------------------------
 // Internal function for matrix multiplication
@@ -487,12 +435,12 @@ WordMultiplication:
 	//
 	// Setup address pointers x11,x12,x13,x14(these will not change)
 	//
-	mov	x1, HAND_ACC
-	mov	x2, HAND_OPR
-	mov	x3, HAND_WORKA
-	bl	set_x11_to_Var_LS_Word_Address
-	bl	set_x12_to_Var_LS_Word_Address
-	bl	set_x13_to_Var_LS_Word_Address
+	mov	x1, HAND_ACC	// (Factor1)
+	mov	x2, HAND_OPR	// (Factor2)
+	mov	x3, HAND_WORKA	// (Product)
+	bl	set_x11_to_Var_LS_Word_Address // (Factor1)
+	bl	set_x12_to_Var_LS_Word_Address // (Factor2)
+	bl	set_x13_to_Var_LS_Word_Address // (Product)
 
 	//
 	// Setup x17 LSW and x18 MSW as constant value address offset
@@ -521,10 +469,34 @@ WordMultiplication:
 	bl	CopyVariable
 
 	//
+	// Restore Factor1 and Factor2 to correct position
+	// This may not be necessary and possibly removed.
+	//
+	mov	x1, HAND_ACC
+	ldr	x0, [sp, PostMultShift1]
+	bl	RightNBits
+	mov	x1, HAND_OPR
+	ldr	x0, [sp, PostMultShift2]
+	bl	RightNBits
+
+	//
 	// Align bits for proper decimal point
-	ldr	x0, [sp, PostMultShift]
+	//
+	ldr	x4, =IntWSize
+	ldr	x4, [x4]
+	lsl	x4, x4, X64SHIFT4BIT	// Bit's needed for decimal separator alignment
+	ldr	x0, [sp, PostMultShift3]
+	subs	x0, x4, x0
+	b.eq	360f
+	b.mi	350f
+	mov	x1, HAND_ACC
+	bl	RightNBits
+	b.al	360f
+350:
+	sub	x0, xzr, x0		// 2's TwosCompliment
 	mov	x1, HAND_ACC
 	bl	LeftNBits
+360:
 	//
 	// Check sign flag and 2's compliment if needed
 	//
@@ -571,9 +543,13 @@ MultErrMsg4:	.asciz	"WordMultiplication: Error: Bit alignment error"
 //
 // DO NOT CALL DIRECTLY This is an internal function.
 //
-// WARNING, registers are NOT preserved.
+//     * * * * * * *
+//   * * * The product variable MUST be set to zero before calling this procedure
+// * * * * * * *
 //
-// * If one of the factors is a small integer, it should be Factor1 at x11 address.
+// If one of the factors is a small integer, it should be Factor1 at x11 address.
+//
+// Registers are NOT preserved.
 //
 // On entry, these are treated as constants
 //	x11 - Factor1 LS Word Address
