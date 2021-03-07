@@ -902,7 +902,7 @@ Command_mmode:
 	bl	IntWordInput		// x0 in binary 64 bit data
 	cmp	x1, #0			// Check for input error
 	b.ne	20f			// yes error
-	and	x0, x0, 0x0C		// mask valid bits
+	and	x0, x0, 0x0E		// mask valid bits
 	ldr	x1, =MathMode
 	str	x0, [x1]
 	// fall through to display
@@ -1012,8 +1012,24 @@ Command_recip:
 	mov	x2, HAND_ACC
 	bl	CopyVariable
 
+	ldr	x0, =MathMode
+	ldr	x0, [x0]
+	tst	x0, #2			// Force bitwise (shift and subtract) method of long division
+	b.ne	10f			// skip
+	//
+	// Fast way, call reciprocal
+	//
 	bl	Reciprocal
+	b.al	20f
+10:
+	//
+	// Bitwise method, call bitwise long divsion
+	//
+	mov	x1, HAND_OPR
+	bl	SetToOne
+	bl	LongDivision
 
+20:
 	mov	x1, HAND_ACC
 	mov	x2, HAND_XREG
 	bl	CopyVariable

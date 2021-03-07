@@ -283,7 +283,7 @@ MsgRegMultInvalid:	.asciz	"Reg64BitMultiplication: Error: Invalid input (Out of 
 ----------------------------------------- */
 
 WordMultiplication:
-	sub	sp, sp, #192		// Reserve 24 words
+	sub	sp, sp, #224		// Reserve 28 words
 	str	x30, [sp, #0]		// Preserve Registers
 	str	x29, [sp, #8]
 	str	x0,  [sp, #16]
@@ -374,6 +374,7 @@ WordMultiplication:
 	mov	x1, HAND_WORKA
 	bl	ClearVariable
 
+/*  --------------- NEW BIT ALIGNMENT CODE --- BROKEN !!! -------------
 	//
 	// Alignment for multiplicaiton
 	//
@@ -415,19 +416,130 @@ WordMultiplication:
 	add	x0, x0, x1		// total decimal separator alignment bits
 	str	x0, [sp, PostMultShift3]// Save for later
 
-/* TODO reange check need accommodate positive and negative
+//TODO reange check need accommodate positive and negative
 	//
 	// Range Check, Does ineger part have enough bits to hold the result?
 	//
 	add	x0, x0, #2		// 2 bits for safety
 	subs	x0, x4, x0		// Is integer part big enough to hold this variable?
-	b.hs	140f			// Yes enought space, branch ahead and continue
+	// Positive right, Negative Left
+	b.hs	140f			// case of positive lots of room to right,
 	// Fatal error
 	ldr	x0, =MultErrMsg1	// Error message pointer
 	mov	x1, #641		// 12 bit error code
 	b	FatalError
 140:
 */
+
+// -------------- TEMPORARILY RESTORE OLD BIT ALIGNMENT CODE -------------------
+	//
+	// Check for multiply overflow (exceed integer part)
+	//
+	//
+	// x4 contains bit shift needed to stay in range
+	ldr	x4, =IntWSize
+	ldr	x4, [x4]
+	lsl	x4, x4, X64SHIFT4BIT	// Bit's needed for decimal separator alignment
+	//
+	// X3 is space to shift ACC left
+	//
+	mov	x1, HAND_ACC
+	bl	CountLeftZerobits
+	mov	x3, x0
+	//
+	// X2 is space to shift OPR left
+	//
+	mov	x1, HAND_OPR
+	bl	CountLeftZerobits
+	mov	x2, x0
+
+	sub	x5, x4, #2		// Safety bits for overflow
+	add	x0, x2, x3		// Total left shift available
+	cmp	x5, x0			// Check for multiplication overflow
+	// -------------------------
+	// Check for overflow
+	// -------------------------
+	b.lo	150f			// If negative, overlow error
+	// Fatal error
+	ldr	x0, =MultErrMsg1	// Error message pointer
+	mov	x1, #603		// 12 bit error code
+	b	FatalError
+150:
+	// ----------------------------------------------------------
+	// By experimenting, with integer part size set to two 64-bit words,
+	// a post multiplication shift left of 128 bits left is needed.
+	// This is assumed to be related to the size of the integer part.
+	// Pre-multiplication rotation left accomplishes the same thing
+	// but has the advantage of reducing risk of loss of significant
+	// bits on L.S side of variable.
+	// The approach here is to shift OPR, then ACC left as needed
+	// to get 128 bits total while leaving 64 bit safety margin.
+	// Remaining bits (not shifted before mult) will be
+	// shifted left after multiplication is complete.
+	//
+	// If already left at limit, no right shift is done (should?)
+	//---------------------------------------------------
+	//
+	// TODO test bit alignment with size of integer part
+	//      set other than two words
+	//
+	// --------------------------------------------------
+	// Shift OPR, then ACC left
+	//
+	// OPR
+	//
+	// Check OPP zero bits > 64 bit word size
+	subs	x5, x2, BIT_PER_WORD	// OPR available bits - safety word
+	b.lo	170f			// Less than safety word, skip, try ACC
+	cmp	x4, x5			// Requested bits - OPR available
+	b.lo	160f
+	// Case Requested >= OPR availble bits, shift available, then do ACC
+	mov	x0, x5			// available bits is argument
+	mov	x1, HAND_OPR
+	bl	LeftNBits		// shift bits
+	sub	x4, x4, x5		// bits needed by ACC afterwards
+	b.al	170f			// Next shift ACC remaining
+160:
+	// Case Requested < available, shift requested, then done...
+	mov	x0, x4			// requested bits is argument
+	mov	x1, HAND_OPR
+	bl	LeftNBits		// shift bits
+	mov	x4, #0			// requested now zero
+	b.al	190f			// done shifting bits
+170:
+	//
+	// ACC
+	//
+	// Check ACC zero bits > 64 bit word size
+	subs	x5, x3, BIT_PER_WORD	// ACC available bits - safety word
+	b.lo	190f			// Less than safety word, skip,
+	cmp	x4, x5			// Requested bits - ACC available
+	b.lo	180f
+	// Case Requested >= ACC availble bits, shift available
+	mov	x0, x5			// available bits is argument
+	mov	x1, HAND_ACC
+	bl	LeftNBits		// shift bits
+	sub	x4, x4, x5		// bits needed Post multiplication
+	b.al	190f			// Next shift ACC remaining
+180:
+	// Case Requested < available, shift requested, then done...
+	mov	x0, x4			// requested bits is argument
+	mov	x1, HAND_ACC
+	bl	LeftNBits		// shift bits
+	mov	x4, #0			// requested now zero
+	b.al	190f			// done shifting bits
+190:
+	cmp	x4, xzr			// post mult shift must be >= 0
+	b.pl	195f
+	// Fatal error
+	ldr	x0, =MultErrMsg4	// Error message pointer
+	mov	x1, #677		// 12 bit error code
+	b	FatalError
+195:
+
+	// any remiaining bits to shift do after multiplicaiton done
+	str	x4, [sp, PostMultShift3]
+// ------------- END OLD WAY ----------------
 
 //--------------------------------------------------------------------
 // Internal function for matrix multiplication
@@ -468,6 +580,7 @@ WordMultiplication:
 	mov	x2, HAND_ACC
 	bl	CopyVariable
 
+/* ------------------ NEW BIT ALIGNMENT --- BROKEN!!! ---------
 	//
 	// Restore Factor1 and Factor2 to correct position
 	// This may not be necessary and possibly removed.
@@ -482,11 +595,13 @@ WordMultiplication:
 	//
 	// Align bits for proper decimal point
 	//
+
 	ldr	x4, =IntWSize
 	ldr	x4, [x4]
 	lsl	x4, x4, X64SHIFT4BIT	// Bit's needed for decimal separator alignment
 	ldr	x0, [sp, PostMultShift3]
 	subs	x0, x4, x0
+	// Positive Right, negative left
 	b.eq	360f
 	b.mi	350f
 	mov	x1, HAND_ACC
@@ -497,6 +612,16 @@ WordMultiplication:
 	mov	x1, HAND_ACC
 	bl	LeftNBits
 360:
+*/
+
+// ------ RESTORE OLD WAY TEMPORARILY ---------
+	// Align bits for proper decimal point
+	ldr	x0, [sp, PostMultShift3]
+	mov	x1, HAND_ACC
+	bl	LeftNBits
+// ----------END OLD WAY ----------------------
+
+
 	//
 	// Check sign flag and 2's compliment if needed
 	//
@@ -529,7 +654,7 @@ WordMultiplicationExit:
 	ldr	x16, [sp, #144]
 	ldr	x17, [sp, #152]
 	ldr	x18, [sp, #160]
-	add	sp, sp, #192
+	add	sp, sp, #224
 	ret
 
 

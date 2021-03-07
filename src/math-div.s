@@ -4,7 +4,7 @@
 	Floating point division routines
 
 	Created:   2021-02-15
-	Last edit: 2021-03-02
+	Last edit: 2021-03-06
 
 ----------------------------------------------------------------
 MIT License
@@ -63,9 +63,18 @@ DivideVariable:
 
 	ldr	x0, =MathMode
 	ldr	x0, [x0]
-	tst	x0, #8			// disable resister mult
+
+	tst	x0, #2			// Force bitwise (shift and subtract) method of long division
+	b.ne	200f			// skip
+
+	tst	x0, #8			// Disable short division: Denominator / (32 bit divisor)
 	b.ne	100f			// skip
 
+	//
+	// First case, if denominator is only 32 bit integer,
+	// The division can be similified to 32 bit rolling division
+	// Apply mask to see if this is possible
+	//
 	bl	set_x9_to_Int_LS_Word_Addr_Offset
 	mov	x8, x9
 	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
@@ -88,7 +97,7 @@ DivideVariable:
 	ldr	x0, =31f
 	ldr	x0, [x0]
 	tst	x0, x1			// is it 32 bits
-	b.ne	100f			// No go do long division
+	b.ne	100f			// No go do full accuracy division
 	//
 	// Case of faster 32 bit division
 	//
@@ -105,10 +114,21 @@ DivideVariable:
 
 100:
 	//
+	// Second case, it is faster to calculate reciprocal using Newton Raphson
+	// method than full long division. Replace bitwise long division
+	// with reciprocal
+	//
+	// -------------------------
+	bl	Reciprocal		// ACC = (1/ACC)
+	bl	WordMultiplication	// ACC = OPR * ACC
+	b.al	999f
+	// -------------------------
+200:
+	//
 	// Default, do full precision long division
 	//
 	// -------------------------
-	bl	LongDivision
+	bl	LongDivision		// ACC = OPR / ACC
 	// -------------------------
 
 999:
@@ -275,7 +295,7 @@ MsgRegDivByZero:	.asciz	"Reg32BitDivision: Error: Division by zero"
 
 /*-----------------------------------------
 
-  Long_Division
+  LongDivision
 
   This is a bitwise long division.
   It is a very slow method

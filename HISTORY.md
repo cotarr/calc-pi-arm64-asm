@@ -634,6 +634,7 @@ Words     (n)    Digits    Digits
 
 I have decided to try writing a reciprocal function.
 Reciprocal is much faster than long division.
+Compare  ACC = OPR / ACC   verses  ACC = OPR * Reciprocal(ACC)
 This may have an issue, because number must be
 shifted into the range 0.5 to 1.0 for the reciprocal
 to work. This is complicated because I am using
@@ -672,3 +673,11 @@ loops   Verified
     8         52
     9        104
 ```
+After pushing I realize the WordMultiplictaion is broken, with some fault in the
+new bit alignment code. Temporarily I copy/paste the old bit alignment code
+into WordMultiplication until I can look at it further.
+
+- Fixed stack push/pop range error in WordMultiplication (not related to alignment problem)
+- Added mmode bit 0x02 - Force long division, else multiply reciprocal in place of divide.
+- Function recip will switch between long division and reciprocal with mmode bit 0x02
+- Some testing, arithmetic seems working (with old bit alignment code in multiply)

@@ -292,6 +292,7 @@ Help_logoff:
 Help_mmode:
 	.ascii	"Usage: mmode <optional integer bit pattern>\n\n"
 	.ascii	"Descripton: Without argument, mmode displays MathMode variable.\n"
+	.ascii	"   2   (0x04)  Force bitwise long division (shift and subtract)\n"
 	.ascii	"   4   (0x04)  Disable: ARM 64 bit MUL/UMULH matrix multiplication\n"
 	.ascii	"   8   (0x08)  Disable: ARM 32 bit UDIV/MSUB matrix division\n"
 	.byte	0
