@@ -5,3 +5,4 @@ src/*.map
 push*
 pull*
 NOTES.s
+/src/*.temp

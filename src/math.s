@@ -221,14 +221,15 @@ FctLSW_WdPtr_Optimized:	.skip	BYTE_PER_WORD
 	.align 4
 // -----------------------------------------------------
 
-	.include "math-subr.s"
-	.include "math-rotate.s"
-	.include "math-mult.s"
-	.include "math-div.s"
-	.include "math-recip.s"
-	.include "math-input.s"
-	.include "math-output.s"
 	.include "math-debug.s"
+	.include "math-div.s"
+	.include "math-input.s"
+	.include "math-mult.s"
+	.include "math-output.s"
+	.include "math-recip.s"
+	.include "math-rotate.s"
+	.include "math-sqrt.s"
+	.include "math-subr.s"
 
 //--------------------------------------------------------------
 // On program start, initialize the variable space

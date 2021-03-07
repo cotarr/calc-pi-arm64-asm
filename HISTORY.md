@@ -681,3 +681,5 @@ into WordMultiplication until I can look at it further.
 - Added mmode bit 0x02 - Force long division, else multiply reciprocal in place of divide.
 - Function recip will switch between long division and reciprocal with mmode bit 0x02
 - Some testing, arithmetic seems working (with old bit alignment code in multiply)
+
+### 2021-03-07 - Day 22 (7 days to go until pi day)

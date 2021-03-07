@@ -4,7 +4,7 @@
  This module contains user help
 
 	Created:   2021-02-19
-	Last Edit: 2021-03-06
+	Last Edit: 2021-03-07
 
 ----------------------------------------------------------------
 MIT License
@@ -164,6 +164,10 @@ Help_Table:
 	.ascii	"sigfigs"
 	.byte	0
 	.quad	Help_sigfigs
+
+	.ascii	"sqrt"
+	.byte	0,0,0,0
+	.quad	Help_sqrt
 
 	.ascii	"xy"
 	.byte	0,0,0,0,0,0
@@ -338,6 +342,15 @@ Help_rup:
 	.ascii	"Usage: rup\n\n"
 	.ascii	"Stack Roll up: X-->Y, Y-->Z, Z-->T, T-->X\n"
 	.byte	0
+
+
+
+Help_sqrt:
+	.ascii	"Usage: sqrt\n\n"
+	.ascii	"Calculate the square root of XReg\n"
+	.ascii	"Stack not rotated after sqrt(XReg)\n"
+	.byte	0
+
 
 
 Help_xy:

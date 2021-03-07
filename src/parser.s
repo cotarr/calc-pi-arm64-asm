@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-03-06
+	Last edit: 2021-03-07
 
 	PrintCommandList
 	ParseCmd
@@ -181,6 +181,10 @@ Command_Table:
 	.ascii	"sigfigs"
 	.byte	0
 	.quad	Command_sigfigs
+
+	.ascii	"sqrt"
+	.byte	0,0,0,0
+	.quad	Command_sqrt
 
 	.ascii	"test"
 	.byte	0,0,0,0
@@ -1109,6 +1113,20 @@ Command_sigfigs:
 60:
 	.asciz	"\nCommand Parser: sigfigs command invalid argument\n\n"
 	.align 4
+
+Command_sqrt:
+	mov	x1, HAND_XREG
+	mov	x2, HAND_ACC
+	bl	CopyVariable
+
+	bl	SquareRoot
+
+	mov	x1, HAND_ACC
+	mov	x2, HAND_XREG
+	bl	CopyVariable
+
+	bl	PrintResult
+	b	ParseCmd
 
 Command_version:
 	ldr	x0,=versionString
