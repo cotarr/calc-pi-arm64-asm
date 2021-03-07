@@ -74,7 +74,7 @@ SOFTWARE.
 .set	FCT_WSIZE, 	0x10	// 193 dig in fraction part
 //.set	FCT_WSIZE, 	0x40
 // .set	FCT_WSIZE, 	0x400	// 19680 fraction part
-//.set	FCT_WSIZE, 	0x40000	// 5050407 fractio part
+.set	FCT_WSIZE, 	0x40000	// 5050407 fractio part
 
 .set	VAR_WSIZE,	(INT_WSIZE + FCT_WSIZE)
 //--------------------------------------------------------------------

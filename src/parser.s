@@ -1115,18 +1115,45 @@ Command_sigfigs:
 	.align 4
 
 Command_sqrt:
-	mov	x1, HAND_XREG
-	mov	x2, HAND_ACC
-	bl	CopyVariable
 
+	//
+	// Note:
+	// This function pulls data from XReg automatically
+	// Reg0 is used, then cleared in this function.
+	//
+	//
+	// Check and make error if input not positive non-zero number.
+	//
+	mov	x1, HAND_XREG
+	bl	TestIfZero
+	cbnz	x0, 20f
+	mov	x1, HAND_XREG
+	bl	TestIfZero
+	cbnz	x0, 20f
+	b.al	30f
+20:	ldr	x0, =50f		// get error message
+	bl	StrOut
+	b	ParseCmd
+30:
 	bl	SquareRoot
 
 	mov	x1, HAND_ACC
 	mov	x2, HAND_XREG
 	bl	CopyVariable
 
+	mov	x1, HAND_REG0
+	bl	ClearVariable
+
 	bl	PrintResult
+	ldr	x0, =40f
+	bl	StrOut
 	b	ParseCmd
+40:
+.asciz	"Note: Reg0 has been cleared by this function.\n\n"
+50:
+.asciz	"\nError: XReg must be positive non-zero number\n\n"
+	.align	4
+
 
 Command_version:
 	ldr	x0,=versionString

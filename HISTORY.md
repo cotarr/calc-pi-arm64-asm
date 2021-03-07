@@ -683,3 +683,18 @@ into WordMultiplication until I can look at it further.
 - Some testing, arithmetic seems working (with old bit alignment code in multiply)
 
 ### 2021-03-07 - Day 22 (7 days to go until pi day)
+- Added math-sqrt.s for square root calculation
+- Added command sqrd to take square root of XReg
+- 
+```
+   Square root uses successive approximations
+   X(i) = last guess   X(i+1) = next guess  A = input number
+   X(i+1) =  [  (A / X(i))  + (X(i) ] / 2
+
+Digits   Seconds
+ 10000     1.262
+ 20000     6.324
+ 40000	  24.468
+100000	 180.340
+200000	 720.308
+```

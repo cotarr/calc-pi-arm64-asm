@@ -54,8 +54,8 @@ Calculate pi, on a pi, by pi-day.
 + - * / . c.e chs clrstk clrx cmdlist
 D.vars D.fill D.ofst enter exit
 help hex log logoff mmode prac print
-q quit rdown recip rup sf sigfigs test
-version xy
+q quit rdown recip rup sf sigfigs sqrt
+test version xy
 ```
 
 ## First benchmark 2021-03-04 Calculation of e
