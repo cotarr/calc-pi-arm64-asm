@@ -88,6 +88,14 @@ SquareRoot:
 	mov	x1, HAND_REG0
 	bl	SetToOne
 
+	//
+	// Redice Accuracy for early calculation loops
+	//
+	ldr	x0, =MinimumWord
+	ldr	x0, [x0]
+
+	bl	Set_Temporary_Word_Size
+
 Sqrt_Loop:
 	//
 	// Divide ACC = XREG / REG0
@@ -116,15 +124,34 @@ Sqrt_Loop:
 	mov	x1, HAND_ACC
 	bl	Right1Bit
 	//
-	// Check difference guess verses this result
+	// Check difference between guess verses this result
 
 	mov	x1, HAND_REG0
 	mov	x2, HAND_ACC
 	bl	CountAbsValDifferenceBits
 	bl	PrintWordB10
+	cmp	x0, #96			// Is difference significant?
+	b.hs	80f			// Yes loop again
+	//
+	// If no, then see if accuracy can be increased?
+	//
+	bl	Grab_Reduced_Accuracy	// x1 = static x2 = optimized
+	cmp	x1, x2			// Full accuracy now?
+	b.eq	999f			// yes, done
+
+	lsl	x0, x2, #1		// Double words
+	cmp	x1, x0			// new value below maximum?
+	b.hs	70f			// yes, below keep
+	mov	x0, x1			// no, use maximum instead
+70:
+	bl	Set_Temporary_Word_Size
+80:
+	mov	x0, #0x09		// ascii tab
+	bl	CharOut
+	bl	Grab_Reduced_Accuracy
+	mov	x0, x2
+	bl	PrintWordB10
 	bl	CROut
-	cmp	x0, #96
-	b.lo	999f
 	//
 	// Save result as next guess
 	//
@@ -135,6 +162,8 @@ Sqrt_Loop:
 	b.al	Sqrt_Loop		// Loop back (Always taken)
 
 999:
+	bl	Restore_Full_Accuracy
+
 	ldr	x30, [sp, #0]		// Restore registers
 	ldr	x29, [sp, #8]
 	ldr	x0,  [sp, #16]

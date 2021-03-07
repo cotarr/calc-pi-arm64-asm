@@ -685,7 +685,7 @@ into WordMultiplication until I can look at it further.
 ### 2021-03-07 - Day 22 (7 days to go until pi day)
 - Added math-sqrt.s for square root calculation
 - Added command sqrd to take square root of XReg
-- 
+
 ```
    Square root uses successive approximations
    X(i) = last guess   X(i+1) = next guess  A = input number
@@ -694,7 +694,27 @@ into WordMultiplication until I can look at it further.
 Digits   Seconds
  10000     1.262
  20000     6.324
- 40000	  24.468
-100000	 180.340
-200000	 720.308
+ 40000    24.468
+100000   180.340
+200000   720.308
+```
+
+- Added functions Set_Temporary_Word_Size and Restore_Full_Accuracy
+- In core arithmetic utilities, replace "... _Static" with "... _Optimized"
+
+In order to speed up the calculation, the variables referring to the size of the
+floating point variable and the pointer to the least significant word
+are set to temporary values during parts of the calculation were full
+accuracy is not needed. In the case of square root, the size of the
+variable is set to 8 words, then increased by doubling the size at each increase.
+This has reduced the time for the square root as follows:
+
+```
+Digits    Seconds
+  10000     0.575
+  20000     2.263
+  40000     9.378
+ 100000    48.134
+ 200000   202.544
+1000000  4238.884
 ```

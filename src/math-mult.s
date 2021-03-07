@@ -4,7 +4,7 @@
 	Floating point multiplicatoin routines
 
 	Created:   2021-02-27
-	Last edit: 2021-03-06
+	Last edit: 2021-03-07
 
 ----------------------------------------------------------------
 MIT License
@@ -68,8 +68,8 @@ MultiplyVariable:
 
 	bl	set_x9_to_Int_LS_Word_Addr_Offset
 	mov	x8, x9
-	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
+	bl	set_x10_to_Word_Size_Optimized
 
 	mov	x1, HAND_ACC
 	bl	set_x11_to_Var_LS_Word_Address
@@ -182,8 +182,8 @@ Reg64BitMultiplication:
 //       [hi ] <-- last word
 //  [   ][   ][   ] <--- <--- <--- 1 extra for decial point align
 
-	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
+	bl	set_x10_to_Word_Size_Optimized
 	ldr	x1, [sp, #24]		// Source (factor) handle
 	bl	set_x11_to_Var_LS_Word_Address
 	ldr	x2, [sp, #32]		// Source (factor) handle
@@ -557,7 +557,7 @@ WordMultiplication:
 	//
 	// Setup x17 LSW and x18 MSW as constant value address offset
 	//
-	bl set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	bl set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
 	mov	x17, x9			// save LSW offset in x17
 	bl set_x9_to_Int_MS_Word_Addr_Offset
 	mov	x18, x9			// save MSW offset in x18

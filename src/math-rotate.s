@@ -4,7 +4,7 @@
 	Logical shift bit, bytes and words
 
 	Created:   2021-02-10
-	Last edit: 2021-03-05
+	Last edit: 2021-03-07
 
 ----------------------------------------------------------------
 MIT License
@@ -64,7 +64,7 @@ CountLeftZerobits:
 	ldr	x16, [x16]		// 0x8000000000000000
 	mov	x17, #0			// bit counter
 
-	bl	set_x10_to_Word_Size_Static	// Word counter
+	bl	set_x10_to_Word_Size_Optimized	// Word counter
 
 	// Argument in x1 variable handle number
 	bl	set_x11_to_Int_MS_Word_Address	// Top word address
@@ -118,10 +118,10 @@ Right1Bit:
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
 
-	bl	set_x10_to_Word_Size_Static_Minus_1
+	bl	set_x10_to_Word_Size_Optimized_Minus_1
 
 	// Argument x1 contains variable handle number
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 
 	// fetch word to setup loop entry
 	ldr	x1, [x11]		// x1 is first word to shift right
@@ -171,7 +171,7 @@ Left1Bit:
 	str	x10, [sp, #48]		// word counter
 	str	x11, [sp, #56]		// source 1 address
 
-	bl	set_x10_to_Word_Size_Static_Minus_1
+	bl	set_x10_to_Word_Size_Optimized_Minus_1
 
 	// Argument x1 is variable handle number
 	bl	set_x11_to_Int_MS_Word_Address
@@ -221,10 +221,10 @@ Right64Bits:
 	str	x10, [sp, #32]		// word counter
 	str	x11, [sp, #40]		// pointer address
 
-	bl	set_x10_to_Word_Size_Static_Minus_1
+	bl	set_x10_to_Word_Size_Optimized_Minus_1
 
 	// Argument x1 is variable handle number
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 10:
 	ldr	x0, [x11, BYTE_PER_WORD] // Load adjacent word on left
 	str	x0, [x11], BYTE_PER_WORD // Save at pointer location, then inc pointer
@@ -260,7 +260,7 @@ Left64Bits:
 	str	x10, [sp, #32]		// word counter
 	str	x11, [sp, #40]		// pointer address
 
-	bl	set_x10_to_Word_Size_Static_Minus_1
+	bl	set_x10_to_Word_Size_Optimized_Minus_1
 
 	// Argument x1 is variable handle number
 	bl	set_x11_to_Int_MS_Word_Address
@@ -320,10 +320,10 @@ RightNBits:
 	// -------------------------------------------------------
 	// Setup word size counter and varaible address pointer
 	// -------------------------------------------------------
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 
 	// Argument x1 contains variable handle number
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 
 	// -------------------------------------------------
 	// Case #1 - Zero bit shift requested (x15 = 0)
@@ -524,7 +524,7 @@ LeftNBits:
 	// -------------------------------------------------------
 	// Setup word size counter and varaible address pointer
 	// -------------------------------------------------------
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 
 	// Argument x1 contains variable handle number
 	bl	set_x11_to_Int_MS_Word_Address

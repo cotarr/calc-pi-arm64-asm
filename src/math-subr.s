@@ -3,7 +3,7 @@
 	Include file for math.s
 
 	Created:   2021-02-19
-	Last edit: 2021-03-06
+	Last edit: 2021-03-07
 
 ----------------------------------------------------------------
 MIT License
@@ -62,10 +62,10 @@ ClearVariable:
 	str	x10, [sp, #32]		// word counter
 	str	x11, [sp, #40]		// source 1 address
 
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 
 	// Argument in x1 is variable handle (preserved)
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 10:
 	// Perform the fill using 64 bit words
 	str	xzr, [x11], BYTE_PER_WORD
@@ -167,7 +167,7 @@ CopyVariable:
 	// setup offset index to address within variable
 	bl	set_x9_to_Int_MS_Word_Addr_Offset
 
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 
 	// Argument x1 contains variable handle number
 	bl	set_x11_to_Var_LS_Word_Address
@@ -218,7 +218,7 @@ ExchangeVariable:
 	// setup offset index to address within variable
 	bl	set_x9_to_Int_MS_Word_Addr_Offset
 
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 
 	// Argument x1 contains variable handle number
 	bl	set_x11_to_Var_LS_Word_Address
@@ -313,9 +313,9 @@ TestIfZero:
 	// This does an "on the fly" 2's compliment
 	//
 	// Argument x1 contains variable handle
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 
 	mov	x1, #1			// sign flag, default 1 for zero
 
@@ -335,10 +335,10 @@ TestIfZero:
 // Case of Positive
 // --------------------
 50:
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 
 	// Argument x1 variable handl enumber
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 
 	mov	x1, #1			// default flag 1 = zero
 60:
@@ -391,7 +391,7 @@ CountLSBitsDifferent:
 	str	x17, [sp, #72]		// source 1 address
 	str	x18, [sp, #80]		// source 1 address
 
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 
 	// Argument x1 contains variable handle
 	bl	set_x11_to_Int_MS_Word_Address
@@ -431,7 +431,7 @@ CountLSBitsDifferent:
 	//
 	// Subtract (total bits) - (same bits) to get different bits
 	//
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 	lsl	x10, x10, X64SHIFT4BIT	// bits per variable
 	sub	x0, x10, x17		// x0 = bits different
 	//
@@ -490,8 +490,8 @@ CountAbsValDifferenceBits:
 	// Argument x2 contains variable handle
 	bl	set_x12_to_Var_LS_Word_Address
 
-	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
+	bl	set_x10_to_Word_Size_Optimized
 	mov	x17, #0			// init counters
 	mov	x18, #0			// init counters
 
@@ -520,8 +520,8 @@ CountAbsValDifferenceBits:
 	b.al	800f
 
 500:
-	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
+	bl	set_x10_to_Word_Size_Optimized
 	mov	x17, #0			// init counters
 	mov	x18, #0			// init counters
 
@@ -608,13 +608,13 @@ TwosCompliment:
 
 	bl	set_x9_to_Var_LS_Word_Addr_Offset
 
-	bl	set_x10_to_Word_Size_Static_Minus_1
+	bl	set_x10_to_Word_Size_Optimized_Minus_1
 
 	// Argument x1 contains variable handle
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 
 	// Argument x2 contains variable handle
-	bl	set_x12_to_Fct_LS_Word_Address_Static
+	bl	set_x12_to_Fct_LS_Word_Address_Optimized
 
 	// First iteration does not subtract carry
 	ldr	x0, [x11, x9]		// x0 is first word
@@ -666,16 +666,16 @@ AddVariable:
 
 	bl	set_x9_to_Var_LS_Word_Addr_Offset
 
-	bl	set_x10_to_Word_Size_Static_Minus_1
+	bl	set_x10_to_Word_Size_Optimized_Minus_1
 
 	// Argument x1 contains variable handle
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 
 	// Argument x2 contains variable handle
-	bl	set_x12_to_Fct_LS_Word_Address_Static
+	bl	set_x12_to_Fct_LS_Word_Address_Optimized
 
 	// Argument x3 contains variable handle
-	bl	set_x13_to_Fct_LS_Word_Address_Static
+	bl	set_x13_to_Fct_LS_Word_Address_Optimized
 
 	// First iteration does not add carry
 	ldr	x1, [x11, x9]		// Source 1 word
@@ -736,16 +736,16 @@ SubtractVariable:
 	// This is a zero value
 	bl	set_x9_to_Var_LS_Word_Addr_Offset
 
-	bl	set_x10_to_Word_Size_Static_Minus_1
+	bl	set_x10_to_Word_Size_Optimized_Minus_1
 
 	// Argument x1 contains variable handle
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 
 	// Argument x2 contains variable handle
-	bl	set_x12_to_Fct_LS_Word_Address_Static
+	bl	set_x12_to_Fct_LS_Word_Address_Optimized
 
 	// Argument x3 contains variable handle
-	bl	set_x13_to_Fct_LS_Word_Address_Static
+	bl	set_x13_to_Fct_LS_Word_Address_Optimized
 
 	// First iteration does not add carry
 	ldr	x1, [x11, x9]		// Source 1 word
@@ -806,7 +806,7 @@ MultiplyByTen:
 	str	x12, [sp, #72]
 
 	// Argument x1 contains variable handle number
-	bl	set_x11_to_Fct_LS_Word_Address_Static
+	bl	set_x11_to_Fct_LS_Word_Address_Optimized
 	add	x11, x11, #4		// offset for half word
 
 	// set x10 to count of words -1

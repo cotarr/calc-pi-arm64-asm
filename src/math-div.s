@@ -4,7 +4,7 @@
 	Floating point division routines
 
 	Created:   2021-02-15
-	Last edit: 2021-03-06
+	Last edit: 2021-03-07
 
 ----------------------------------------------------------------
 MIT License
@@ -77,8 +77,8 @@ DivideVariable:
 	//
 	bl	set_x9_to_Int_LS_Word_Addr_Offset
 	mov	x8, x9
-	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
+	bl	set_x10_to_Word_Size_Optimized
 
 	mov	x1, HAND_ACC
 	bl	set_x11_to_Var_LS_Word_Address
@@ -227,7 +227,7 @@ Reg32BitDivision:
 	//
 	// set x10 to (count of 32 bit half-words) -1
 	//
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 	lsl	x10, x10, #1		// Multiply two word32 per word64
 	sub	x10, x10, #1		// Count - 1
 
@@ -395,7 +395,7 @@ LongDivision:
 	//
 	// Calculate number of bits-1 in number
 	//
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x10_to_Word_Size_Optimized
 	lsl	x16, x10, X8SHIFT3BIT	// 8 bytes per word
 	lsl	x16, x16, X8SHIFT3BIT	// 8 bits per byte
 	sub	x16, x16, #1		// Don't use sign bit for data
@@ -509,8 +509,8 @@ LongDivision:
 // =================================================================================
 
 loop55:
-	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static // Offset to LS Word
-	bl	set_x10_to_Word_Size_Static // Count of words
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized // Offset to LS Word
+	bl	set_x10_to_Word_Size_Optimized // Count of words
 	//
 	//  Loop through words. For each Word
 	//       WorkA[i] = OPR[i] - ACC[i]
@@ -536,8 +536,8 @@ loop55:
 	ldr	x0, [x0]
 	tst	x1, x0			// Is it negative?
 	b.ne	skip65			// negative skip
-	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
-	bl	set_x10_to_Word_Size_Static
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
+	bl	set_x10_to_Word_Size_Optimized
 300:
 	ldr	x0, [x13, x9]		// get 64 bit word from WORKA
 	str	x0, [x12, x9]		// store in OPR
@@ -560,7 +560,7 @@ skip65:
 	tst	x1, x0			// Is it negative?
 	b.ne	skip66			// negative skip
 
-	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	bl	set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
 	ldr	x0, [x14, x9]		// get LS word from WORKB
 	orr	x0, x0, #1		// set LS bit of LS Word
 	str	x0, [x14, x9]		// Store WORKB

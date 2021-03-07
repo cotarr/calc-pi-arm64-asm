@@ -4,7 +4,7 @@
 	Calculate Reciprocal
 
 	Created:   2021-03-05
-	Last edit: 2021-03-06
+	Last edit: 2021-03-07
 
 ----------------------------------------------------------------
 MIT License
@@ -206,7 +206,7 @@ Reciprocal:
 	//
 	// Setup x17 LSW and x18 MSW as constant value address offset
 	//
-	bl set_x9_to_Fct_LS_Word_Addr_Offset_Static
+	bl set_x9_to_Fct_LS_Word_Addr_Offset_Optimized
 	mov	x17, x9			// save LSW offset in x17
 	bl set_x9_to_Int_MS_Word_Addr_Offset
 	mov	x18, x9			// save MSW offset in x18

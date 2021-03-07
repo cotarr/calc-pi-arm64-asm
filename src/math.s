@@ -36,6 +36,9 @@ SOFTWARE.
 	// Functions
 	.global	FP_Initialize
 	.global	Set_Word_Size
+	.global	Set_Temporary_Word_Size
+	.global Restore_Full_Accuracy
+	.global	Grab_Reduced_Accuracy
 
 	// Data Tables
 	.global RegAddTable
@@ -287,21 +290,20 @@ Set_Word_Size:
 	str	x0,  [sp, #16]
 	str	x10, [sp, #24]
 	str	x11, [sp, #32]
-	str	x17, [sp, #40]		// VAR_MSW_OFST
 //
-// [Word_Size_Static] is variable for number 32 bit words in mantissa
+// Word_size_static is number of 64 bit words in variable
 //
 	ldr	x11, =Word_Size_Static		// [Word_Size_Static] number 64 bit words
 	str	x0, [x11]
 	ldr	x11, =Word_Size_Optimized	// Default [Word_Size_Optimized] value
 	str	x0, [x11]
 //
-// [FctLSW_WdPtr_Static] is variable to offset to L.S. Word in mantissa
+// FctLSW_WdPtr_Static is variable to word count offset to L.S. Word in mantissa
 //
 	ldr	x10, =IntMSW_WdPtr	// Offset Top Word in Integer part
 	ldr	x10, [x10]
 	add	x10, x10, #1		// Point 1 past
-	sub	x10, x10, x0 // subtrat word size
+	sub	x10, x10, x0		// subtrat word size
  	ldr	x11, =FctLSW_WdPtr_Static
 	str	x10, [x11]
 	ldr	x11, =FctLSW_WdPtr_Optimized
@@ -312,8 +314,98 @@ Set_Word_Size:
 	ldr	x0,  [sp, #16]
 	ldr	x10,  [sp, #24]
 	ldr	x11,  [sp, #32]
-	ldr	x17,  [sp, #40]
 	add	sp, sp, #64
+	ret
+
+/*--------------------------------------------------------------
+  Set Temporary Number of Words Variables
+
+  Input:   x0 - Number of 64 bit words in mantissa
+
+  Output:  none
+
+--------------------------------------------------------------*/
+Set_Temporary_Word_Size:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x10, [sp, #24]
+	str	x11, [sp, #32]
+//
+// Contains the number 64 bit words in variable
+//
+	ldr	x11, =Word_Size_Optimized // Default [Word_Size_Optimized] value
+	str	x0, [x11]
+//
+// FctLSW_WdPtr_Static is variable to word count offset to L.S. Word in mantissa
+//
+	ldr	x10, =IntMSW_WdPtr	// Offset Top Word in Integer part
+	ldr	x10, [x10]
+	add	x10, x10, #1		// Point 1 past
+	sub	x10, x10, x0 		// subtrat word size
+	ldr	x11, =FctLSW_WdPtr_Optimized
+	str	x10, [x11]
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x10,  [sp, #24]
+	ldr	x11,  [sp, #32]
+	add	sp, sp, #64
+	ret
+
+/*--------------------------------------------------------------
+  Restore Optimized accuracy configuration from Static Config
+
+  Input:   none
+
+  Output:  none
+
+--------------------------------------------------------------*/
+Restore_Full_Accuracy:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x10, [sp, #24]
+	str	x11, [sp, #32]
+	//
+	// Copy Static values to Optimized Values
+	//
+	ldr	x11, =Word_Size_Static
+	ldr	x0, [x11]
+	ldr	x11, =Word_Size_Optimized
+	str	x0, [x11]
+
+	ldr	x11, =FctLSW_WdPtr_Static
+	ldr	x0, [x11]
+	ldr	x11, =FctLSW_WdPtr_Optimized
+	str	x0, [x11]
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x10,  [sp, #24]
+	ldr	x11,  [sp, #32]
+	add	sp, sp, #64
+	ret
+
+/* -----------------------------------------
+  Input: none
+
+  Output:  x1 = Word_Size_Static
+           x2 = Word_Size_Optimized
+-------------------------------------------*/
+Grab_Reduced_Accuracy:
+	stp	x29, x30, [sp, -16]!	// preserve return address
+
+	ldr	x1, =Word_Size_Static
+	ldr	x1, [x1]
+	ldr	x2, =Word_Size_Optimized
+	ldr	x2, [x2]
+
+	ldp	x29, x30, [sp], 16	// restore return address
 	ret
 
 // ---------------------------------------------

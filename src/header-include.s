@@ -84,7 +84,7 @@ SOFTWARE.
 .set	GUARDWORDS,	4
 .set	GUARDBYTES,	(GUARDWORDS*BYTE_PER_WORD)
 
-.set	MINIMUM_WORD,	2+GUARDWORDS			//**** Includes GUARD Bytes ****
+.set	MINIMUM_WORD,	INT_WSIZE + 2 + GUARDWORDS		//**** Includes GUARD Bytes ****
 
 .set	INIT_SIG_DIG,	60
 .set	INIT_EXT_DIG,	10
