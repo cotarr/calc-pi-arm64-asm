@@ -4,7 +4,7 @@
  This module contains user help
 
 	Created:   2021-02-19
-	Last Edit: 2021-03-07
+	Last Edit: 2021-03-08
 
 ----------------------------------------------------------------
 MIT License
@@ -79,6 +79,14 @@ Help_Table:
 	.ascii	"c.e"
 	.byte	0,0,0,0,0
 	.quad	Help_c_e
+
+	.ascii	"c.pi"
+	.byte	0,0,0,0
+	.quad	Help_c_pi
+
+	.ascii	"c.pi.ch"
+	.byte	0
+	.quad	Help_c_pi_ch
 
 	.ascii	"clrstk"
 	.byte	0,0
@@ -219,6 +227,15 @@ Help_c_e:
 	.ascii	"Description: Calculation of the constant e.\n"
 	.ascii	"The calculation is performed by the summation of 1/n!.\n"
 	.ascii	"Division loop calculates 1/n using ARM register 64/32 bit udiv/msub.\n"
+	.byte	0
+
+Help_c_pi:
+Help_c_pi_ch:
+	.ascii	"Usage: c.pi\n"
+	.ascii	"Usage: c.pi.ch\n\n"
+	.ascii	"Description: Calculation of the constant pi\n"
+	.ascii	"The calculation is performed by the summation \n"
+	.ascii	"involving the Chudnovsky Formula\n"
 	.byte	0
 
 Help_chs:

@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-03-07
+	Last edit: 2021-03-08
 
 	PrintCommandList
 	ParseCmd
@@ -88,6 +88,14 @@ Command_Table:
 	.ascii	"c.e"
 	.byte	0,0,0,0,0
 	.quad	Command_c_e
+
+	.ascii	"c.pi"
+	.byte	0,0,0,0
+	.quad	Command_c_pi
+
+	.ascii	"c.pi.ch"
+	.byte	0
+	.quad	Command_c_pi_ch
 
 	.ascii	"chs"
 	.byte	0,0,0,0,0
@@ -758,6 +766,42 @@ Command_c_e:
 
 	bl	PrintResult
 	b	ParseCmd
+
+//
+// Calculate pi
+//
+Command_c_pi:
+//
+// Calculate pi Chudnovsky Formula
+//
+Command_c_pi_ch:
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_TREG
+	bl	CopyVariable
+
+	mov	x1, HAND_YREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	mov	x0, #10005
+	mov	x1, HAND_XREG
+	bl	Load64BitNumber
+
+//	bl	SquareRoot
+
+//	mov	x1, HAND_ACC
+//	mov	x2, HAND_XREG
+//	bl	CopyVariable
+
+	bl	Function_calc_pi_ch
+
+	bl	PrintResult
+	b	ParseCmd
+
 
 //
 //

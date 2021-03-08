@@ -176,6 +176,8 @@ calc_e_overflow_message:
 	.asciz	"Error: Summation error, n overflow"
 calc_e_description:
 	.asciz	"\nFunction_calc_e: Calculating e using sum 1/n!\n"
+	.align 4
 calc_e_overflow_mask:
 	.quad	0xffffffff00000000
 //      Ruler --> 1234567812345678
+	.align 4

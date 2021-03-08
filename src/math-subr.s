@@ -3,7 +3,7 @@
 	Include file for math.s
 
 	Created:   2021-02-19
-	Last edit: 2021-03-07
+	Last edit: 2021-03-08
 
 ----------------------------------------------------------------
 MIT License
@@ -33,6 +33,7 @@ SOFTWARE.
 	.global	ClearVariable
 	.global SetToOne
 	.global SetToTwo
+	.global Load64BitNumber
 	.global	CopyVariable
 	.global	ExchangeVariable
 	.global TestIfNegative
@@ -142,6 +143,39 @@ SetToTwo:
 	ldr	x11,  [sp, #32]
 	add	sp, sp, #64
 	ret
+
+/* --------------------------------------------------------------
+  Set Variable integer value of x0
+
+  Input:     x0 = 64 bit unsigned positive value
+             x1 = handle number of variable
+
+  Output:  none
+
+------------------------------------------------------------- */
+Load64BitNumber:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]
+	str	x29, [sp, #8]
+	str	x0,  [sp, #16]
+	str	x1,  [sp, #24]		// Handle number of variable (Argument)
+	str	x11,  [sp, #32]		// Address Pointer
+
+	// Argument in x1 is variable handle (preserved)
+	bl	ClearVariable
+	bl	set_x11_to_Int_LS_Word_Address
+
+	ldr	x0, [sp, #16]		// get 64 bit value
+	str	x0, [x11]		// Place top word of integer part
+
+	ldr	x30, [sp, #0]		// Restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0,  [sp, #16]
+	ldr	x1,  [sp, #24]
+	ldr	x11,  [sp, #32]
+	add	sp, sp, #64
+	ret
+
 
 /*--------------------------------------------------------------
   Copy F.P. Variable
