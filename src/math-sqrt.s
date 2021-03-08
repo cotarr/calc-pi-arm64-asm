@@ -129,7 +129,7 @@ Sqrt_Loop:
 	mov	x1, HAND_REG0
 	mov	x2, HAND_ACC
 	bl	CountAbsValDifferenceBits
-	bl	PrintWordB10
+//	bl	PrintWordB10
 	cmp	x0, #96			// Is difference significant?
 	b.hs	80f			// Yes loop again
 	//
@@ -146,12 +146,12 @@ Sqrt_Loop:
 70:
 	bl	Set_Temporary_Word_Size
 80:
-	mov	x0, #0x09		// ascii tab
-	bl	CharOut
+//	mov	x0, #0x09		// ascii tab
+//	bl	CharOut
 	bl	Grab_Reduced_Accuracy
 	mov	x0, x2
-	bl	PrintWordB10
-	bl	CROut
+//	bl	PrintWordB10
+//	bl	CROut
 	//
 	// Save result as next guess
 	//

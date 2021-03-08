@@ -154,7 +154,7 @@ DivideVariable:
    Output:  none
 
     This will utilize 64 bit dividend by 32 bit divisor
-   to get 32 bit quotient and 32 bit remiander
+   to get 32 bit quotient and 32 bit remainder
 
    The each loop 32 bit remainder and 32 bit data
    is used to form the 64 bit divisor.

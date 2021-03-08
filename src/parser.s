@@ -791,13 +791,13 @@ Command_c_pi_ch:
 	mov	x1, HAND_XREG
 	bl	Load64BitNumber
 
-//	bl	SquareRoot
+	bl	SquareRoot
 
-//	mov	x1, HAND_ACC
-//	mov	x2, HAND_XREG
-//	bl	CopyVariable
+	mov	x1, HAND_ACC
+	mov	x2, HAND_XREG
+	bl	CopyVariable
 
-	bl	Function_calc_pi_ch
+	bl	Function_calc_pi_ch	// Result in XREG
 
 	bl	PrintResult
 	b	ParseCmd
