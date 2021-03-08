@@ -145,6 +145,10 @@ Help_Table:
 	.byte	0, 0, 0, 0
 	.quad	Help_q
 
+	.ascii	"rcl"
+	.byte	0,0,0,0,0
+	.quad	Help_rcl
+
 	.ascii	"rdown"
 	.byte	0,0,0
 	.quad	Help_rdown
@@ -168,6 +172,10 @@ Help_Table:
 	.ascii	"sqrt"
 	.byte	0,0,0,0
 	.quad	Help_sqrt
+
+	.ascii	"sto"
+	.byte	0,0,0,0,0
+	.quad	Help_sto
 
 	.ascii	"xy"
 	.byte	0,0,0,0,0,0
@@ -327,6 +335,15 @@ Help_q:
 	.ascii	"Description: Quit the program.\n"
 	.byte	0
 
+Help_rcl:
+	.ascii	"Usage: rcl <reg-number>\n\n"
+	.ascii	"Description: Recall storage register into XREG\n"
+	.ascii	"Valid registers: 0 to "
+	.byte	"TOP_REG_ASCII"
+	.ascii	"\n"
+	.ascii	"Stack Roll up: R-->X, X-->Y, Y-->Z, Z-->T\n"
+	.byte	0
+
 Help_rdown:
 	.ascii	"Usage: rdown\n\n"
 	.ascii	"Stack Roll DOWN: T-->Z, Z-->Y, Y-->X, X-->T\n"
@@ -351,6 +368,14 @@ Help_sqrt:
 	.ascii	"Stack not rotated after sqrt(XReg)\n"
 	.byte	0
 
+Help_sto:
+	.ascii	"Usage: sto <reg-number>\n\n"
+	.ascii	"Description: Store XREG into storage register\n"
+	.ascii	"Valid registers: 0 to "
+	.byte	"TOP_REG_ASCII"
+	.ascii	"\n"
+	.ascii	"Stack not rotated after sto()\n"
+	.byte	0
 
 
 Help_xy:

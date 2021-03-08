@@ -115,5 +115,7 @@ Variable Handle Numbers
 .set	HAND_REG7,	16
 */
 .set	TOPHAND,	HAND_REG3
+// ASCII digit '3'
+.set	TOP_REG_ASCII,	0x33
 
 // .list

@@ -683,6 +683,7 @@ into WordMultiplication until I can look at it further.
 - Some testing, arithmetic seems working (with old bit alignment code in multiply)
 
 ### 2021-03-07 - Day 22 (7 days to go until pi day)
+
 - Added math-sqrt.s for square root calculation
 - Added command sqrd to take square root of XReg
 
@@ -718,3 +719,14 @@ Digits    Seconds
  200000   202.544
 1000000  4238.884
 ```
+
+```
+git checkout te4fc3cdddddb573053bb53257b037dc6ee0c3435
+```
+
+
+### 2021-03-08 - Day 23 (6 days to go until pi day)
+
+- Added command sto and rcl to use register 0 to 3 like a standard RPN calculator.
+
+(coding of infinite series for pi is the next task)

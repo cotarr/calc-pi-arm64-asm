@@ -1,6 +1,6 @@
 # 7 Days to go ...
 
-Read file [HISTORY.md](../master/HISTORY.md) to see progress to date.
+## Read file [HISTORY.md](../master/HISTORY.md) to follow progress to date.
 
 ## No Pi calculation yet, few more days please...
 
@@ -30,7 +30,7 @@ make
 
 ```
 
-Update 2021-03-01 (See [HISTORY.md](../master/HISTORY.md)).
+## Update 2021-03-07 (See [HISTORY.md](../master/HISTORY.md)).
 
 The core arithmetic functions are now working. This includes
 addition, subtraction, multiplication, long division (bit-wise)
@@ -42,19 +42,23 @@ Numbers may be input followed by the [enter] key. The
 "*", "/", "+", and "-" operators will invoke the arithmetic
 functions. Pressing a period will print the X-Register.
 
-In the next few days I plan to work with some code to
-perform series summations and I build out other tools.
-I still have Pi-day 2021 as a goal:
+Summation of infinite series is in progress. As a test
+the constant e (sum of n!) has been calculated to 1 million
+decimal places and the square root (2) has been calculated
+to 1 million decimal places.
 
-Calculate pi, on a pi, by pi-day.
+The main purpose of this program is to calculate pi, and
+coding of that infinite series is in progress.
+
+I am optimistic I can calculate pi on a pi by pi-day.
 
 ## Commands available:
 
 ```
 + - * / . c.e chs clrstk clrx cmdlist
-D.vars D.fill D.ofst enter exit
-help hex log logoff mmode prac print
-q quit rdown recip rup sf sigfigs sqrt
+D.vars D.fill D.ofst enter exit help
+hex log logoff mmode prac print q recip
+quit rcl rdown rup sf sigfigs sqrt sto
 test version xy
 ```
 
@@ -73,4 +77,16 @@ Terms    Request  Verified   Elapsed Time
 3255       10000     10021          0.168
 25210     100000    100017          3.368
 205027   1000000   1000024        279.820
+```
+
+## Second benchmark 2021-03-07 Calculation of square root (2)
+
+```
+   Digits     Seconds
+    10000       0.575
+    20000       2.263
+    40000       9.378
+   100000      48.134
+   200000     202.544
+  1000000    4238.884
 ```

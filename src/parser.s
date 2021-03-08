@@ -165,10 +165,13 @@ Command_Table:
 	.byte	0,0,0,0
 	.quad	Command_exit
 
+	.ascii	"rcl"
+	.byte	0,0,0,0,0
+	.quad	Command_rcl
+
 	.ascii	"rdown"
 	.byte	0,0,0
 	.quad	Command_rdown
-
 
 	.ascii	"rup"
 	.byte	0,0,0,0,0
@@ -185,6 +188,10 @@ Command_Table:
 	.ascii	"sqrt"
 	.byte	0,0,0,0
 	.quad	Command_sqrt
+
+	.ascii	"sto"
+	.byte	0,0,0,0,0
+	.quad	Command_sto
 
 	.ascii	"test"
 	.byte	0,0,0,0
@@ -987,6 +994,47 @@ Command_print:
 	bl	CROut
 	b	ParseCmd
 
+
+
+Command_rcl:
+	cmp	x0, #0			// Check for argument
+	b.eq	55f			// No argument, error
+
+	ldrb	w1, [x0]		// character argument
+	cmp	w1, #'0'
+	b.lo	55f
+	cmp	w1, TOP_REG_ASCII
+	b.hi	55f
+	and	x3, x1, #0x0f		// x3 storage register handle
+	add	x3, x3, HAND_REG0
+
+	mov	x1, HAND_ZREG
+	mov	x2, HAND_TREG
+	bl	CopyVariable
+
+	mov	x1, HAND_YREG
+	mov	x2, HAND_ZREG
+	bl	CopyVariable
+
+	mov	x1, HAND_XREG
+	mov	x2, HAND_YREG
+	bl	CopyVariable
+
+	mov	x1, x3			// Previously saved
+	mov	x2, HAND_XREG
+	bl	CopyVariable
+
+	bl	PrintResult
+	b	ParseCmd
+
+55:	ldr	x0, =60f
+	bl	StrOut
+	b	ParseCmd
+60:
+	.asciz	"\nCommand Parser: rcl command invalid argument\n\n"
+	.align 4
+
+
 Command_rdown:
 	mov	x1, HAND_XREG
 	mov	x2, HAND_ACC
@@ -1154,6 +1202,30 @@ Command_sqrt:
 .asciz	"\nError: XReg must be positive non-zero number\n\n"
 	.align	4
 
+Command_sto:
+	cmp	x0, #0			// Check for argument
+	b.eq	55f			// No argument, error
+
+	ldrb	w1, [x0]		// character argument
+	cmp	w1, #'0'
+	b.lo	55f
+	cmp	w1, TOP_REG_ASCII
+	b.hi	55f
+
+	and	x2, x1, #0x0f
+	add	x2, x2, HAND_REG0
+	mov	x1, HAND_XREG
+	bl	CopyVariable
+
+	bl	PrintResult
+	b	ParseCmd
+
+55:	ldr	x0, =60f
+	bl	StrOut
+	b	ParseCmd
+60:
+	.asciz	"\nCommand Parser: sto command invalid argument\n\n"
+	.align 4
 
 Command_version:
 	ldr	x0,=versionString
