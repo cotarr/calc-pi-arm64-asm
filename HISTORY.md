@@ -763,3 +763,32 @@ Digits   Seconds
 Binary to decimal conversion of 1000000 digits 299.708 seconds.
 ```
 <img src="images/calc-time.png">
+
+### 2021-03-09 - Day 24 (5 days to go until pi day)
+
+Today, I tried running the program on several different
+types of Raspberry Pi. It looks like 2B and earlier
+won't boot the 64-Bit operating system.
+
+```
+Fail - Cortex-A7  Raspberry Pi 2 Model B Rev 1.1 (Won't boot 64 bit OS)
+OK   - Cortex-A53 Raspberry Pi 3 Model B Rev 1.2
+OK   - Cortex-A53 Raspberry Pi 3 Model B Plus Rev 1.3
+OK   - Cortex-A72 Raspberry Pi 4 Model B Rev 1.2
+```
+
+This was a quick look at calculation speed and CPU temperature
+on several pi. The test was calculation of pi was calculated to 200000 digits.
+The raspberry pi and /boot/config.txt are at the factory
+default values. There is no overclocking. Except for the last Pi-4B
+there is no heat sink glued onto the processor. In general
+one core was at 100% continuously. Access was by SSH so there was
+no HDMI cable attached, so the GPU was possibly idle.
+
+```
+Model  Temperature   Time
+Pi-3B       62       437.557 Seconds (No Heat Sink)
+Pi-3B-Plus  60       373.523 Seconds (No Heat Sink)
+Pi-4B       58       321.155 Seconds (No Heat Sink)
+Pi-4B       42       317.762 Seconds (heat sink case)
+```
