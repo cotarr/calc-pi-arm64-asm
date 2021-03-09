@@ -728,5 +728,38 @@ git checkout te4fc3cdddddb573053bb53257b037dc6ee0c3435
 ### 2021-03-08 - Day 23 (6 days to go until pi day)
 
 - Added command sto and rcl to use register 0 to 3 like a standard RPN calculator.
+- Added command c.pi and c.pi.ch (same function) to calculate pi.
 
-(coding of infinite series for pi is the next task)
+My first attempt at calculating pi is now coded for debugging.
+The method used the Chudnovsky formula. I like this formula because it is
+rapidly converging, gaining 14 digits per term of the series summation.
+
+If you look at the there are two
+apparent challenges: 1) calculation of square root of 10005 which is
+calculated by successive approximations, and 2) the division
+of the square root 10005 dividend by the full infinite series summation as divisor.
+Both of these represent full precision slow calculations. Most of the rest of the calculation
+can use 64 or 32 bit arithmetic and matrix through the variables word by word.
+
+<img src="images/Chudnovskyformula.jpg">
+
+
+
+There are some issues that need to be addressed that may increase the speed, as well
+as some general code clean up.
+
+Here is an initial benchmark of calculation times using a Raspberry Pi 4B at
+standard CPU clock rate.
+
+```
+Digits   Seconds
+  10000     1.049
+  20000     4.820
+  40000    23.344
+ 100000    77.266
+ 200000   321.775
+1000000  7797.897
+
+Binary to decimal conversion of 1000000 digits 299.708 seconds.
+```
+<img src="images/calc-time.png">
