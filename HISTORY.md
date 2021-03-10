@@ -58,6 +58,10 @@ git checkout d5188777cda71522eb2428c5fdba4ab9a0a63314
 - Fixed several errors preserving registers in Hello World
 - Added Keyboard input function KeyIn, reads line from console terminal with address in X0
 
+```
+git checkout be53bf079df40da133861fe7ebc44e38fe3a4d66
+```
+
 - util.s - New file with function to print byte and 64 bit word in hexadecimal format to stdout
 
 ```
@@ -792,3 +796,7 @@ Pi-3B-Plus  60       373.523 Seconds (No Heat Sink)
 Pi-4B       58       321.155 Seconds (No Heat Sink)
 Pi-4B       42       317.762 Seconds (heat sink case)
 ```
+
+### 2021-03-10 - Day 25 (4 days to go until pi day)
+
+Working on documentation and perhaps make a video for pi day.
