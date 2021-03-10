@@ -90,12 +90,6 @@ Function_calc_pi_ch:
 	.set flag_term_A_done, 160
 	.set flag_term_B_done, 168
 
-	//
-	// Print description
-	//
-	ldr	x0, =calc_pi_ch_description
-	bl	StrOut
-
 	// ----------------------------
 	// Initialize Number Variables
 	// ----------------------------
@@ -456,8 +450,6 @@ pi_ch_sum:
 
 calc_pi_ch_overflow_message:
 	.asciz	"Error: Summation error, n overflow"
-calc_pi_ch_description:
-	.asciz	"\nFunction_calc_e: Calculating pi using Chudnovsky Formul\n"
 	.align 4
 calc_pi_ch_overflow_mask:
 			.quad	0xffffffff00000000

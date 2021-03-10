@@ -65,6 +65,8 @@ SquareRoot:
 	str	x1,  [sp, #24]
 	str	x2,  [sp, #32]
 	str	x3,  [sp, #40]
+	str	x4,  [sp, #48]
+
 
 	//
 	// Check and make error if input not positive non-zero number.
@@ -125,12 +127,33 @@ Sqrt_Loop:
 	bl	Right1Bit
 	//
 	// Check difference between guess verses this result
+	//
+	// Continue in loop until half of bits match
+	// then double accuracy and continue util half of those match
+	//
+	bl	Grab_Reduced_Accuracy	// x1 = static x2 = optimized
+	cmp	x1, x2			// full accuracy?
+	b.ne	40f
+	mov	x4, #96			// Final end, full accuracy, 96 ls bits allow different
+	b.al	50f
+40:
+	mov	x4, x2			// static words in variable
+	lsl	x4, x4, X64SHIFT4BIT	// multiply 64 bit per word
+	lsr	x4, x4, #1		// divide by 2, limit bits match
+	cmp	x4, #96
+	b.hs	50f
+	mov	x4, #96
+50:
+	// mov	x0, x4
+	// bl	PrintWordB10
+	// mov	x0, #0x09		// tab
+	// bl	CharOut
 
 	mov	x1, HAND_REG0
 	mov	x2, HAND_ACC
 	bl	CountAbsValDifferenceBits
-//	bl	PrintWordB10
-	cmp	x0, #96			// Is difference significant?
+	// bl	PrintWordB10
+	cmp	x0, x4			// Is difference significant?
 	b.hs	80f			// Yes loop again
 	//
 	// If no, then see if accuracy can be increased?
@@ -146,12 +169,13 @@ Sqrt_Loop:
 70:
 	bl	Set_Temporary_Word_Size
 80:
-//	mov	x0, #0x09		// ascii tab
-//	bl	CharOut
-	bl	Grab_Reduced_Accuracy
-	mov	x0, x2
-//	bl	PrintWordB10
-//	bl	CROut
+
+	// mov	x0, #0x09		// ascii tab
+	// bl	CharOut
+	// bl	Grab_Reduced_Accuracy
+	// mov	x0, x2
+	// bl	PrintWordB10
+	// bl	CROut
 	//
 	// Save result as next guess
 	//
@@ -170,6 +194,7 @@ Sqrt_Loop:
 	ldr	x1,  [sp, #24]
 	ldr	x2,  [sp, #32]
 	ldr	x3,  [sp, #40]
+	ldr	x4,  [sp, #48]
 	add	sp, sp, #96
 	ret
 SqrtRangeError:

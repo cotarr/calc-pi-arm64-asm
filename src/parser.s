@@ -4,7 +4,7 @@
 	Command Parser Module
 
 	Created:   2021-02-15
-	Last edit: 2021-03-08
+	Last edit: 2021-03-09
 
 	PrintCommandList
 	ParseCmd
@@ -337,6 +337,60 @@ InitTimerAtProgramStart:
 	add	sp, sp, #64
 	ret
 
+
+//
+// Elapsed time
+//
+PrintElapsedTime:
+	sub	sp, sp, #64		// Reserve 8 words
+	str	x30, [sp, #0]		// Preserve these registers
+	str	x29, [sp, #8]
+	str	x0, [sp, #16]
+	str	x1, [sp, #24]
+	str	x2, [sp, #32]
+	str	x3, [sp, #40]
+	str	x4, [sp, #48]
+
+	ldr	x0, =timeStr1
+	bl	StrOut
+	bl	ReadSysTime
+	mov	x4, x0			// current time
+	ldr	x1, =TimeLastSec
+	ldr	x2, [x1]		// last time
+	// str	x4, [x1]
+	sub	x1, x4, x2		// difference milliseconds
+	mov	x2, #1000
+	udiv	x3, x1, x2		// integer seconds
+	msub	x4, x3, x2, x1		// integer milliseconds
+	mov	x0, x3
+	bl	PrintWordB10
+	mov	x0, #'.'
+	bl	CharOut
+	mov	x2, #100
+	cmp	x4, x2
+	b.hs	36f
+	mov	x0, #'0'
+	bl	CharOut
+36:	mov	x2, #10
+	cmp	x4, x2
+	b.hs	37f
+	mov	x0, #'0'
+	bl	CharOut
+37:	mov	x0, x4
+	bl	PrintWordB10
+	ldr	x0, =timeStr2
+	bl	StrOut
+
+	ldr	x30, [sp, #0]		// restore registers
+	ldr	x29, [sp, #8]
+	ldr	x0, [sp, #16]
+	ldr	x1, [sp, #24]
+	ldr	x2, [sp, #32]
+	ldr	x3, [sp, #40]
+	ldr	x4, [sp, #48]
+	add	sp, sp, #64
+	ret
+
 /*******************************************
 
    ParseCmd
@@ -439,37 +493,8 @@ ParseCmd:
 35:
 
 //
-// Elapsed time
-//
-	ldr	x0, =timeStr1
-	bl	StrOut
-	bl	ReadSysTime
-	mov	x4, x0			// current time
-	ldr	x1, =TimeLastSec
-	ldr	x2, [x1]		// last time
-	str	x4, [x1]
-	sub	x1, x4, x2		// difference milliseconds
-	mov	x2, #1000
-	udiv	x3, x1, x2		// integer seconds
-	msub	x4, x3, x2, x1		// integer milliseconds
-	mov	x0, x3
-	bl	PrintWordB10
-	mov	x0, #'.'
-	bl	CharOut
-	mov	x2, #100
-	cmp	x4, x2
-	b.hs	36f
-	mov	x0, #'0'
-	bl	CharOut
-36:	mov	x2, #10
-	cmp	x4, x2
-	b.hs	37f
-	mov	x0, #'0'
-	bl	CharOut
-37:	mov	x0, x4
-	bl	PrintWordB10
-	ldr	x0, =timeStr2
-	bl	StrOut
+// Print elapsed time
+	bl	PrintElapsedTime
 
 //
 // Show prompt string
@@ -787,6 +812,9 @@ Command_c_pi_ch:
 	mov	x2, HAND_YREG
 	bl	CopyVariable
 
+	ldr	x0, =71f
+	bl	StrOut			// Progress message
+
 	mov	x0, #10005
 	mov	x1, HAND_XREG
 	bl	Load64BitNumber
@@ -797,12 +825,23 @@ Command_c_pi_ch:
 	mov	x2, HAND_XREG
 	bl	CopyVariable
 
+
+	bl	PrintElapsedTime
+
+	ldr	x0, =72f
+	bl	StrOut			// Progress message
+
 	bl	Function_calc_pi_ch	// Result in XREG
+
+	bl	PrintElapsedTime
+	bl	CROut
 
 	bl	PrintResult
 	b	ParseCmd
 
-
+71:	.asciz	"\nCalculating: Square Root 10005"
+72:	.asciz	"\nCalculating: Chudnovsky infinite series"
+	.align	4
 //
 //
 //
