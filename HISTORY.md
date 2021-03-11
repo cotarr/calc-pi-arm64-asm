@@ -748,7 +748,6 @@ can use 64 or 32 bit arithmetic and matrix through the variables word by word.
 <img src="images/Chudnovskyformula.jpg">
 
 
-
 There are some issues that need to be addressed that may increase the speed, as well
 as some general code clean up.
 
@@ -766,7 +765,6 @@ Digits   Seconds
 
 Binary to decimal conversion of 1000000 digits 299.708 seconds.
 ```
-<img src="images/calc-time.png">
 
 ### 2021-03-09 - Day 24 (5 days to go until pi day)
 
@@ -799,4 +797,12 @@ Pi-4B       42       317.762 Seconds (heat sink case)
 
 ### 2021-03-10 - Day 25 (4 days to go until pi day)
 
-Working on documentation and perhaps make a video for pi day.
+- Working on documentation and perhaps make a video for pi day.
+- Updated chart of calculation times.
+
+<img src="images/pi-calc-time.png">
+
+### 2021-03-11 - Day 26 (3 days to go until pi day
+
+- Update program start banner text.
+- Add instructions to README.md
