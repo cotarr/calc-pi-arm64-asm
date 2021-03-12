@@ -806,3 +806,11 @@ Pi-4B       42       317.762 Seconds (heat sink case)
 
 - Update program start banner text.
 - Add instructions to README.md
+
+### 2021-03-12 - Day 27 (2 days to go until pi day)
+
+I have discovered that making a video for this repository
+is much more difficult than I expected. The past 2 days have
+been spent moving the repository back in time to early
+commits and discussing them in a video. I hope to
+have it uploaded tomorrow so it will be online for pi-day.
