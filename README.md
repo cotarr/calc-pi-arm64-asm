@@ -161,7 +161,7 @@ test version xy
 
 ## Chudnovsky Formula
 
-<img src="images/Chudnovskyformula.jpg">
+<img src="/cotarr/calc-pi-arm64-asm/raw/main/images/Chudnovskyformula.jpg">
 
 ## benchmark 2021-03-11 Calculation of pi
 
@@ -176,7 +176,7 @@ test version xy
   1000000   7153.571
 ```
 
-<img src="images/pi-calc-time.png">
+<img src="/cotarr/calc-pi-arm64-asm/raw/main/images/pi-calc-time.png">
 
 ### Security Note
 
