@@ -745,8 +745,7 @@ of the square root 10005 dividend by the full infinite series summation as divis
 Both of these represent full precision slow calculations. Most of the rest of the calculation
 can use 64 or 32 bit arithmetic and matrix through the variables word by word.
 
-<img src="images/Chudnovskyformula.jpg">
-
+![Chudnovsky-Formula-Image](https://github.com/cotarr/calc-pi-arm64-asm/blob/main/images/Chudnovskyformula.jpg?raw=true)
 
 There are some issues that need to be addressed that may increase the speed, as well
 as some general code clean up.
@@ -800,7 +799,7 @@ Pi-4B       42       317.762 Seconds (heat sink case)
 - Working on documentation and perhaps make a video for pi day.
 - Updated chart of calculation times.
 
-<img src="images/pi-calc-time.png">
+![Calculation-Time-Image](https://github.com/cotarr/calc-pi-arm64-asm/blob/main/images/pi-calc-time.png?raw=true)
 
 ### 2021-03-11 - Day 26 (3 days to go until pi day
 

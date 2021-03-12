@@ -161,7 +161,7 @@ test version xy
 
 ## Chudnovsky Formula
 
-<img src="https://github.com/cotarr/calc-pi-arm64-asm/raw/main/images/Chudnovskyformula.jpg">
+![CHudnovsky-Formula-Image](https://github.com/cotarr/calc-pi-arm64-asm/blob/main/images/Chudnovskyformula.jpg?raw=true)
 
 ## benchmark 2021-03-11 Calculation of pi
 
@@ -176,7 +176,8 @@ test version xy
   1000000   7153.571
 ```
 
-<img src="https://github.com/cotarr/calc-pi-arm64-asm/raw/main/images/Chudnovskyformula.jpg">
+![Calculation-Time-Image](https://github.com/cotarr/calc-pi-arm64-asm/blob/main/images/pi-calc-time.png?raw=true)
+
 
 ### Security Note
 
