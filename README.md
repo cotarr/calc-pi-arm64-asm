@@ -1,6 +1,10 @@
-# 2 Days to go ...
+# pi (the number) on a raspberry pi (the computer) for pi-day (March 14, 2021)
 
-## Read file [HISTORY.md](../master/HISTORY.md) to follow progress to date.
+Read file [HISTORY.md](../master/HISTORY.md) to see day by day notes.
+
+My coding challenge is now complete.
+You can see the result here: [pi-1000000-digit.txt](../master/output-example/pi-1000000-digit.txt)
+
 
 The start date was Feb 14, 2021. Time needed is 1 month.
 The coding challenge was to write a program in assembly language to calculate pi,
@@ -8,7 +12,7 @@ on a Raspberry Pi, by "Pi Day" March 14, 2021.
 The personal goal was to learn a little about ARM64/arm-v8a assembly language.
 The technical goal was to avoid use of any external math libraries.
 
-### Models Tested
+### Models Used
 
 - Raspberry Pi 4 Model B Rev 1.2
 - Raspberry Pi 3 Model B Plus Rev 1.3
@@ -159,7 +163,7 @@ quit rcl rdown rup sf sigfigs sqrt sto
 test version xy
 ```
 
-## Chudnovsky Formula
+## Chudnovsky Formula to compute pi
 
 ![CHudnovsky-Formula-Image](https://github.com/cotarr/calc-pi-arm64-asm/blob/main/images/Chudnovskyformula.jpg?raw=true)
 

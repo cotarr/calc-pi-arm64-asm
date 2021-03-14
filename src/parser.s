@@ -1316,7 +1316,7 @@ Command_version:
 	b	ParseCmd
 
 versionString:
-	.asciz	"\n     Version 1.0 - Debugging in progress\n\n"
+	.asciz	"\n     Version 1.0 2021-03-14\n\n"
 	.align 4
 
 Command_xy:

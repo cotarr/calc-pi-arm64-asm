@@ -813,3 +813,11 @@ is much more difficult than I expected. The past 2 days have
 been spent moving the repository back in time to early
 commits and discussing them in a video. I hope to
 have it uploaded tomorrow so it will be online for pi-day.
+
+### 2021-03-13 - Day 28 (last day)
+
+- Added example calculation result in example-output/pi-1000000-digits.txt
+- Fixed version string in command parser to 1.0
+- Recording video covering day by day progress.
+
+This ends my coding challenge to calculate pi on a pi for pi-day.
