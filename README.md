@@ -2,7 +2,7 @@
 
 Read file [HISTORY.md](../master/HISTORY.md) to see day by day notes.
 
-[YouTube Video](https://youtu.be/Czo20LnoEDs)
+Watch the [YouTube Video](https://youtu.be/Czo20LnoEDs)
 
 My coding challenge is now complete.
 You can see the result here: [pi-1000000-digit.txt](../master/output-example/pi-1000000-digit.txt)
