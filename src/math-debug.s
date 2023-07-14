@@ -73,7 +73,7 @@ PrintVar:
 	bl	CharOut
 	bl	CROut
 	//
-	// Print all of mantissa in words
+	// Print all of variable in words
 	//
 	ldr	x11, =RegAddTable	// x11 address vector table
 	mov	x1, x10, lsl X8SHIFT3BIT // 64 bit address size
@@ -85,7 +85,7 @@ PrintVar:
 
 	mov	x14, #0			// line feed counter
 	ldr	x13, =Word_Size_Static
-	ldr     x13, [x13]		// x13 mantissa word counter
+	ldr     x13, [x13]		// x13 word counter
 10:
 
 	ldr     x0, [x11, x12]		// get word
@@ -164,8 +164,7 @@ PrintHex:
 	bl	CharOut
 
 //
-// Print word values Mantissa
-//
+// Print word values Number
 	ldr	x11, =RegAddTable	// variable vector table
 	mov	x1, x10, lsl #3		// 8 byte / 64 bit address
 	add	x11, x11, x1		// offset from handle
@@ -275,7 +274,7 @@ DebugFillVariable:
 	ldr	x0, [x0]
 	lsl	x0, x0, X8SHIFT3BIT
 	add	x0, x0, #7		// shift to type byte
-	add	x2, x2, x0		// x2 point at mantissa M.S.Byte
+	add	x2, x2, x0		// x2 point at number M.S.Byte
 	mov	x0, #0x11		// fill value 11,12,13...
 	ldr	x1, =Word_Size_Static
 	ldr	x1, [x1]

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+		<title>Debug Functions</title>
+    <link rel="stylesheet" href="css/styles.css">
+	</head>
+	<body>
+    <div class="head-fixed">
+      Documentation for
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">calc-pi-arm64-asm</a>
+    </div>
+    <div class="menu-div-fixed">
+      <div class="menu-div">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="tutorial.html">Tutorial</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="commands00.html">RPN Commands</a></li>
+          <li><a href="commands01.html">Calculations</a></li>
+          <li><a class="active" href="commands02.html">Debug Functions</a></li>
+          <li><a href="commands03.html">Toolbox Commands</a></li>
+          <li><a href="config.html">Configuration</a></li>
+          <li><a href="links.html">Links &amp; Referencs</a></li>
+          <li><a href="security.html">Security Notes</a></li>
+          <li><a href="license.html">License</a></li>
+        </ul>
+      </div> <!-- /menu-div-->
+    </div>
+
+    <div class="scrollable-div">
+      <div class="command-div">
+
+        <div class="desc-title">
+          Debug Functions
+        </div>
+        <table>
+          <tr>
+            <th>Command</th>
+            <th>Input</th>
+            <th>Output</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>D.fill</td>
+            <td>Int<br>0-12<br>typed</td>
+            <td></td>
+            <td>
+              Usage: D.fill &lt;handle&gt;<br>
+              Description: This is a debug command to fill a variable
+              with sequential byte value numbers.<br>
+              It starts with the integer part<br>
+              0102030405060708 1011121314151617<br>
+              followed by the fraction part<br>
+              2122232425262728 292A2B2C2D2E2F30...<br>
+              This is very useful to check low level functions,<br>
+              such as shifting memory left or right 1 bit.<br>
+              Use the &quot;hex&quot; command to display handle numbers.
+                
+            </td>
+          </tr>
+          <tr>
+            <td>D.ofst</td>
+            <td></td>
+            <td></td>
+            <td>
+              This shows the offset values of the variables in both hexadecimal and decimal.
+              This is intended for use with the gdb debugger to identify the memory map.
+              
+            </td>
+          </tr>
+          <tr>
+            <td>D.vars</td>
+            <td></td>
+            <td></td>
+            <td>
+              This shows the current value of internal varaibles used to specify
+              the size of a number and it's different parts, such as integer part, 
+              fraction part, guard words, etc.
+            </td>
+          </tr>
+          <tr>
+            <td>hex<br>hex &lt;r&gt;</td>
+            <td></td>
+            <td></td>
+            <td>
+              "hex" will print summary of all registers in abbreviated hexadecimal format.
+              This will also show register index numbers. Adding an integer
+              index number from 0 to 12 will show a specific register. The index
+              numbers are different from register name. (Reg2 is index 11).
+            </td>
+          </tr>
+          <tr>
+            <td>test</td>
+            <td></td>
+            <td></td>
+            <td>
+              This will do a subroutine call the &quot;Command_test&quot; label in parser.s.
+              Custom assembly code can be inserted at this location, then executed 
+              from inside the program using the &quot;test&quot; command.
+            </td>
+          </tr>
+        </table>
+      </div> <!-- command div -->
+      <div class="text-div">
+        <div class="desc-title">
+          Debug Notes
+        </div>
+        <p>
+          The typical method to debug this type of mathematics is to run the 
+          program inside the Linux gdb debugger. If you try this, the 
+          D.ofst and D.vars commands will be helpful to determine a 
+          memory map of the variables.
+        </p>
+        <p>
+          A simpler approach is to use the hex command to display a summary of each internal fixed point variable.
+          If the handle number 0 to 12 is provided, the full variable will be displayed.
+          A lot of this is demonstrated in the youtube video.
+        </p>
+      </div> <!-- /text-div -->
+
+    </div> <!-- /scrollable-div -->
+
+    <div class="footer-div">
+      Repository:
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">
+        https://github.com/cotarr/calc-pi-arm64-asm</a>
+    </div> <!-- /footer-div -->
+
+	</body>
+</html>
+

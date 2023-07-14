@@ -844,8 +844,8 @@ MultiplyByTen:
 	add	x11, x11, #4		// offset for half word
 
 	// set x10 to count of words -1
-	ldr	x10, =Word_Size_Static	// Pointer to of words in mantissa
-	ldr	x10, [x10]		// Number words in mantissa
+	ldr	x10, =Word_Size_Static	// Pointer top of words in number
+	ldr	x10, [x10]		// Number words in number
 	lsl	x10, x10, #1		// Multiply * 2 to address 32 bit word size
 
 	mov	x12, #10		// constant value, (multiply by 10 from register)
@@ -913,8 +913,8 @@ DivideByTen:
 	str	x12, [sp, #64]
 
 	// set x10 to (count of 32 bit half-words) -1
-	ldr	x10, =Word_Size_Static	// Pointer to of words in mantissa
-	ldr	x10, [x10]		// Number words in mantissa
+	ldr	x10, =Word_Size_Static	// Pointer top of words in number
+	ldr	x10, [x10]		// Number words in number
 	lsl	x10, x10, #1		// Multiply two word32 per word64
 	sub	x10, x10, #1		// Count - 1
 	// Argument x1 is variable handle number

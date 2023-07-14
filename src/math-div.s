@@ -505,7 +505,7 @@ LongDivision:
 //  If result negative (highest bit 1) then copy OPR = WorkA
 //  Rotate OPR and WorkB left 1 bit at a time
 //  For each cycle, if M.S.Bit of WorkA = 1 then Rotate 1 into L.S. Bit WorkB
-//  When done all bits, result mantissa is in WorkB
+//  When done all bits, result is in WorkB
 // =================================================================================
 
 loop55:
@@ -527,7 +527,7 @@ loop55:
 	cbnz	x10, 210b		// loop again?
 	//
 	// If the result of the subtraction is positive
-	//   then move mantissa of WorkA to OPR
+	//   then move number in WorkA to OPR
 	//  else skip
 	//
 	bl	set_x9_to_Int_MS_Word_Addr_Offset

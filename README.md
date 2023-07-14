@@ -4,6 +4,8 @@ Read file [HISTORY.md](../master/HISTORY.md) to see day by day notes.
 
 Watch the [YouTube Video](https://youtu.be/Czo20LnoEDs)
 
+Read the [/docs](https://cotarr.github.io/calc-pi-arm64-asm/)
+
 My coding challenge is now complete.
 You can see the result here: [pi-1000000-digit.txt](../master/output-example/pi-1000000-digit.txt)
 
@@ -21,9 +23,13 @@ The technical goal was to avoid use of any external math libraries.
 - Raspberry Pi 3 Model B Rev 1.2
 - The 64 bit operating system does not load on Pi-2 and earlier.
 
-### Operating System 64-Bit beta version of Raspberry OS
+### Operating System 64-Bit Raspberry Pi OS
 
-https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2020-08-24/
+Update: 2023-07-14
+
+The 64 bit version of Raspberry Pi OS has been released as a stable release.
+You can find it at https://www.raspberrypi.com/software/operating-systems/#raspberry-pi-os-64-bit
+Please disregard any instructions to use the "beta" version.
 
 ### What am I using?
 

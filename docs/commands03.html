@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+		<title>Toolbox Functions</title>
+    <link rel="stylesheet" href="css/styles.css">
+	</head>
+	<body>
+    <div class="head-fixed">
+      Documentation for
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">calc-pi-arm64-asm</a>
+    </div>
+    <div class="menu-div-fixed">
+      <div class="menu-div">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="tutorial.html">Tutorial</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="commands00.html">RPN Commands</a></li>
+          <li><a href="commands01.html">Calculations</a></li>
+          <li><a href="commands02.html">Debug Functions</a></li>
+          <li><a class="active" href="commands03.html">Toolbox Commands</a></li>
+          <li><a href="config.html">Configuration</a></li>
+          <li><a href="links.html">Links &amp; Referencs</a></li>
+          <li><a href="security.html">Security Notes</a></li>
+          <li><a href="license.html">License</a></li>
+        </ul>
+      </div> <!-- /menu-div-->
+    </div>
+    <div class="scrollable-div">
+      <div class="command-div">
+        <table>
+          <tr>
+            <th>Command</th>
+            <th>Input</th>
+            <th>Output</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>cmdlist</td>
+            <td></td>
+            <td></td>
+            <td>
+              Dynaically generate a listing of all commands in the command parser.
+            </td>
+          </tr>
+
+          <tr>
+            <td>exit</td>
+            <td></td>
+            <td></td>
+            <td>
+              Quit the program.<br>Commands "exit" and "q" are synonymous.
+            </td>
+          </tr>
+          <tr>
+            <td>help<br>help &lt;c&gt;</td>
+            <td></td>
+            <td></td>
+            <td>
+              "help" displays basic help on the program.<br>
+              "help &lt;command&gt;" for help on one command<br>
+              Some commands do not have help.
+            </td>
+          </tr>
+          <tr>
+            <td>log<br>logoff</td>
+            <td></td>
+            <td></td>
+            <td>
+              The command 'log' starts a terminal log session.
+              The filenames are sequential as follows:
+              out/out001.txt, out/out002.txt, out/out003.txt ...
+              the folder 'out' must exist in the working directory.
+              Logging is stopped with the 'logoff' command.
+            </td>
+          </tr>
+
+          <tr>
+            <td>mmode</td>
+            <td></td>
+            <td></td>
+            <td>
+              Set or View mmode (Math Mode)<br>
+              See <a href="config.html">Configuration</a>
+            </td>
+          </tr>
+
+          <tr>
+            <td>quit</td>
+            <td></td>
+            <td></td>
+            <td>
+	             Quit the program.<br>
+               Commands "exit" and "q" are synonymous.
+            </td>
+          </tr>
+
+          <tr>
+            <td>version</td>
+            <td></td>
+            <td></td>
+            <td>
+              Shows program version.
+            </td>
+          </tr>
+
+        </table>
+      </div> <!-- /command-div-->
+
+      <div class="text-div">
+
+        <div class="desc-title">
+          Program Help
+        </div>
+        <p>
+          The command "cmdlist" will automatically extract a list of all text commands
+          from the program command parser. Within the program, the "help &lt;command&gt;
+          function can be combined with a text
+          &lt;command&gt; to view detail information on any specific command. Example: "help print".
+        </p>
+        <p>
+          External to the program, these help pages are available from the github repositiory at:
+          <a href="https://cotarr.github.io/calc-pi-arm64-asm/">https://cotarr.github.io/calc-pi-arm64-asm/</a>
+        </p>
+      </div> <!-- /text-div -->
+
+    </div> <!-- /scrollable-div -->
+
+    <div class="footer-div">
+      Repository:
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm/">
+        https://github.com/cotarr/calc-pi-arm64-asm/</a>
+    </div> <!-- /footer-div -->
+
+	</body>
+</html>

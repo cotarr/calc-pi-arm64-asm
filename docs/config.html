@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+		<title>Configuration</title>
+    <link rel="stylesheet" href="css/styles.css">
+	</head>
+	<body>
+    <div class="head-fixed">
+      Documentation for
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">calc-pi-arm64-asm</a>
+    </div>
+    <div class="menu-div-fixed">
+      <div class="menu-div">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="tutorial.html">Tutorial</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="commands00.html">RPN Commands</a></li>
+          <li><a href="commands01.html">Calculations</a></li>
+          <li><a href="commands02.html">Debug Functions</a></li>
+          <li><a href="commands03.html">Toolbox Commands</a></li>
+          <li><a class="active" href="config.html">Configuration</a></li>
+          <li><a href="links.html">LInks &amp; Referencs</a></li>
+          <li><a href="security.html">Security Notes</a></li>
+          <li><a href="license.html">License</a></li>
+        </ul>
+      </div> <!-- /menu-div-->
+    </div>
+    <div class="scrollable-div">
+      <div class="text-div">
+        <div class="desc-title">
+          Program Configuration
+        </div>
+        <div class="desc-title">
+          ARM Processor Type
+        </div>
+        <p>
+          The Raspberry Pi 3 and 4 have different types of processor.
+          Before compiling the program, the assembler can be informed 
+          of the processor type by commenting or removing comments
+          in the file &quot;arch-include.s&quot;.
+        </p>
+        <p>
+          However, I have tried both configuration of both type of ARM cpu,
+          and I can not tell the difference. If you are not sure, leave it
+          set to A72.
+        </p>
+        <p>
+          File: arch-include.s
+        </p>
+<pre class="pre-command">
+  // Raspberry Pi Model 3B, 3B+
+  //    .cpu    cortex-a53
+  //    .set    CORTEXA53, 1
+  
+  // Rasperry Pi Model 4 B
+    .cpu    cortex-a72
+    .set    CORTEXA72, 1
+</pre>
+        <div class="desc-title">
+          Data Variable Memory Allocation
+        </div>
+        <p>
+          There are a number of global compiler definitions. Most of these should not be changed.
+          One configuration that can be changed is memory allocation.
+        </p>
+        <p>
+          System memory used for fixed point number variables is defined in math.s line 190
+          using <b>.skip</b> statements to declare uninitialized blocks of memory in the BSS segment.
+          These are statically allocated when the program is started as part of the load image.
+          The maximum size of the floating point variables can be configured
+          in header-include.s line 77. As shown below, the default variable size
+          is about 5 million decimal digits. This establishes a maximum size for the 
+          variables, but the sigfigs or sf command will set the accuracy for a specific calculation
+          within the maximum allowed for a given memory configuration.
+          It is suggested to uncomment one of the following lines. 
+          It is necessary to recompile the binary after this is changed using
+          the make command.
+        </p>
+        <p>
+          File: header-include.s
+        </p>
+<pre class="pre-command">
+ // .set    FCT_WSIZE,    0x10       // 193 digits in fraction part
+ // .set    FCT_WSIZE,    0x40
+ // .set    FCT_WSIZE,    0x400      // 19680 digits in fraction part
+ .set    FCT_WSIZE,    0x40000    // 5050407 digits in fraction part
+</pre>
+
+        <div class="desc-title">
+          Math Mode (mmode) setting
+        </div>
+        <p>
+          The backbone of this program is a series of binary bitwise arithmetic functions
+          used for multiplication and division. These are conventional multi-precisions
+          routines bitwise rotations combined with addition and subtraction.
+          However, this method is extremely slow. In order to increase speed,
+          alternate multiplication and division routines can use the 64 bit microprocessor
+          instruction to work with 128 bit / 64 bit integer operations.
+        </p>
+        <p>
+          The "mmode" command is used to set or view a series of flags
+          used to select or de-select various alternate arithmetic methods.
+          The default value of mmode is 0.
+        </p>
+        <p>
+          For example, calculation of Pi using Chudnovsky formula to 100,000 digits:<br>
+          Time 135 seconds (mmode=0)<br>
+          Time 263 Seconds (mmode 14, full bitwise arithmetic)
+        </p>
+        <p>
+          To view the options, type: "help mmode"
+        </p>
+
+<pre class="pre-command">
+Usage: mmode <optional integer bit pattern>
+
+Descripton: Without argument, mmode displays MathMode variable.
+
+Modes:
+2   (0x04)  Force bitwise long division (shift and subtract)
+4   (0x04)  Disable: ARM 64 bit MUL/UMULH matrix multiplication
+8   (0x08)  Disable: ARM 32 bit UDIV/MSUB matrix division
+</pre>
+      </div> <!-- /text-div -->
+
+    </div> <!-- /scrollable-div -->
+
+    <div class="footer-div">
+      Repository:
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">
+        https://github.com/cotarr/calc-pi-arm64-asm</a>
+    </div> <!-- /footer-div -->
+
+	</body>
+</html>

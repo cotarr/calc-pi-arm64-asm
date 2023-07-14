@@ -821,3 +821,11 @@ have it uploaded tomorrow so it will be online for pi-day.
 - Recording video covering day by day progress.
 
 This ends my coding challenge to calculate pi on a pi for pi-day.
+
+### Update: 2023-07-14
+
+- Added /docs/ folder with a help web page.
+- Updated README.md to note stable OS release.
+- A few minor errors in comments in the code and help messages were corrected.
+- No code changes were made, this commit contains only documentation additions.
+

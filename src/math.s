@@ -278,7 +278,7 @@ FP_Initialize:
 /*--------------------------------------------------------------
   Set Number of Words Variables
 
-  Input:   x0 - Number of 64 bit words in mantissa
+  Input:   x0 - Number of 64 bit words in number
 
   Output:  none
 
@@ -298,7 +298,7 @@ Set_Word_Size:
 	ldr	x11, =Word_Size_Optimized	// Default [Word_Size_Optimized] value
 	str	x0, [x11]
 //
-// FctLSW_WdPtr_Static is variable to word count offset to L.S. Word in mantissa
+// FctLSW_WdPtr_Static is variable to word count offset to L.S. Word in number
 //
 	ldr	x10, =IntMSW_WdPtr	// Offset Top Word in Integer part
 	ldr	x10, [x10]
@@ -320,7 +320,7 @@ Set_Word_Size:
 /*--------------------------------------------------------------
   Set Temporary Number of Words Variables
 
-  Input:   x0 - Number of 64 bit words in mantissa
+  Input:   x0 - Number of 64 bit words in number
 
   Output:  none
 
@@ -338,7 +338,7 @@ Set_Temporary_Word_Size:
 	ldr	x11, =Word_Size_Optimized // Default [Word_Size_Optimized] value
 	str	x0, [x11]
 //
-// FctLSW_WdPtr_Static is variable to word count offset to L.S. Word in mantissa
+// FctLSW_WdPtr_Static is variable to word count offset to L.S. Word in number
 //
 	ldr	x10, =IntMSW_WdPtr	// Offset Top Word in Integer part
 	ldr	x10, [x10]

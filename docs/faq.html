@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+		<title>FAQ</title>
+    <link rel="stylesheet" href="css/styles.css">
+	</head>
+	<body>
+    <div class="head-fixed">
+      Documentation for
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">calc-pi-arm64-asm</a>
+    </div>
+    <div class="menu-div-fixed">
+      <div class="menu-div">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="tutorial.html">Tutorial</a></li>
+          <li><a class="active" href="faq.html">FAQ</a></li>
+          <li><a href="commands00.html">RPN Commands</a></li>
+          <li><a href="commands01.html">Calculations</a></li>
+          <li><a href="commands02.html">Debug Functions</a></li>
+          <li><a href="commands03.html">Toolbox Commands</a></li>
+          <li><a href="config.html">Configuration</a></li>
+          <li><a href="links.html">Links &amp; Referencs</a></li>
+          <li><a href="security.html">Security Notes</a></li>
+          <li><a href="license.html">License</a></li>
+        </ul>
+      </div> <!-- /menu-div-->
+    </div>
+
+    <div class="scrollable-div">
+      <div class="text-div">
+        <div class="desc-title">
+          Frequently Asked Questions
+        </div>
+        <div class="faq-spacer"></div>
+        <a href="#faq-purpose">Why did you write this program?</a><br>
+        <a href="#faq-largest">What is your largest pi calculation?</a><br>
+        <a href="#faq-tested">Has the program been formally tested?</a><br>
+        <a href="#faq-testing">Does the program have automated testing?</a><br>
+        <a href="#faq-hang">Why does the program appear to hang?</a><br>
+        <a href="#faq-record">Can this be used to set any speed records?</a><br>
+        <a href="#faq-size">Do high precision pi calculations matter?</a><br>
+        <div class="faq-spacer"></div>
+        <table>
+
+          <tr><td><a name="faq-purpose">
+            <p>
+              Q: Why did you write this program?<br>
+            </p>
+            A: Because it was interesting.
+            My hope is that it may inspire others to try writing a program of their own.
+            <br><br>
+            My primary goal in writing this program was to learn some 64 bit assembly language.
+            In 1983, I wrote a 6502 assembly program to calculate pi to 600 digits on an Apple [].
+            For me, it was a nostalgic revisit to the past, but with a much faster computer.
+          </a></td></tr>
+
+          <tr><td><a name="faq-largest">
+            <p>
+              Q: What is your largest pi calculation?<br>
+            </p>
+            In February 2015, I used this program to calculate pi to 50,000,000 digits.
+            The calculation took 28 days 6 hours and 27 minutes.
+            It was run on a Dell XPS with i7-4790 desktop circa 2014.
+          </a></td></tr>
+
+          <tr><td><a name="faq-tested">
+            <p>
+              Q: Has the program been formally tested?<br>
+            </p>
+            A: No formal testing or validation has been performed.
+          </a></td></tr>
+
+          <tr><td><a name="faq-testing">
+            <p>
+              Q: Does the program have automated testing?
+            </p>
+            A: No automated tests have been written.<br><br>
+            In the case of more complex functions, try a reciprocal function.
+            For example, to test square root of 2, square the result and see
+            if it returns to 2.00000...
+          </a></td></tr>
+          <tr><td><a name="faq-hang">
+            <p>
+              Q: Why does the program appear to hang?<br>
+            </p>
+            A: This is a complex question. How do you know it is hung?
+            Some calculations take a long time to complete.
+            Given my limited programming experience, it may simply be a software bug.
+            <br><br>
+            One suggestion is to try a calculation at lower accuracy
+            to make sure it works properly, then increase accuracy in steps while
+            keeping track of time needed to scale the calculation to larger accuracy.
+            Time needed to scale calculation is certainly not linear and the time can increase quite quickly.
+	    (see <a href="tutorial.html">tutorial</a>)
+          </a></td></tr>
+
+          <tr><td><a name="faq-record">
+            <p>
+              Q: Can this be used to set any speed records?<br>
+            </p>
+            A: No, highly unlikely. This program uses conventional binary arithmetic functions for
+            multiplication and division. This involves classic binary methods of shifting bits
+            left or right combined with addition and subtraction. These methods
+            do not scale well past about a million digits. The current record for pi is
+            50 trillion digits. (over a million times more accuracy than the capabilities of this program)
+	    <br><br>
+            Other programs use more abstract methods for multiplication and division typically
+            involving Fast Fourier Transforms (FFT) for ultra fast multiplication.
+            The alternate FFT type calculation can be multi-tasked across multiple cores.
+            This program is a single thread application.
+	    (see <a href="links.html">links and references)</a>
+          </a></td></tr>
+
+          <tr><td><a name="faq-size">
+            <p>
+              Q: Do high precision pi calculations matter?<br>
+            </p>
+            A: Perhaps not<br><br>
+            First consider something really big. The estimated diameter of the observable
+            universe is about 93 billion light years (9.3x10<sup>+10</sup> ly).
+            A light year is defined as 9460730472580800 meters (9.46x10<sup>+15</sup> m).
+            Now think of something really small.
+            The size of a proton is small, on the order of 0.8 fm (femtometer = 10<sup>-15</sup> meters).
+            Now compare the two. The size of the observable universe would be
+            (9.3x10<sup>+10</sup> ly)*(9.45x10<sup>+15</sup> m/ly)(1x10<sup>+15</sup> fm/m) = 8.8x10<sup>+41</sup> fm).
+            Ok, rounding this off to orders of magnitude, lets approximate the size of a proton
+            to be 1 femtometer and size of the observable universe to be 10<sup>+42</sup> femtometers.
+            This means it would take 42 digits to write the size of the observable universe
+            in femtometers as in integer. The formula for the circumference of a circle is
+            (Circumference) = (π) x (Diameter).
+            <br><br>
+            Thus, having π to 42 significant digits would be roughly sufficient to calculate
+            the circumference of a circle the size of the observable universe to the accuracy
+            of the size of a proton.
+          </a></td></tr>
+        </table>
+      </div> <!-- /text-div -->
+    </div> <!-- /scrollable-div -->
+
+    <div class="footer-div">
+      Repository:
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">
+        https://github.com/cotarr/calc-pi-arm64-asm</a>
+    </div> <!-- /footer-div -->
+
+	</body>
+</html>

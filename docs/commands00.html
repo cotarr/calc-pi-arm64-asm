@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+		<title>RPN Commands</title>
+    <link rel="stylesheet" href="css/styles.css">
+	</head>
+	<body>
+    <div class="head-fixed">
+      Documentation for
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">calc-pi-arm64-asm</a>
+    </div>
+    <div class="menu-div-fixed">
+      <div class="menu-div">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="tutorial.html">Tutorial</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a class="active" href="commands00.html">RPN Commands</a></li>
+          <li><a href="commands01.html">Calculations</a></li>
+          <li><a href="commands02.html">Debug Functions</a></li>
+          <li><a href="commands03.html">Toolbox Commands</a></li>
+          <li><a href="config.html">Configuration</a></li>
+          <li><a href="links.html">Links &amp; Referencs</a></li>
+          <li><a href="security.html">Security Notes</a></li>
+          <li><a href="license.html">License</a></li>
+        </ul>
+      </div> <!-- /menu-div-->
+    </div>
+
+    <div class="scrollable-div">
+      <div class="command-div">
+        <table>
+          <tr>
+            <th>Command</th>
+            <th>Input</th>
+            <th>Output</th>
+            <th>Description</th>
+          </tr>
+
+          <tr>
+            <td>+</td>
+            <td>Xreg, Yreg</td>
+            <td>Xreg</td>
+            <td>
+              Addition Xreg = Yreg + Xreg<br>
+              Rotate stack Zreg &rarr; Yreg<br>
+              Rotate stack Treg &rarr; Zreg<br>
+              Set 0.0 &rarr; Treg
+            </td>
+          </tr>
+
+          <tr>
+            <td>-</td>
+            <td>Xreg, Yreg</td>
+            <td>Xreg</td>
+            <td>
+              Subtract Xreg = Yreg - Xreg<br>
+              Rotate stack Zreg &rarr; Yreg<br>
+              Rotate stack Treg &rarr; Zreg<br>
+              Set 0.0 &rarr; Treg
+            </td>
+          </tr>
+
+          <tr>
+            <td>*</td>
+            <td>Xreg, Yreg</td>
+            <td>Xreg</td>
+            <td>
+              Multiply Xreg = Yreg * Xreg<br>
+              Rotate stack Zreg &rarr; Yreg<br>
+              Rotate stack Treg &rarr; Zreg<br>
+              Set 0.0 &rarr; Treg
+            </td>
+          </tr>
+
+          <tr>
+            <td>/</td>
+            <td>Xreg, Yreg</td>
+            <td>Xreg</td>
+            <td>
+              Divide Xreg = Yreg / Xreg<br>
+              Rotate stack Zreg &rarr; Yreg<br>
+              Rotate stack Treg &rarr; Zreg<br>
+              Set 0.0 &rarr; Treg<br>
+              The value of Xreg must be non-zero.
+            </td>
+          </tr>
+
+          <tr>
+            <td>chs</td>
+            <td>Xreg</td>
+            <td>Xreg</td>
+            <td>
+              Change sign of number in Xreg by performing a <br>
+              2's Compliment subraction from zero.
+            </td>
+          </tr>
+          <tr>
+            <td>clrstk</td>
+            <td></td>
+            <td></td>
+            <td>
+              Clear Stack<br>
+              Sets 0.0 into Xreg, Yreg, Zreg, Treg
+            </td>
+          </tr>
+
+          <tr>
+            <td>clrx</td>
+            <td></td>
+            <td></td>
+            <td>
+              Clear X Register<br>
+              Sets 0.0 into Xreg<br>
+              The stack is not rotated.
+            </td>
+          </tr>
+
+          <tr>
+            <td>enter</td>
+            <td>XReg</td>
+            <td>Yreg</td>
+            <td>
+              RPN Enter command<br>
+              Move Zreg &rarr; Treg<br>
+              Move Yreg &rarr; Zreg<br>
+              Copy Xreg &rarr; Yreg<br><br>
+              This is included for compatibility with scientific pocket calculators.
+              The "Enter" text command duplicates Xreg into Yreg.
+              This is different from the keyboard [Enter] key used to terminate number input.
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>log<br>logoff</td>
+            <td></td>
+            <td></td>
+            <td>
+              The command 'log' starts a terminal log session.
+              The filenames are sequential as follows:
+              out/out001.txt, out/out002.txt, out/out003.txt ...
+              the folder 'out' must exist in the working directory.
+              Logging is stopped with the 'logoff' command.
+            </td>
+          </tr>
+
+          <tr>
+            <td>print<br>print f<br><br>.<br>. f</td>
+            <td></td>
+            <td></td>
+            <td>
+              Print Xreg to console output without formatting.
+              The base-10 conversion mode is set independently
+              using commands: fix, int, or sci.
+              The period character "." is synonymous to "print".<br><br>
+              Adding "f" to print command will format
+              the text output stream in groups of 10 digits, with
+              100 digits per line, in blocks of 1000 digits.
+              Formatting is independent of the base-10 conversion
+              mode set with: fix, int, or sci.
+              Use "help print" to see more options.
+            </td>
+            </td>
+          </tr>
+
+           <tr>
+            <td>rcl &lt;reg&gt;</td>
+            <td></td>
+            <td>XReg</td>
+            <td>
+              Recall value from Register Reg0 to Reg7<br>
+              Move Zreg &rarr; Treg<br>
+              Move Yreg &rarr; Zreg<br>
+              Move Xreg &rarr; Yreg<br>
+              Copy Register to Xreg<br>
+              Valid input: 0,1,2,3,4,5,6,7
+            </td>
+          </tr>
+
+          <tr>
+            <td>rdown</td>
+            <td></td>
+            <td></td>
+            <td>
+              Rotate stack down R&darr; (circular rotation)<br>
+              Move Yreg &rarr; Xreg<br>
+              Move Zreg &rarr; Yreg<br>
+              Move Treg &rarr; Zreg<br>
+              (Circular) Move previous Xreg &rarr; Treg
+
+            </td>
+          </tr>
+
+          <tr>
+            <td>recip</td>
+            <td>Xreg</td>
+            <td>Xreg</td>
+            <td>
+              Compute Xreg = 1/Xreg reciprocal value
+            </td>
+          </tr>
+
+          <tr>
+            <td>rup</td>
+            <td></td>
+            <td></td>
+            <td>
+              Rotate stack up R&uarr; (circular rotation)<br>
+              Move Zreg &rarr; Treg<br>
+              Move Yreg &rarr; Zreg<br>
+              Move Xreg &rarr; Yreg<br>
+              (circuar) Move previous Treg &rarr; Xreg<br>
+
+            </td>
+          </tr>
+
+           <tr>
+            <td>sigfigs<br>sigfigs v<br>sigfigs &lt;a&gt;<br>
+              <br>sf<br>sf v<br>sf &lt;a&gt;</td>
+            <td></td>
+            <td></td>
+            <td>
+              Show or set number of significant digits.
+              The command "sf" is synonymous to "sigfigs"
+              Adding "v" to sigfigs or sf will show accuracy
+              verbose mode, showing bytes and words.
+              Adding an integer argument to sigfigs or sf will set
+              the variable size. Example: "sf 1000" will set accuracy to 1000 digits.
+              Use "help sf" to get more options to set variable size.
+            </td>
+          </tr>
+
+           <tr>
+            <td>sto &lt;reg&gt;</td>
+            <td></td>
+            <td>XReg</td>
+            <td>
+              Store value from Xreg to Reg0 to Reg7<br>
+              Valid input: 0,1,2,3,4,5,6,7<br>
+              Stack is not rotated.
+            </td>
+          </tr>
+
+          <tr>
+            <td>xy</td>
+            <td></td>
+            <td></td>
+            <td>
+              Exchange Xreg and Yreg
+            </td>
+          </tr>
+
+        </table>
+      </div> <!-- /command-div-->
+
+      <div class="text-div">
+        <div class="desc-title">
+          RPN registers
+        </div>
+        <p>
+          RPN calculators can be recognized because RPN calculators do not have an equals
+          sign [=] button. In place of the equals sign key is a large [Enter] key.
+          You can read about RPN on Wikipedia
+          <a href="https://en.wikipedia.org/wiki/Reverse_Polish_notation">here</a>
+          This type of calculator will add 1 + 2 + 3 to obtain the sum 6 with the
+          following keystrokes:
+        </p>
+        <p>
+          "1 Enter 2 Enter 3 + +"
+        </p>
+        <p>
+          Scientific calculators like the HP-11C or HP-15C have always been my favorite.
+          Anyone who has used such a scientific calculator should feel right at home
+          with this type of calculator.
+          This program works with a 4 register stack, X, Y, Z, and T. Similar to a
+          scientific calculator, there are 8 storage registers number 0 to 7.
+          There is a simple demonstration of these registers at the start of
+          this program's tutorial <a href="tutorial.html">here</a>.
+        </p>
+
+        <div class="desc-title">
+          Numeric Input
+        </div>
+        <p>
+          The program will accept floating point input. At the "Op Code:" prompt,
+          enter a numeric text string. Use the keyboard [Enter] key to terminate the input.
+          The input be converted to a binary fixed point.
+          White space is ignored within the number.<br><br>
+          Example syntax:<br>0 <br>0.0 <br>
+          123 <br>+123 <br>-123 <br>123.456 <br>-123.456<br>
+          For example:
+        </p>
+
+<pre class="pre-command">
+Op Code: 123
+Op Code: 456
+Op Code; +
+
+XREG  +579.000000000000000000000000000000000000000000000000
+YREG   0.0
+ZREG   0.0
+TREG   0.0
+</pre>
+
+        <div class="desc-title">
+          Printing Numbers
+        </div>
+        <p>
+          Printing involves 3 concepts: base-10 conversion, text formatting, and significant digits.
+        </p>
+        <p>
+          Base-10 conversion:<br><br>
+
+          All numbers are stored binary fixed point format.
+          In order to view the numbers in human understandable
+          output, it is necessary to convert the binary numbers (base-2) to recognizable (base-10)
+          format. For example, the number "123.0" would be stored as binary
+          fixed point as (integer part).(fraction part) with values
+          &quot;07B.0000000000000000&quot;
+        </p>
+
+<pre class="pre-command">
+hex  0000000000000000 000000000000007B 0000000000000000 0000000000000000 0000000000000000 0000000000000000
+dec +123.000000000000000000000000000000000000000000000000000000000000
+</pre>
+
+        <p>
+          Text formatting:<br><br>
+
+          The process of the base-10 conversion produces a continuous stream of ascii
+          characters. Unformatted text will "wrap" to the next line when the screen width of the
+          console terminal is reached. It is very difficult to work with unformatted
+          numbers. Formatting requires adding ascii space characters and
+          end of line characters. Formatting is configured by adding the &quot;f&quot; modifier character
+          to the end of the "print" or "." commands to request that text be formatted in group of 10 digits,
+          100 digits per line, in blocks of 1000 digits.
+        </p>
+
+<pre class="pre-command">
+print     +3.141592653589793238462643383279502884197169399375105820974944
+print f   +3.
+          1415926535 8979323846 2643383279 5028841971 6939937510 5820974944
+
+.         +3.141592653589793238462643383279502884197169399375105820974944
+. f       +3.
+           1415926535 8979323846 2643383279 5028841971 6939937510 5820974944
+</pre>
+
+        <p>
+          Significant digits:<br><br>
+
+          In the case of any repetitive calculation that runs in a loop,
+          each operation in the loop may experience round off errors.
+          Over many loops, these cumulative errors can add up.
+          Additionally, the variables are allocated in 64 bit words. The intended number of decimal
+          digits may not match up to an even number of 64 bit words.
+          To avoid this problem, extra bytes (or 64 bit words) are added to each variable to absorb
+          these precision errors.
+        </p>
+        <p>
+          To illustrate, take the example of dividing 1/3 to produce and endless text string
+          of 3's looking like "0.3333...".
+          However at some point the number may inherit various accuracy errors and look something like
+          "0.33333328342". In this case 6 digits were accurate followed by 5 random digits.
+          The sigfigs or sf command will set the intended accuracy variable size and number of
+          base-10 digits to print. Extra 64 bit words are allocated, called "guard words".
+          Adding "e" followed by an integer to the sigfigs or sf command will allow
+          extended digits to be included in the "print" or "." commands. Extended
+          digits beyond the specified accuracy are shown in parentheses.
+        </p>
+        <p>
+          Example:<br>
+          "sf 100" will set accuracy to 100 digits.<br>
+          "sf e 100" will tell the program to print 100 "extended" digits.<br><br>
+          Let's do the this and divide 1/3, then print 100 digits and 100 extra
+          digits, 200 total. You can see the last 37 digits are random.
+          Although the requested accuracy is 100 digits, in fact this calculation
+          of 1/3 has an internal calculation accuracy of about 163 digits.
+        </p>
+
+<pre class="pre-command">
++0.333333333333333333333333333333333333333333333333333333333333333333333333333333
+3333333333333333333333(3333333333333333333333333333333333333333333333333333333333
+333335069863606368550117241574023322014605)
+</pre>
+        <p>
+          A normal calculation to 100 digits would print 1/3 to the specified accuracy.
+        </p>
+<pre class="pre-command">
++0.333333333333333333333333333333333333333333333333333333333333333333333333333333
+3333333333333333333333
+</pre>
+
+        <p>
+          To calculate and print pi to 1000 digits with 10 extended digits
+          and print in formatted output (note period command to print),
+          you would do the following:
+        </p>
+
+<pre class="pre-command">
+Op Code: sf 1000
+Op Code: sf e 10
+Op Code: c.pi
+Op Code: . f
+</pre>
+        <div class="desc-title">
+          Capturing output to a file
+        </div>
+        <p>
+          To capture text output to a disk file, first create a folder called "out" in the
+          current working directory. Next use the "log" and "logoff" commands to start
+          and stop a logging session. The output text capture files will be automatically named
+          out/out001.txt, out/out002.txt, out/out003.txt ...
+        </p>
+
+        <div class="desc-title">
+          Display intermediate results on the stack
+        </div>
+        <p>
+          Each time a numeric command is requested from the keyboard, the program will 
+          show the stack registers, Xreg, Yreg, Zreg, and Treg.
+          The number is shown unformatted, truncated to 50 digits.  
+        </p>
+      </div> <!-- /text-div -->
+
+    </div> <!-- /scrollable-div -->
+
+    <div class="footer-div">
+      Repository:
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">
+        https://github.com/cotarr/calc-pi-arm64-asm</a>
+    </div> <!-- /footer-div -->
+
+	</body>
+</html>

@@ -60,7 +60,7 @@ SOFTWARE.
 
   InFlags bits - Use x16 register for this
 
-  0x0001 0 = Accepting leading + or - in mantissa, 1=done
+  0x0001 0 = Accepting leading + or - in number, 1=done
   0x0002 0 = positive, 1 = negative  need 2's compliment
   0x0004 0 = Accepting integer part before decimal point, 1=done
 

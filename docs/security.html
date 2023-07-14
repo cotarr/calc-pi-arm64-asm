@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+		<title>Security Notes</title>
+    <link rel="stylesheet" href="css/styles.css">
+	</head>
+	<body>
+    <div class="head-fixed">
+      Documentation for
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">calc-pi-arm64-asm</a>
+    </div>
+    <div class="menu-div-fixed">
+      <div class="menu-div">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="tutorial.html">Tutorial</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="commands00.html">RPN Commands</a></li>
+          <li><a href="commands01.html">Calculations</a></li>
+          <li><a href="commands02.html">Debug Functions</a></li>
+          <li><a href="commands03.html">Toolbox Commands</a></li>
+          <li><a href="config.html">Configuration</a></li>
+          <li><a href="links.html">Links &amp; Referencs</a></li>
+          <li><a class="active" href="security.html">Security Notes</a></li>
+          <li><a href="license.html">License</a></li>
+        </ul>
+      </div> <!-- /menu-div-->
+    </div>
+    <div class="scrollable-div">
+      <div class="text-div">
+        <div class="desc-title">
+          Security Notes
+        </div>
+        <p>
+          This application was intended for I/O limited to local keyboard and console output
+          within a Linux command line shell. This calculation includes a rather ubiquitous
+          use of memory pointers that have not been reviewed for safe pointer practices.
+          Therefore, modification of the program to service a direct internet connection is not recommended.
+        </p>
+        <p>
+          System memory used for floating point number variables are defined in
+          the &quot;math.s&quot; file using &quot;.skip&quot; statements to declare uninitialized blocks of memory
+          in the .bss section. These are statically allocated when the program is
+          started as part of the load image. No memory is dynamically allocated.
+        </p>
+        <p>
+          All input and output is performed using assembly language &quot;svc&quot; statements.
+          All I/O functions are located in the &quot;iomodule.s&quot; file.
+          They are used to accept keyboard input, produce console output,
+          capture program text output to a disk file, and
+          read the system clock.
+        </p>
+        <p>
+          File name used to log the terminal session are sequential as follows:
+          out/out001.txt, out/out002.txt, out/out003.txt ...
+          the folder 'out' is expected to exist in the working directory.
+        </p>
+      </div> <!-- /text-div -->
+
+    </div> <!-- scrollable-div -->
+
+    <div class="footer-div">
+      Repository:
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">
+        https://github.com/cotarr/calc-pi-arm64-asm</a>
+    </div> <!-- /footer-div -->
+
+	</body>
+</html>
+

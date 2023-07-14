@@ -267,10 +267,10 @@ Help_cmdlist:
 Help_D_fill:
 	.ascii	"Usage: D.fill <handle>\n\n"
 	.ascii	"Description: This is a debug command to fill a variable with\n"
-	.ascii	"sequential byte value numbers. It starts with the exponent \n"
-	.ascii	"0102030405060708 (exponent)\n"
-	.ascii	"1011121314151617 (most significant word)\n"
-	.ascii	"18191A1B1C1D1E1F (next word in mantissa)\n"
+	.ascii	"sequential byte value numbers. It starts with the integer part\n"
+	.ascii	"0102030405060708 1011121314151617\n"
+	.ascii	"next words in fraction part\n"
+	.ascii	"2122232425262728 292A2B2C2D2E2F30\n"
 	.ascii	"This is very useful to check low level functions, such as \n"
 	.ascii	"shifting memory left or right 1 bit.\n"
 	.byte	0
@@ -300,7 +300,7 @@ Help_hex:
 	.ascii	"Description: Hex command is used to display variables in \n"
 	.ascii	"binary (hexidecimal) format. If the hex command is called\n"
 	.ascii	"without an argument, all the registers are printed showing\n"
-	.ascii	"showing the first 3 words, the last word, and exponent in\n"
+	.ascii	"first the integer part followed by fraction part in\n"
 	.ascii	"64-bit words in hexidecimal. If a variable hands is \n"
 	.ascii	"is provided, the entire variable is printed.\n"
 	.byte	0
@@ -430,7 +430,7 @@ DefaultHelp:
 	.ascii	"instructions for the use of a specific command.\n"
 	.ascii	"To see a list of all commands, type 'cmdlist'. \n\n"
 //	.ascii	"Help in html format is in the docs/ folder or on the web at \n"
-//	.ascii      "https://cotarr.github.io/calc-pi-x86-64-asm/docs/\n\n"
+//	.ascii      "https://cotarr.github.io/calc-pi-arm64-asm/\n\n"
 	.ascii	"Help is available for the following commands:\n\n"
 	.byte	0
 

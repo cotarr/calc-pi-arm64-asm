@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+		<title>Home</title>
+    <link rel="stylesheet" href="css/styles.css">
+	</head>
+	<body>
+    <div class="head-fixed">
+      Documentation for
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">calc-pi-arm64-asm</a>
+    </div>
+    <div class="menu-div-fixed">
+      <div class="menu-div">
+        <ul>
+          <li><a class="active" href="index.html">Home</a></li>
+          <li><a href="tutorial.html">Tutorial</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="commands00.html">RPN Commands</a></li>
+          <li><a href="commands01.html">Calculations</a></li>
+          <li><a href="commands02.html">Debug Functions</a></li>
+          <li><a href="commands03.html">Toolbox Commands</a></li>
+          <li><a href="config.html">Configuration</a></li>
+          <li><a href="links.html">Links &amp; Referencs</a></li>
+          <li><a href="security.html">Security Notes</a></li>
+          <li><a href="license.html">License</a></li>
+        </ul>
+      </div> <!-- /menu-div-->
+    </div>
+    <div class="scrollable-div">
+    
+      <div class="text-div">
+        <div class="desc-title">
+          Program Description
+        </div>
+        <p>
+          Calc-pi is a 64 bit assembly language program used to calculate &#960; (pi).
+          The interface is a simple text based RPN calculator intended
+          to run in a Linux command line bash shell.
+          It is fully stand alone and has no external library dependencies.
+        </p>
+        <p>
+          Start date was Feb 14, 2021. Time needed is 1 month.
+          The coding challenge was to write a program in assembly language to calculate pi,
+          on a Raspberry Pi, by "Pi Day" March 14, 2021.
+          The personal goal was to learn a little about ARM64/arm-v8a assembly language.
+          The technical goal was to avoid use of any external math libraries.
+        </p>
+        <p>
+          Watch the <a href="https://youtu.be/Czo20LnoEDs">youtube video</a>
+        </p>
+        <p>
+          The repository includes a day by day HISTORY.md journal.
+        </p>
+        <p>
+          You can view all one million digits the result here: 
+          <a href="https://github.com/cotarr/calc-pi-arm64-asm/blob/main/output-example/pi-1000000-digit.txt"</a>
+            https://github.com/cotarr/calc-pi-arm64-asm/blob/main/output-example/pi-1000000-digit.txt
+          </a>
+        </p>
+      
+        <div class="desc-title">
+          Example: pi to 1000 digits
+        </div>
+<pre class="pre-example">
+
+  (Elapsed: 0.000 Sec) Op Code: sigfigs 1000
+
+Accuracy: 1000 Digits (fraction part)
+
+  (Elapsed: 0.002 Sec) Op Code: c.pi
+
+Calculating: Square Root 10005  (Elapsed: 0.005 Sec) 
+Calculating: Chudnovsky infinite series  (Elapsed: 0.010 Sec) 
+
+XREG   +3.14159265358979323846264338327950288419716939937510
+YREG   +0.0
+ZREG   +0.0
+TREG   +0.0
+
+  (Elapsed: 0.012 Sec) Op Code: print f
+
+ +3.
+  1415926535 8979323846 2643383279 5028841971 6939937510 5820974944 5923078164 0628620899 8628034825 3421170679 
+  8214808651 3282306647 0938446095 5058223172 5359408128 4811174502 8410270193 8521105559 6446229489 5493038196 
+  4428810975 6659334461 2847564823 3786783165 2712019091 4564856692 3460348610 4543266482 1339360726 0249141273 
+  7245870066 0631558817 4881520920 9628292540 9171536436 7892590360 0113305305 4882046652 1384146951 9415116094 
+  3305727036 5759591953 0921861173 8193261179 3105118548 0744623799 6274956735 1885752724 8912279381 8301194912 
+  9833673362 4406566430 8602139494 6395224737 1907021798 6094370277 0539217176 2931767523 8467481846 7669405132 
+  0005681271 4526356082 7785771342 7577896091 7363717872 1468440901 2249534301 4654958537 1050792279 6892589235 
+  4201995611 2129021960 8640344181 5981362977 4771309960 5187072113 4999999837 2978049951 0597317328 1609631859 
+  5024459455 3469083026 4252230825 3344685035 2619311881 7101000313 7838752886 5875332083 8142061717 7669147303 
+  5982534904 2875546873 1159562863 8823537875 9375195778 1857780532 1712268066 1300192787 6611195909 2164201989
+ (3809525720 )
+
+  (Elapsed: 0.038 Sec) Op Code: 
+
+</pre>
+        <p>
+          In the case of the pi calculation, the square root is calculated independantly.
+          The total elapsed time of the calculation would be the time of the square root 
+          added to the infinite series time.
+        </p>
+        <div class="desc-title">
+          Requirements
+        </div>
+        <p>
+          Raspberry Pi Model 3B<br>
+          Raspberry Pi Model 3B Plus<br>
+          Raspberry Pi Model 4<br>
+          64 bit Raspbery Pi OS (Raspbian)
+        </p>
+
+        <div class="desc-title">
+          Installation
+        </div>
+        <p>
+          The GitHub repository 
+          contains assembly language source files. To build a binary executable, it is necessary to 
+          compile the program using the GNU assembler &quot;as&quot; (GNU Binutils), 
+          the system linker &quot;ln&quot; (GNU coreutils), and GNU Make &quot;make&quot; (GNU make).
+          All three of these should be included in the standard install of Raspberry Pi OS (Raspbian) 64 bit.
+          The GitHub repository includes detail installation instructions in the README file.
+        </p>
+        <p>
+          GitHub Repository
+          <a href="https://github.com/cotarr/calc-pi-arm64-asm">github.com/cotarr/calc-pi-arm64-asm</a>
+        </p>
+        <p>
+          Documentation:
+            <a href="https://cotarr.github.io/calc-pi-arm64-asm/">https://cotarr.github.io/calc-pi-arm64-asm/</a>
+        </p>
+
+
+        <div class="desc-title">
+          What is this? What is it not?
+        </div>
+        <p>
+          In simple terms, it is a set of assembly language floating point math calculations that
+          can calculate numeric constants pi, e, and square root of 2.
+          In order to develop these internal functions,
+          the math capabilities are wrapped into a very simple text based 
+          <a href="https://en.wikipedia.org/wiki/Reverse_Polish_notation">RPN</a> calculator program.
+          This calculator interface provides a very useful way to work with calculations as
+          they are written and debugged.
+        </p>
+        <p>
+          This is not intended to be a multi-precision library.
+          It is not intended to be a programming language.
+          All of the internal programs are written in assembler, and there is no high level
+          language programming capabilities.
+          No validation or testing of the math functions has been performed.
+        </p>
+        <div class="desc-title">
+          A word about arithmetic.
+        </div>
+        <p>
+          Internal to the program, numbers are stored in binary fixed point format using a
+          128 bit (2 word) integer part and an arbitrary number of 64 bit words as the fraction part.
+          There are no floating point capabilities, so the use of an exponent does not apply.
+          Negative numbers are 2's complement.
+        </p>
+        <p>
+          The primary backbone calculation is a set of functions for binary floating point bitwise addition, subtraction,
+          multiplication and long division. This is a simple straight forward way to
+          do arithmetic with low risk of errors. Its easy to write and easy to debug.
+          However, it is unfortunately very slow. It is  literally operating on the numbers bit by bit.
+        </p>
+        <p>
+          To speed up the calculation, several shortcuts have been added.
+          These include reducing the number of significant digits during multiplication and 
+          division when summing an infinite series. As a series summation proceeds, the 
+          terms added to the running sum become smaller and smaller, and some of the digits are not relevant.
+          As a hypothetical example, take a calculation using 10 significant digits (base 10).
+          You can see the first number, when added to the much smaller second number, only 2 digits are relevant.
+          It is possible to save time by avoiding bitwise calculation of the leading zeros in the second number.
+        </p>
+
+<pre>
+                1.0220020022
+              + 0.0000000014
+              = 1.0220020036
+</pre>          
+        <p>
+          In place of bitwise arithmetic, the internal ARM processor <b>mul</b> and <b>umulh</b> 
+          commands can multiply two 64 bit integers to obtain a 128 bit result.
+          Similarly, the ARM chip <b>udiv</b> and <b>msub</b> commands can divide 
+          a 64 bit dividend by 32 bit divisor to get 32 bit quotient and 32 bit remainder. 
+          By applying these integer instructions in a matrix approach, the processor internal
+          integer arithmetic functions are faster than a tedious bit by bit arithmetic.
+          These can be seen in source files math-mul.s and math-div.s.
+          Replacing long division with multiplication of the reciprocal value is 
+          is also faster in most cases. In the program the faster modes can be disabled 
+          by command to compare the difference.
+        </p>
+        <p>
+          The program includes conversion from decimal (base 10) to binary (base 2) to 
+          allow calculator in put using base 10 and to print result using base 10.
+        </p>
+
+        <div class="image-div">
+          <img src="images/pi-calc-time.png" width="531" height="367"  alt="Times to calculate pi">
+        </div>
+
+      </div> <!-- /text-div -->
+
+    </div> <!-- scrollable-div -->
+
+    <div class="footer-div">
+      Repository:
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">
+        https://github.com/cotarr/calc-pi-arm64-asm</a>
+    </div> <!-- /footer-div -->
+
+	</body>
+</html>

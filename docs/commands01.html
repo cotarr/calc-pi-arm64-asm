@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+		<title>Calculations</title>
+    <link rel="stylesheet" href="css/styles.css">
+	</head>
+	<body>
+    <div class="head-fixed">
+      Documentation for
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">calc-pi-arm64-asm</a>
+    </div>
+    <div class="menu-div-fixed">
+      <div class="menu-div">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="tutorial.html">Tutorial</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+          <li><a href="commands00.html">RPN Commands</a></li>
+          <li><a class="active" href="commands01.html">Calculations</a></li>
+          <li><a href="commands02.html">Debug Functions</a></li>
+          <li><a href="commands03.html">Toolbox Commands</a></li>
+          <li><a href="config.html">Configuration</a></li>
+          <li><a href="links.html">Links &amp; Referencs</a></li>
+          <li><a href="security.html">Security Notes</a></li>
+          <li><a href="license.html">License</a></li>
+        </ul>
+      </div> <!-- /menu-div-->
+    </div>
+
+    <div class="scrollable-div">
+      <div class="command-div">
+        <table>
+          <tr>
+            <th>Command</th>
+            <th>Input</th>
+            <th>Output</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>c.pi</td>
+            <td></td>
+            <td>Xreg</td>
+            <td>
+              Calculates pi using default method<br>
+              Default is Chudnovsky formula
+            </td>
+          </tr>
+          <tr>
+            <td>c.pi.ch</td>
+            <td></td>
+            <td>Xreg</td>
+            <td>
+              Calculates pi using Chudnovsky formula
+            </td>
+          </tr>
+        </table>
+
+        <h3>Some other Constants</h3>
+        <table>
+          <tr>
+            <th>Command</th>
+            <th>Input</th>
+            <th>Output</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>c.e<br>c.e &lt;a&gt;</td>
+            <td></td>
+            <td>Xreg</td>
+            <td>
+              "c.e" calculates e by Sum 1/n! in fixed precision<br>
+            </td>
+          </tr>
+        </table>
+
+        <h3>Functions Constants</h3>
+        <table>
+          <tr>
+            <th>Command</th>
+            <th>Input</th>
+            <th>Output</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>sqrt</td>
+            <td>Xreg</td>
+            <td>Xreg</td>
+            <td>
+              Calculate the square root of XReg.<br>
+              Stack not rotated after sqrt(XReg)
+            </td>
+          </tr>
+        </table>
+
+      </div> <!-- /command-div-->
+
+      <div class="text-div">
+        <div class="desc-title">
+          Calculation of &#960;
+        </div>
+        <p>
+          The following is a quick overview of one method to calculate pi that is used in this program.
+          If you would like to know more about &#960, Wikipedia has a great page
+          <a href="https://en.wikipedia.org/wiki/Pi">here<a>.
+        </p>
+        <div class="desc-title">
+          &#960; by Chudnovsky formula
+        </div>
+        <p>
+          The Chudnovsky formula is my favorite method to calculate pi.
+          You can read more about it on Wikipedia <a href="https://en.wikipedia.org/wiki/Chudnovsky_algorithm">here</a>.
+          This is rapidly convergent. This program adds 711 terms of the infinite series to calculate 10,000 digits,
+          which is about 14 digits per term. You may notice a delay at the start of the program, because
+          the square root sqrt(10005) is calculated before starting the infinite series summation.
+        </p>
+        <div class="image-div">
+          <!-- 70% of native 481x139 -->
+          <img src="images/Chudnovskyformula.jpg" width="337" height="97">
+        </div>
+        <p>
+          This is a chart made in 2021 showing the time to calculate &#960; using
+          the Chudnovsky formula. The line shows how this type of arithmetic scales
+          (or perhaps does not scale) to larger size.
+          It was run on a Raspberry Pi 4B.
+          This does not include the base-10 conversion.
+        </p>
+        <!--  50% of original size 1300 x 1032 -->
+        <div class="image-div">
+          <img src="images/pi-calc-time.png" width="531" height="367"  alt="Times to calculate pi">
+        </div>
+
+      </div> <!-- /text-div -->
+
+    </div> <!-- /scrollable-div -->
+
+    <div class="footer-div">
+      Repository:
+      <a href="https://github.com/cotarr/calc-pi-arm64-asm">
+        https://github.com/cotarr/calc-pi-arm64-asm</a>
+    </div> <!-- /footer-div -->
+
+	</body>
+</html>
